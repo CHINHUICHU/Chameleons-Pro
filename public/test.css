@@ -1,0 +1,17 @@
+#main{
+    display: flex;
+    justify-content: space-around;
+}
+#article-A, #article-B {
+    height: 800px;
+    width: 500px;
+}
+#submit {
+    height: 30px;
+    width: 100px;
+}
+#finish {
+    margin-top: 50px;
+    display: flex;
+    justify-content: space-around;
+}

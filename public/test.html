@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chameleons Pro Test</title>
+    <link rel="stylesheet" type="text/css" href="test.css" media="all" />
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <h1>Chameleons Pro</h1>
+    <div id="main">
+        <div>
+            <h2>文章A</h2>
+            <textarea id="article-A"></textarea>
+        </div>
+        <div>
+            <h2>文章B</h2>
+            <textarea id="article-B"></textarea>
+        </div>
+    </div>
+    <div id="finish">
+        <button id="submit">送出</button>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            $('#submit').click(()=>{
+                let response = $.ajax({
+                    contentType: 'application/json',
+                    method: 'GET',
+                    url: 'localhost:3000/api/1.0/comparison',
+                    data: {
+                        articleA: $('#article-A').value,
+                        articleB: $('#article-B').value
+                    }
+                });
+                console.log(response);
+            })
+
+        });
+
+    </script>
+</body>
+</html>
