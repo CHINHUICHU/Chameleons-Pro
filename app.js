@@ -39,10 +39,73 @@ async function findSynonym(synonymMap, paragraphArray) {
   return newParagraphArray;
 }
 
+function findMatchedKeyword(
+  articleAtaggedArray,
+  articleBtaggedArray,
+  articleAarray,
+  articleBarray
+) {
+  const matchedArticleA = [];
+  const matchedArticleB = [];
+  const articleAlength = articleAtaggedArray.length;
+  const articleBlength = articleBtaggedArray.length;
+  for (let i = 0; i < articleAlength; i += 7) {
+    for (let j = 0; j < articleBlength; j += 7) {
+      const articleAsubarray = articleAtaggedArray.slice(
+        i,
+        Math.min(i + 7, articleAlength)
+      );
+      const articleBsubarray = articleBtaggedArray.slice(
+        j,
+        Math.min(j + 7, articleBlength)
+      );
+
+      const compareSubarray = new Map();
+      const articleAmchtedKeyword = [];
+      const articleBmchtedKeyword = [];
+
+      articleAsubarray.forEach((element) => {
+        compareSubarray.set(element, articleAsubarray.indexOf(element) + i);
+      });
+
+      articleBsubarray.forEach((element) => {
+        if (compareSubarray.get(element)) {
+          articleAmchtedKeyword.push(
+            articleAarray[compareSubarray.get(element)]
+          );
+          articleBmchtedKeyword.push(
+            articleBarray[articleBsubarray.indexOf(element) + j]
+          );
+          compareSubarray.delete(element);
+        }
+      });
+
+      if (articleAmchtedKeyword.length >= 3) {
+        matchedArticleA.push(articleAmchtedKeyword);
+        matchedArticleB.push(articleBmchtedKeyword);
+      }
+    }
+  }
+
+  return [matchedArticleA, matchedArticleB];
+}
+
+function findKeywordIndex(article, matchedKeywords) {
+  const indexArray = [];
+  matchedKeywords.forEach((element) => {
+    const indices = [];
+    element.forEach((word) => {
+      indices.push(article.indexOf(word));
+    });
+    indexArray.push(indices);
+  });
+  return indexArray;
+}
+
 app.get(`/api/${process.env.API_VERSION}/comparison`, async (req, res) => {
   const { articleA, articleB } = req.body;
-  const articleAsentenseSplit = articleA.split(/(?:，|。|？|：|；|——|！|⋯⋯)+/);
-  const articleBsentenseSplit = articleB.split(/(?:，|。|？|：|；|——|！|⋯⋯)+/);
+  //   const articleAsentenseSplit = articleA.split(/(?:，|。|？|：|；|——|！|⋯⋯)+/);
+  //   const articleBsentenseSplit = articleB.split(/(?:，|。|？|：|；|——|！|⋯⋯)+/);
 
   const articleAsplit = nodejieba.cut(articleA);
   const articleBsplit = nodejieba.cut(articleB);
@@ -71,101 +134,34 @@ app.get(`/api/${process.env.API_VERSION}/comparison`, async (req, res) => {
   const articleAFiltered = await filterStopWords(stopwordMap, articleAsplit);
   const articleBFiltered = await filterStopWords(stopwordMap, articleBsplit);
 
-  console.log(articleAFiltered);
-  console.log('------------------');
-  console.log(articleBFiltered);
+  //   console.log(articleAFiltered);
+  //   console.log('------------------');
+  //   console.log(articleBFiltered);
 
   const articleAsynonymized = await findSynonym(synonymMap, articleAFiltered);
   const articleBsynonymized = await findSynonym(synonymMap, articleBFiltered);
 
-  const matchedMap = [];
-  const articleAsynonymizedLength = articleAsynonymized.length;
-  const articleBsynonymizedLength = articleBsynonymized.length;
+  //   const matchedMap = [];
 
-  console.log(articleAsynonymized);
-  console.log('------------------');
-  console.log(articleBsynonymized);
+  const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+    articleAsynonymized,
+    articleBsynonymized,
+    articleAFiltered,
+    articleBFiltered
+  );
+  const matchedArticleAindices = findKeywordIndex(articleA, matchedArticleA);
+  const matchedBrticleAindices = findKeywordIndex(articleB, matchedArticleB);
 
-  for (let i = 0; i < articleAsynonymizedLength - 2; i += 3) {
-    for (let j = 0; j < articleBsynonymizedLength - 2; j += 3) {
-      if (
-        articleAsynonymized[i] === articleBsynonymized[j] &&
-        articleAsynonymized[i + 1] === articleBsynonymized[j + 1] &&
-        articleAsynonymized[i + 2] === articleBsynonymized[j + 2]
-      ) {
-        matchedMap.push({
-          articleAIndex: i,
-          articleBIndex: j,
-        });
-      }
-    }
-  }
-  console.log('matched...');
-  console.log(matchedMap);
-
-  const articleASet = new Set();
-  const articleALength = articleAsentenseSplit.length;
-  for (const matchedWord of matchedMap) {
-    for (let i = 0; i < articleALength; i += 1) {
-      if (
-        articleAsentenseSplit[i].includes(
-          articleAFiltered[matchedWord.articleAIndex]
-        ) &&
-        articleAsentenseSplit[i].includes(
-          articleAFiltered[matchedWord.articleAIndex + 1]
-        ) &&
-        articleAsentenseSplit[i].includes(
-          articleAFiltered[matchedWord.articleAIndex + 2]
-        )
-      ) {
-        articleASet.add({
-          sentense: articleAsentenseSplit[i],
-          sentenseIndex: i,
-        });
-      }
-    }
-  }
-
-  const articleBSet = new Set();
-  const aritcleBLength = articleBsentenseSplit.length;
-
-  for (const matchedWord of matchedMap) {
-    for (let i = 0; i < aritcleBLength; i += 1) {
-      if (
-        articleBsentenseSplit[i].includes(
-          articleBFiltered[matchedWord.articleBIndex]
-        ) &&
-        articleBsentenseSplit[i].includes(
-          articleBFiltered[matchedWord.articleBIndex + 1]
-        ) &&
-        articleBsentenseSplit[i].includes(
-          articleBFiltered[matchedWord.articleBIndex + 2]
-        )
-      ) {
-        articleBSet.add({
-          sentense: articleBsentenseSplit[i],
-          sentenseIndex: i,
-        });
-      }
-    }
-  }
+  console.log('heyyyyy');
+  console.log(matchedArticleA);
+  console.log('---------------------');
+  console.log(matchedArticleB);
 
   const response = {
-    articleA: [],
-    articleB: [],
+    articleA: matchedArticleAindices,
+    articleB: matchedBrticleAindices,
   };
-  const articleAsetIterator = articleASet.values();
-  const articleBsetIterator = articleBSet.values();
 
-  console.log(articleASet);
-  console.log('-----------------');
-  console.log(articleBSet);
-  for (let i = 0; i < articleASet.size; i += 1) {
-    response.articleA.push(articleAsetIterator.next().value);
-  }
-  for (let i = 0; i < articleBSet.size; i += 1) {
-    response.articleB.push(articleBsetIterator.next().value);
-  }
   res.send({ data: response });
 });
 
