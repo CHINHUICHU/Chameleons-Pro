@@ -1,18 +1,18 @@
 require('dotenv').config();
 const express = require('express');
 const nodejieba = require('nodejieba');
+const _ = require('lodash');
+const fs = require('fs');
+const { promisify } = require('util');
 
 nodejieba.load({ userDict: './dict.utf8' });
 const bodyParser = require('body-parser');
-const fs = require('fs');
-const { promisify } = require('util');
 
 const readAsync = promisify(fs.readFile);
 const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-const _ = require('lodash');
 
 async function filterStopWords(stopwordMap, splitedParagraphArray) {
   const newArray = _.cloneDeep(splitedParagraphArray);
@@ -102,10 +102,29 @@ function findKeywordIndex(article, matchedKeywords) {
   return indexArray;
 }
 
+function calculateSimilary(articleA, articleB) {
+  const articleAset = new Set();
+  articleA.forEach((element) => {
+    articleAset.add(element);
+  });
+
+  const articleBset = new Set();
+  articleB.forEach((element) => {
+    articleBset.add(element);
+  });
+
+  const intersection = new Set(
+    [...articleAset].filter((element) => articleBset.has(element))
+  );
+
+  const union = new Set([...articleAset, ...articleBset]);
+  const similarity = intersection.size / union.size;
+
+  return similarity;
+}
+
 app.get(`/api/${process.env.API_VERSION}/comparison`, async (req, res) => {
   const { articleA, articleB } = req.body;
-  //   const articleAsentenseSplit = articleA.split(/(?:，|。|？|：|；|——|！|⋯⋯)+/);
-  //   const articleBsentenseSplit = articleB.split(/(?:，|。|？|：|；|——|！|⋯⋯)+/);
 
   const articleAsplit = nodejieba.cut(articleA);
   const articleBsplit = nodejieba.cut(articleB);
@@ -134,14 +153,17 @@ app.get(`/api/${process.env.API_VERSION}/comparison`, async (req, res) => {
   const articleAFiltered = await filterStopWords(stopwordMap, articleAsplit);
   const articleBFiltered = await filterStopWords(stopwordMap, articleBsplit);
 
-  //   console.log(articleAFiltered);
-  //   console.log('------------------');
-  //   console.log(articleBFiltered);
-
   const articleAsynonymized = await findSynonym(synonymMap, articleAFiltered);
   const articleBsynonymized = await findSynonym(synonymMap, articleBFiltered);
 
-  //   const matchedMap = [];
+  console.log(articleAsynonymized);
+  console.log('--------------------');
+  console.log(articleBsynonymized);
+
+  const articleSimilarity = calculateSimilary(
+    articleAsynonymized,
+    articleBsynonymized
+  );
 
   const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
     articleAsynonymized,
@@ -152,12 +174,8 @@ app.get(`/api/${process.env.API_VERSION}/comparison`, async (req, res) => {
   const matchedArticleAindices = findKeywordIndex(articleA, matchedArticleA);
   const matchedBrticleAindices = findKeywordIndex(articleB, matchedArticleB);
 
-  console.log('heyyyyy');
-  console.log(matchedArticleA);
-  console.log('---------------------');
-  console.log(matchedArticleB);
-
   const response = {
+    similarity: articleSimilarity,
     articleA: matchedArticleAindices,
     articleB: matchedBrticleAindices,
   };
