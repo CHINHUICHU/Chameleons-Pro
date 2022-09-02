@@ -11,5 +11,8 @@
         "ecmaVersion": "latest"
     },
     "rules": {
+        "no-restricted-syntax": ["error", "FunctionExpression", "WithStatement", "BinaryExpression[operator='in']"],
+        "operator-linebreak": ["error", "after"],
+        "comma-dangle": ["error", "never"]
     }
 }
