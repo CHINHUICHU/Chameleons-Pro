@@ -105,11 +105,10 @@ function findMatchedKeyword(
   return [matchedArticleA, matchedArticleB];
 }
 
-function findKeywordIndex(article, matchedKeywords) {
+function findSimilarSentenseIndex(article, matchedKeywords) {
   let articleForSearching = article;
-  const indexArray = [];
+
   matchedKeywords.forEach((element) => {
-    const indices = [];
     element.forEach((matched) => {
       const matchedLength = matched.keyword.length;
       const matchedIndex = article.indexOf(matched.keyword);
@@ -133,13 +132,19 @@ function findKeywordIndex(article, matchedKeywords) {
           matchedIndex
         )}ＯＯＯＯ${articleForSearching.substring(matchedIndex + 3)}`;
       }
-      indices.push(matchedIndex);
     });
-    indexArray.push(indices);
   });
-  console.log(articleForSearching);
-  console.log('----------------------');
-  return indexArray;
+
+  const splitArticle = articleForSearching.split(/(?:，|。|\n|！|？|：|；)+/);
+  const markingArray = [];
+
+  splitArticle.forEach((sentense) => {
+    if (sentense.includes('ＯＯ')) {
+      markingArray.push(1);
+    } else markingArray.push(0);
+  });
+
+  return markingArray;
 }
 
 function calculateSimilary(articleA, articleB) {
@@ -239,11 +244,11 @@ app.post(
       console.log(matchedArticleB);
       console.log('-------------------');
 
-      const matchedArticleAindices = findKeywordIndex(
+      const matchedArticleAindices = findSimilarSentenseIndex(
         articleA,
         matchedArticleA
       );
-      const matchedBrticleAindices = findKeywordIndex(
+      const matchedBrticleAindices = findSimilarSentenseIndex(
         articleB,
         matchedArticleB
       );
