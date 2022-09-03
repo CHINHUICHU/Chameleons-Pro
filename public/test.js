@@ -36,6 +36,9 @@ $(document).ready(() => {
       .split(/(?:，|。|\n|！|？|：|；)+/);
     const articleBsplitLength = articleBsplit.length;
 
+    console.log(articleAsplit);
+    console.log(articleBsplit);
+
     const { articleA, articleB } = response.data;
 
     $('#result-A').html($('#article-A').val());
@@ -52,31 +55,5 @@ $(document).ready(() => {
         $('#result-B').mark(articleBsplit[i]);
       }
     }
-
-    // articleA.forEach((element) => {
-    //   const start = Math.min(...element);
-    //   const end = Math.max(...element);
-    //   if (start >= 0) {
-    //     $('#result-A').markRanges([
-    //       {
-    //         start,
-    //         length: end - start,
-    //       },
-    //     ]);
-    //   }
-    // });
-
-    // articleB.forEach((element) => {
-    //   const start = Math.min(...element);
-    //   const end = Math.max(...element);
-    //   if (start >= 0) {
-    //     $('#result-B').markRanges([
-    //       {
-    //         start,
-    //         length: end - start,
-    //       },
-    //     ]);
-    //   }
-    // });
   });
 });

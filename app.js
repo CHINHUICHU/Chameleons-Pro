@@ -80,13 +80,10 @@ function findMatchedKeyword(
             keyword: articleAarray[compareSubarray.get(element)],
             index: compareSubarray.get(element),
           });
-          articleAarrayForSearch[compareSubarray.get(element)] = Math.random();
           articleBmchtedKeyword.push({
             keyword: articleBarray[articleBsubarray.indexOf(element) + j],
             index: articleBsubarray.indexOf(element) + j,
           });
-          articleBarrayForSearch[articleBsubarray.indexOf(element) + j] =
-            Math.random();
           compareSubarray.delete(element);
         }
       });
@@ -111,31 +108,33 @@ function findSimilarSentenseIndex(article, matchedKeywords) {
   matchedKeywords.forEach((element) => {
     element.forEach((matched) => {
       const matchedLength = matched.keyword.length;
-      const matchedIndex = article.indexOf(matched.keyword);
 
       if (matchedLength === 2) {
-        articleForSearching = `${articleForSearching.substring(
-          0,
-          matchedIndex
-        )}ＯＯ${articleForSearching.substring(matchedIndex + 2)}`;
+        articleForSearching = articleForSearching.replace(
+          matched.keyword,
+          'ＯＯ'
+        );
       }
 
       if (matchedLength === 3) {
-        articleForSearching = `${articleForSearching.substring(
-          0,
-          matchedIndex
-        )}ＯＯＯ${articleForSearching.substring(matchedIndex + 3)}`;
+        articleForSearching = articleForSearching.replace(
+          matched.keyword,
+          'ＯＯＯ'
+        );
       }
       if (matchedLength === 4) {
-        articleForSearching = `${articleForSearching.substring(
-          0,
-          matchedIndex
-        )}ＯＯＯＯ${articleForSearching.substring(matchedIndex + 3)}`;
+        articleForSearching = articleForSearching.replace(
+          matched.keyword,
+          'ＯＯＯＯ'
+        );
       }
     });
   });
 
   const splitArticle = articleForSearching.split(/(?:，|。|\n|！|？|：|；)+/);
+
+  console.log(splitArticle.length, splitArticle);
+
   const markingArray = [];
 
   splitArticle.forEach((sentense) => {
