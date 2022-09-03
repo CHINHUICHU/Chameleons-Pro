@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 require('dotenv').config();
 const express = require('express');
 const nodejieba = require('nodejieba');
@@ -51,6 +52,9 @@ function findMatchedKeyword(
   const matchedArticleB = [];
   const articleAlength = articleAtaggedArray.length;
   const articleBlength = articleBtaggedArray.length;
+  const articleAarrayForSearch = [...articleAarray];
+  const articleBarrayForSearch = [...articleBarray];
+
   for (let i = 0; i < articleAlength; i += 7) {
     for (let j = 0; j < articleBlength; j += 7) {
       const articleAsubarray = articleAtaggedArray.slice(
@@ -72,12 +76,17 @@ function findMatchedKeyword(
 
       articleBsubarray.forEach((element) => {
         if (compareSubarray.get(element)) {
-          articleAmchtedKeyword.push(
-            articleAarray[compareSubarray.get(element)]
-          );
-          articleBmchtedKeyword.push(
-            articleBarray[articleBsubarray.indexOf(element) + j]
-          );
+          articleAmchtedKeyword.push({
+            keyword: articleAarray[compareSubarray.get(element)],
+            index: compareSubarray.get(element),
+          });
+          articleAarrayForSearch[compareSubarray.get(element)] = Math.random();
+          articleBmchtedKeyword.push({
+            keyword: articleBarray[articleBsubarray.indexOf(element) + j],
+            index: articleBsubarray.indexOf(element) + j,
+          });
+          articleBarrayForSearch[articleBsubarray.indexOf(element) + j] =
+            Math.random();
           compareSubarray.delete(element);
         }
       });
@@ -89,18 +98,47 @@ function findMatchedKeyword(
     }
   }
 
+  console.log(articleAarrayForSearch);
+  console.log('----------------------');
+  console.log(articleBarrayForSearch);
+
   return [matchedArticleA, matchedArticleB];
 }
 
 function findKeywordIndex(article, matchedKeywords) {
+  let articleForSearching = article;
   const indexArray = [];
   matchedKeywords.forEach((element) => {
     const indices = [];
-    element.forEach((word) => {
-      indices.push(article.indexOf(word));
+    element.forEach((matched) => {
+      const matchedLength = matched.keyword.length;
+      const matchedIndex = article.indexOf(matched.keyword);
+
+      if (matchedLength === 2) {
+        articleForSearching = `${articleForSearching.substring(
+          0,
+          matchedIndex
+        )}ＯＯ${articleForSearching.substring(matchedIndex + 2)}`;
+      }
+
+      if (matchedLength === 3) {
+        articleForSearching = `${articleForSearching.substring(
+          0,
+          matchedIndex
+        )}ＯＯＯ${articleForSearching.substring(matchedIndex + 3)}`;
+      }
+      if (matchedLength === 4) {
+        articleForSearching = `${articleForSearching.substring(
+          0,
+          matchedIndex
+        )}ＯＯＯＯ${articleForSearching.substring(matchedIndex + 3)}`;
+      }
+      indices.push(matchedIndex);
     });
     indexArray.push(indices);
   });
+  console.log(articleForSearching);
+  console.log('----------------------');
   return indexArray;
 }
 
@@ -165,6 +203,11 @@ app.post(
         articleBsplit
       );
 
+      console.log(articleAFiltered);
+      console.log('--------------------');
+      console.log(articleBFiltered);
+      console.log('-------------------');
+
       const articleAsynonymized = await findSynonym(
         synonymMap,
         articleAFiltered
@@ -177,6 +220,7 @@ app.post(
       console.log(articleAsynonymized);
       console.log('--------------------');
       console.log(articleBsynonymized);
+      console.log('-------------------');
 
       const articleSimilarity = calculateSimilary(
         articleAsynonymized,
@@ -189,6 +233,12 @@ app.post(
         articleAFiltered,
         articleBFiltered
       );
+
+      console.log(matchedArticleA);
+      console.log('-------------------');
+      console.log(matchedArticleB);
+      console.log('-------------------');
+
       const matchedArticleAindices = findKeywordIndex(
         articleA,
         matchedArticleA
@@ -197,6 +247,11 @@ app.post(
         articleB,
         matchedArticleB
       );
+
+      console.log('matched index');
+      console.log(matchedArticleAindices);
+      console.log('--------------------');
+      console.log(matchedBrticleAindices);
 
       const response = {
         similarity: articleSimilarity,
@@ -213,15 +268,19 @@ app.post(
 );
 
 // 404 error handling
-app.use((req, res, next) =>
+// eslint-disable-next-line no-unused-vars
+app.use((req, res, next) => {
   res
     .status(404)
-    .json({ error_code: 404, error_message: 'please give correct route' })
-);
+    .json({ error_code: 404, error_message: 'please give correct route' });
+});
 
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.log('something wrong', err);
-  res.status(500).send({ error_code: 500, error_message: 'server error' });
+  res
+    .status(500)
+    .send({ error_code: 500, error_message: 'internal server error' });
 });
 
 app.listen(process.env.SERVER_PORT, () => {
