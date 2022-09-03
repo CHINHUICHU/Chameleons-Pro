@@ -25,6 +25,12 @@ $(document).ready(() => {
     $('#result').showFlex();
 
     $('#similarity').html(response.data.similarity);
+    $('#progress-bar').css('height', '20px');
+    $('#progress-bar').css('width', '500px');
+    $('#progress-bar').css('background', 'orange');
+    $('#progress-bar').progressbar({
+      value: response.data.similarity * 100,
+    });
 
     const articleAsplit = $('#article-A')
       .val()
