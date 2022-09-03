@@ -1,8 +1,8 @@
-#main{
+#top, #main{
     display: flex;
     justify-content: space-around;
 }
-#article-A, #article-B {
+#article-A, #article-B, #result-A, #result-B {
     height: 800px;
     width: 500px;
 }
@@ -14,4 +14,7 @@
     margin-top: 50px;
     display: flex;
     justify-content: space-around;
+}
+#result {
+    display: none;
 }

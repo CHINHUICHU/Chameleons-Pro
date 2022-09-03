@@ -7,9 +7,13 @@
     <title>Chameleons Pro Test</title>
     <link rel="stylesheet" type="text/css" href="test.css" media="all" />
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
 </head>
 <body>
     <h1>Chameleons Pro</h1>
+    <div id="top">
+        <div id="similarity"></div>
+    </div>
     <div id="main">
         <div>
             <h2>文章A</h2>
@@ -23,20 +27,71 @@
     <div id="finish">
         <button id="submit">送出</button>
     </div>
+    <div id="result">
+        <div>
+            <h2>文章A</h2>
+            <div id="result-A"></div>
+        </div>
+        <div>
+            <h2>文章B</h2>
+            <div id="result-B"></div>
+        </div>
+    </div>
     
     <script>
+
         $(document).ready(function() {
-            $('#submit').click(()=>{
-                let response = $.ajax({
-                    contentType: 'application/json',
-                    method: 'GET',
-                    url: 'localhost:3000/api/1.0/comparison',
+            $('#submit').click(async ()=>{
+                const response = await $.ajax({
+                    //contentType: 'application/json',
+                    method: 'POST',
+                    url: 'http://localhost:3000/api/1.0/comparison',
                     data: {
-                        articleA: $('#article-A').value,
-                        articleB: $('#article-B').value
+                        articleA: $('#article-A').val(),
+                        articleB: $('#article-B').val()
+                    },
+                    dataType: 'json',
+                    crossDomain: true,
+                });
+
+                console.log(response);
+
+                $('#main').hide();
+                $('#finish').hide();
+                $.fn.showFlex = function() {
+                    this.css('display', 'flex');
+                    this.css('justify-content', 'space-around');
+                }
+                $('#result').showFlex();
+
+                $('#result-A').html($('#article-A').val());
+                $('#result-B').html($('#article-B').val());
+
+                const { articleA, articleB } = response.data;
+
+
+                articleA.forEach(element => {
+                    let start = Math.min(...element);
+                    let end = Math.max(...element);
+                    if(start >= 0){
+                        $('#result-A').markRanges([{
+                            start: start,
+                            length: end - start
+                        }]);
                     }
                 });
-                console.log(response);
+
+                articleB.forEach(element => {
+                    let start = Math.min(...element);
+                    let end = Math.max(...element);
+                    if(start >= 0){
+                        $('#result-B').markRanges([{
+                            start: start,
+                            length: end - start
+                        }]);
+                    }
+                });
+
             })
 
         });

@@ -4,15 +4,17 @@ const nodejieba = require('nodejieba');
 const _ = require('lodash');
 const fs = require('fs');
 const { promisify } = require('util');
+const cors = require('cors');
+const bodyParser = require('body-parser');
 
 nodejieba.load({ userDict: './dict.utf8' });
-const bodyParser = require('body-parser');
 
 const readAsync = promisify(fs.readFile);
 const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors());
 
 async function filterStopWords(stopwordMap, splitedParagraphArray) {
   const newArray = _.cloneDeep(splitedParagraphArray);
@@ -123,64 +125,103 @@ function calculateSimilary(articleA, articleB) {
   return similarity;
 }
 
-app.get(`/api/${process.env.API_VERSION}/comparison`, async (req, res) => {
-  const { articleA, articleB } = req.body;
+app.post(
+  `/api/${process.env.API_VERSION}/comparison`,
+  async (req, res, next) => {
+    const { articleA, articleB } = req.body;
 
-  const articleAsplit = nodejieba.cut(articleA);
-  const articleBsplit = nodejieba.cut(articleB);
+    const articleAsplit = nodejieba.cut(articleA);
+    const articleBsplit = nodejieba.cut(articleB);
+    try {
+      // search stop words in file
+      const stopwordMap = new Map();
+      const stopWords = (await readAsync('./stops.utf8'))
+        .toString()
+        .split('\n');
+      for (const word of stopWords) {
+        stopwordMap.set(word, -1);
+      }
+      stopwordMap.set(' ', -1);
+      stopwordMap.set('\n', -1);
 
-  // search stop words in file
-  const stopwordMap = new Map();
-  const stopWords = (await readAsync('./stops.utf8')).toString().split('\n');
-  for (const word of stopWords) {
-    stopwordMap.set(word, -1);
-  }
-  stopwordMap.set(' ', -1);
-  stopwordMap.set('\n', -1);
+      // build synonym map
+      const synonymMap = new Map();
+      const synonyms = (await readAsync('./dict_synonym.txt'))
+        .toString()
+        .split('\n');
+      for (const sysnonym of synonyms) {
+        const words = sysnonym.split(' ');
+        for (let i = 1; i < words.length; i += 1) {
+          synonymMap.set(words[i], words[0]);
+        }
+      }
 
-  // build synonym map
-  const synonymMap = new Map();
-  const synonyms = (await readAsync('./dict_synonym.txt'))
-    .toString()
-    .split('\n');
-  for (const sysnonym of synonyms) {
-    const words = sysnonym.split(' ');
-    for (let i = 1; i < words.length; i += 1) {
-      synonymMap.set(words[i], words[0]);
+      const articleAFiltered = await filterStopWords(
+        stopwordMap,
+        articleAsplit
+      );
+      const articleBFiltered = await filterStopWords(
+        stopwordMap,
+        articleBsplit
+      );
+
+      const articleAsynonymized = await findSynonym(
+        synonymMap,
+        articleAFiltered
+      );
+      const articleBsynonymized = await findSynonym(
+        synonymMap,
+        articleBFiltered
+      );
+
+      console.log(articleAsynonymized);
+      console.log('--------------------');
+      console.log(articleBsynonymized);
+
+      const articleSimilarity = calculateSimilary(
+        articleAsynonymized,
+        articleBsynonymized
+      );
+
+      const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+        articleAsynonymized,
+        articleBsynonymized,
+        articleAFiltered,
+        articleBFiltered
+      );
+      const matchedArticleAindices = findKeywordIndex(
+        articleA,
+        matchedArticleA
+      );
+      const matchedBrticleAindices = findKeywordIndex(
+        articleB,
+        matchedArticleB
+      );
+
+      const response = {
+        similarity: articleSimilarity,
+        articleA: matchedArticleAindices,
+        articleB: matchedBrticleAindices,
+      };
+
+      res.send({ data: response });
+    } catch (err) {
+      console.log(err);
+      next();
     }
   }
+);
 
-  const articleAFiltered = await filterStopWords(stopwordMap, articleAsplit);
-  const articleBFiltered = await filterStopWords(stopwordMap, articleBsplit);
+// 404 error handling
+app.use((req, res, next) =>
+  res
+    .status(404)
+    .json({ error_code: 404, error_message: 'please give correct route' })
+);
 
-  const articleAsynonymized = await findSynonym(synonymMap, articleAFiltered);
-  const articleBsynonymized = await findSynonym(synonymMap, articleBFiltered);
-
-  console.log(articleAsynonymized);
-  console.log('--------------------');
-  console.log(articleBsynonymized);
-
-  const articleSimilarity = calculateSimilary(
-    articleAsynonymized,
-    articleBsynonymized
-  );
-
-  const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
-    articleAsynonymized,
-    articleBsynonymized,
-    articleAFiltered,
-    articleBFiltered
-  );
-  const matchedArticleAindices = findKeywordIndex(articleA, matchedArticleA);
-  const matchedBrticleAindices = findKeywordIndex(articleB, matchedArticleB);
-
-  const response = {
-    similarity: articleSimilarity,
-    articleA: matchedArticleAindices,
-    articleB: matchedBrticleAindices,
-  };
-
-  res.send({ data: response });
+app.use((err, req, res, next) => {
+  console.log('something wrong', err);
+  res.status(500).send({ error_code: 500, error_message: 'server error' });
 });
 
 app.listen(process.env.SERVER_PORT, () => {
