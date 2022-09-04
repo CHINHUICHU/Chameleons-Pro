@@ -1,4 +1,4 @@
-#top, #main{
+#top, #main, #index, #nav{
     display: flex;
     justify-content: space-around;
 }
@@ -10,11 +10,34 @@
     height: 30px;
     width: 100px;
 }
-#finish {
+#finish, #multiple-finish {
     margin-top: 50px;
     display: flex;
     justify-content: space-around;
 }
-#result {
+#result, #top, #main, #finish, #nav, #drop_zone, #multiple-finish{
     display: none;
+}
+.comparison {
+    width: 300px;
+    height: 400px;
+    font-size: large;
+}
+.paste, .upload {
+    height: 50px;
+    width: 500px;
+}
+
+#drop_zone {
+    border: 5px solid blue;
+    width:  200px;
+    height: 100px;
+}
+
+#multiple {
+    display: none;
+}
+.article {
+    width: 800px;
+    height: 400px;
 }

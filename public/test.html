@@ -9,14 +9,24 @@
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" integrity="sha512-tqaIiFJopq4lTBmFlWF0MNzzTpDsHyug8tJaaY0VkcH5AR2ANMJlcD+3fIL+RQ4JU3K6edt9OoySKfCCyKgkng==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="test.js"></script>
 </head>
 <body>
     <h1>Chameleons Pro</h1>
+    <div id="index">
+        <button class="1-1-article comparison">單篇文章比對</button>
+        <button class="multiple-article comparison">多篇文章比對</button>
+    </div>
     <div id="top">
         <div id="similarity"></div>
         <div id="progress-bar"></div>
     </div>
+    <div id="nav">
+        <button class="paste">貼上文章</button>
+        <button class="upload">上傳檔案</button>
+    </div>
+    <!-- 1-1-article comparison -->
     <div id="main">
         <div>
             <h2>文章A</h2>
@@ -28,6 +38,7 @@
         </div>
     </div>
     <div id="finish">
+        <button id="go-back-index">返回</button>
         <button id="submit">送出</button>
     </div>
     <div id="result">
@@ -39,6 +50,19 @@
             <h2>文章B</h2>
             <div id="result-B"></div>
         </div>
+    </div>
+    <!-- multiple article comparison -->
+    <div id="multiple">
+        <h2 class="article-num">文章1</h2>
+        <textarea class="article"></textarea>
+        <h2 class="article-num">文章2</h2>
+        <textarea class="article"></textarea>
+    </div>
+
+    <div id="multiple-finish">
+        <button id="go-back-index">返回</button>
+        <button id="new-article">新增文章</button>
+        <button id="submit">送出</button>
     </div>
     
 </body>

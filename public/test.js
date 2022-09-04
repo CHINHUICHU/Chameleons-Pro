@@ -1,6 +1,48 @@
+/* eslint-disable func-names */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable no-undef */
+
 $(document).ready(() => {
+  $.fn.showFlex = function () {
+    this.show();
+    this.css('display', 'flex');
+    this.css('justify-content', 'space-around');
+  };
+
+  $('.1-1-article').click(() => {
+    $('#index').hide();
+    $('#nav').showFlex();
+    $('#main').showFlex();
+    $('#finish').showFlex();
+  });
+
+  $('.multiple-article').click(() => {
+    $('#index').hide();
+    $('#multiple').css('display', 'flex');
+    $('#multiple').css('flex-direction', 'column');
+    $('#nav').showFlex();
+    $('#multiple-finish').showFlex();
+  });
+
+  let comparedArticles = 2;
+  $('#new-article').click(() => {
+    comparedArticles += 1;
+    $('#multiple').append(`<h2>文章${comparedArticles}</h2>`);
+    $('.article:first').clone().appendTo('#multiple');
+  });
+
+  $('.upload').click(() => {
+    $('#main').hide();
+    $('#drop_zone').showFlex();
+  });
+
+  $('#go-back-index').click(() => {
+    $('#main').hide();
+    $('#finish').hide();
+    $('#nav').hide();
+    $('#index').showFlex();
+  });
+
   $('#submit').click(async () => {
     const response = await $.ajax({
       // contentType: 'application/json',
@@ -18,10 +60,6 @@ $(document).ready(() => {
 
     $('#main').hide();
     $('#finish').hide();
-    $.fn.showFlex = function () {
-      this.css('display', 'flex');
-      this.css('justify-content', 'space-around');
-    };
     $('#result').showFlex();
 
     $('#similarity').html(response.data.similarity);
