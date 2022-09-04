@@ -7,6 +7,12 @@ const fs = require('fs');
 const { promisify } = require('util');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const natural = require('natural');
+
+const { EdgeWeightedDigraph } = natural;
+
+// const { TfIdf } = natural;
+// const tfidf = new TfIdf();
 
 nodejieba.load({ userDict: './dict.utf8' });
 
@@ -16,6 +22,33 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
+
+async function buildStopWordsMap() {
+  // search stop words in file
+  const stopwordMap = new Map();
+  const stopWords = (await readAsync('./stops.utf8')).toString().split('\n');
+  for (const word of stopWords) {
+    stopwordMap.set(word, -1);
+  }
+  stopwordMap.set(' ', -1);
+  stopwordMap.set('\n', -1);
+  return stopwordMap;
+}
+
+async function buildSynonymMap() {
+  // build synonym map
+  const synonymMap = new Map();
+  const synonyms = (await readAsync('./dict_synonym.txt'))
+    .toString()
+    .split('\n');
+  for (const sysnonym of synonyms) {
+    const words = sysnonym.split(' ');
+    for (let i = 1; i < words.length; i += 1) {
+      synonymMap.set(words[i], words[0]);
+    }
+  }
+  return synonymMap;
+}
 
 async function filterStopWords(stopwordMap, splitedParagraphArray) {
   const newArray = _.cloneDeep(splitedParagraphArray);
@@ -174,29 +207,10 @@ app.post(
 
     const articleAsplit = nodejieba.cut(articleA);
     const articleBsplit = nodejieba.cut(articleB);
-    try {
-      // search stop words in file
-      const stopwordMap = new Map();
-      const stopWords = (await readAsync('./stops.utf8'))
-        .toString()
-        .split('\n');
-      for (const word of stopWords) {
-        stopwordMap.set(word, -1);
-      }
-      stopwordMap.set(' ', -1);
-      stopwordMap.set('\n', -1);
 
-      // build synonym map
-      const synonymMap = new Map();
-      const synonyms = (await readAsync('./dict_synonym.txt'))
-        .toString()
-        .split('\n');
-      for (const sysnonym of synonyms) {
-        const words = sysnonym.split(' ');
-        for (let i = 1; i < words.length; i += 1) {
-          synonymMap.set(words[i], words[0]);
-        }
-      }
+    try {
+      const stopwordMap = await buildStopWordsMap();
+      const synonymMap = await buildSynonymMap();
 
       const articleAFiltered = await filterStopWords(
         stopwordMap,
