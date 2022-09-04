@@ -285,6 +285,46 @@ app.post(
   }
 );
 
+app.post(
+  `/api/${process.env.API_VERSION}/multiple/comparison`,
+  async (req, res) => {
+    const { data } = req.body;
+    const articleNumber = data.length;
+    const digraph = new EdgeWeightedDigraph();
+    const stopwordMap = await buildStopWordsMap();
+    const synonymMap = await buildSynonymMap();
+
+    const processedData = await Promise.all(
+      data.map(async (element) => {
+        const tokenizedArticle = nodejieba.cut(element.article);
+        const filteredArticle = await filterStopWords(
+          stopwordMap,
+          tokenizedArticle
+        );
+        const synonymiedArticle = await findSynonym(
+          synonymMap,
+          filteredArticle
+        );
+        return synonymiedArticle;
+      })
+    );
+
+    console.log(processedData);
+
+    for (let i = 0; i < articleNumber; i += 1) {
+      for (let j = i + 1; j < articleNumber; j += 1) {
+        digraph.add(
+          i,
+          j,
+          calculateSimilary(processedData[i], processedData[j])
+        );
+      }
+    }
+
+    res.send(digraph);
+  }
+);
+
 // 404 error handling
 // eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {
