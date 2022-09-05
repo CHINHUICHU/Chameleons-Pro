@@ -1,7 +1,4 @@
 .env
 node_modules/
 .DS_Store
-dict.utf8
-stops.utf8
-dict_synonym.txt
-.eslintrc.json
+
