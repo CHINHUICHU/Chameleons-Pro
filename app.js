@@ -20,7 +20,7 @@ const readAsync = promisify(fs.readFile);
 const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(cors());
 
 async function buildStopWordsMap() {
@@ -288,8 +288,11 @@ app.post(
 app.post(
   `/api/${process.env.API_VERSION}/multiple/comparison`,
   async (req, res) => {
+    const start = Date.now();
+    console.log(start);
     const { data } = req.body;
     const articleNumber = data.length;
+    console.log(articleNumber);
     const digraph = new EdgeWeightedDigraph();
     const stopwordMap = await buildStopWordsMap();
     const synonymMap = await buildSynonymMap();
@@ -309,8 +312,6 @@ app.post(
       })
     );
 
-    console.log(processedData);
-
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
         digraph.add(
@@ -320,6 +321,8 @@ app.post(
         );
       }
     }
+
+    console.log(Date.now() - start);
 
     res.send(digraph);
   }
