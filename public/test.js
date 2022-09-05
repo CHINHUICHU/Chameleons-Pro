@@ -101,12 +101,14 @@ $(document).ready(() => {
   });
 
   $('#multiple-submit').click(async () => {
+    $('#nav').hide();
+    $('#multiple').hide();
+    $('#multiple-finish').hide();
+
     const articles = [];
     $('.article').each(function () {
       articles.push(this.value);
     });
-
-    console.log(typeof articles);
 
     const response = await $.ajax({
       method: 'POST',
@@ -116,6 +118,18 @@ $(document).ready(() => {
       crossDomain: true,
     });
 
-    console.log(response);
+    console.log(response.data.links.length);
+
+    const edges = response.data.links;
+
+    let edgeNumber = edges.length;
+
+    for (let i = 0; i < edgeNumber; i += 1) {
+      $('#multiple-result').append(
+        `<div>文章${+edges[i].source + 1}與文章${
+          +edges[i].target + 1
+        }的相似度為${(+edges[i].weight * 100).toFixed(2)}%</div>`
+      );
+    }
   });
 });

@@ -7,12 +7,7 @@ const fs = require('fs');
 const { promisify } = require('util');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const natural = require('natural');
-
-const { EdgeWeightedDigraph } = natural;
-
-// const { TfIdf } = natural;
-// const tfidf = new TfIdf();
+const Graph = require('graph-data-structure');
 
 nodejieba.load({ userDict: './dict.utf8' });
 
@@ -288,14 +283,11 @@ app.post(
 app.post(
   `/api/${process.env.API_VERSION}/multiple/comparison`,
   async (req, res) => {
-    const start = Date.now();
-    console.log(start);
     const data = req.body['articles[]'];
     console.log(data);
 
     const articleNumber = data.length;
     console.log(articleNumber);
-    const digraph = new EdgeWeightedDigraph();
 
     const stopwordMap = await buildStopWordsMap();
     const synonymMap = await buildSynonymMap();
@@ -315,9 +307,11 @@ app.post(
       })
     );
 
+    const articlesGraph = Graph();
+
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
-        digraph.add(
+        articlesGraph.addEdge(
           i,
           j,
           calculateSimilary(processedData[i], processedData[j])
@@ -325,9 +319,9 @@ app.post(
       }
     }
 
-    console.log(Date.now() - start);
+    console.log(articlesGraph.serialize());
 
-    res.send(digraph);
+    res.send({ data: articlesGraph.serialize() });
   }
 );
 

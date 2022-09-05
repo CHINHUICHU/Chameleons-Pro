@@ -35,12 +35,6 @@
     width: 500px;
 }
 
-#drop_zone {
-    border: 5px solid blue;
-    width:  200px;
-    height: 100px;
-}
-
 #multiple {
     display: none;
 }
