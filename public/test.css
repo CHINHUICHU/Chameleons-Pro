@@ -18,6 +18,13 @@
 #result, #top, #main, #finish, #nav, #drop_zone, #multiple-finish{
     display: none;
 }
+#similarity {
+    font-size: large;
+}
+#progress-bar {
+    height: 20px;
+    width: 500px;
+}
 .comparison {
     width: 300px;
     height: 400px;

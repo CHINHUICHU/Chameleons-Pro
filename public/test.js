@@ -1,7 +1,3 @@
-/* eslint-disable func-names */
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-undef */
-
 $(document).ready(() => {
   $.fn.showFlex = function () {
     this.show();
@@ -28,7 +24,8 @@ $(document).ready(() => {
   $('#new-article').click(() => {
     comparedArticles += 1;
     $('#multiple').append(`<h2>文章${comparedArticles}</h2>`);
-    $('.article:first').clone().appendTo('#multiple');
+    const $textarea = $('<textarea>', { class: 'article' });
+    $('#multiple').append($textarea);
   });
 
   $('.upload').click(() => {
@@ -58,16 +55,18 @@ $(document).ready(() => {
 
     console.log(response);
 
+    $('#top').showFlex();
+    $('#nav').hide();
     $('#main').hide();
     $('#finish').hide();
     $('#result').showFlex();
 
-    $('#similarity').html(response.data.similarity);
-    $('#progress-bar').css('height', '20px');
-    $('#progress-bar').css('width', '500px');
-    $('#progress-bar').css('background', 'orange');
+    $('#similarity').html(
+      `相似度${(response.data.similarity * 100).toFixed(2)}%`
+    );
+
     $('#progress-bar').progressbar({
-      value: response.data.similarity * 100,
+      value: (response.data.similarity * 100).toFixed(2),
     });
 
     const articleAsplit = $('#article-A')
@@ -99,5 +98,24 @@ $(document).ready(() => {
         $('#result-B').mark(articleBsplit[i]);
       }
     }
+  });
+
+  $('#multiple-submit').click(async () => {
+    const articles = [];
+    $('.article').each(function () {
+      articles.push(this.value);
+    });
+
+    console.log(typeof articles);
+
+    const response = await $.ajax({
+      method: 'POST',
+      url: 'http://localhost:3000/api/1.0/multiple/comparison',
+      data: { articles: articles },
+      dataType: 'json',
+      crossDomain: true,
+    });
+
+    console.log(response);
   });
 });

@@ -290,16 +290,19 @@ app.post(
   async (req, res) => {
     const start = Date.now();
     console.log(start);
-    const { data } = req.body;
+    const data = req.body['articles[]'];
+    console.log(data);
+
     const articleNumber = data.length;
     console.log(articleNumber);
     const digraph = new EdgeWeightedDigraph();
+
     const stopwordMap = await buildStopWordsMap();
     const synonymMap = await buildSynonymMap();
 
     const processedData = await Promise.all(
       data.map(async (element) => {
-        const tokenizedArticle = nodejieba.cut(element.article);
+        const tokenizedArticle = nodejieba.cut(element);
         const filteredArticle = await filterStopWords(
           stopwordMap,
           tokenizedArticle
