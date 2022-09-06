@@ -311,11 +311,8 @@ app.post(
 
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
-        articlesGraph.addEdge(
-          i,
-          j,
-          calculateSimilary(processedData[i], processedData[j])
-        );
+        let similarity = calculateSimilary(processedData[i], processedData[j]);
+        articlesGraph.addEdge(i, j, -Math.log(similarity));
       }
     }
 
