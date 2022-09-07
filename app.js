@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 require('dotenv').config();
 const express = require('express');
-const nodejieba = require('nodejieba');
+const nodejieba = require('@node-rs/jieba');
 
 const _ = require('lodash');
 const fs = require('fs');
