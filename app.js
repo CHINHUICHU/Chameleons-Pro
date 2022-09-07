@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const nodejieba = require('nodejieba');
+
 const _ = require('lodash');
 const fs = require('fs');
 const { promisify } = require('util');
