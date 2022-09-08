@@ -323,7 +323,7 @@ app.post(
   }
 );
 
-app.get(`/api/${process.env.API_VERSION}/multiple/comparison`, (req, res) => {
+app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
   res.send('I am healthy server!!!!');
 });
 
