@@ -44,7 +44,7 @@ $(document).ready(() => {
     const response = await $.ajax({
       // contentType: 'application/json',
       method: 'POST',
-      url: 'http://localhost:3000/api/1.0/comparison',
+      url: '/api/1.0/comparison',
       data: {
         articleA: $('#article-A').val(),
         articleB: $('#article-B').val(),
@@ -112,7 +112,7 @@ $(document).ready(() => {
 
     const response = await $.ajax({
       method: 'POST',
-      url: 'http://localhost:3000/api/1.0/multiple/comparison',
+      url: '/api/1.0/multiple/comparison',
       data: { articles: articles },
       dataType: 'json',
       crossDomain: true,
