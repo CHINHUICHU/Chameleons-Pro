@@ -323,6 +323,10 @@ app.post(
   }
 );
 
+app.get(`/api/${process.env.API_VERSION}/multiple/comparison`, (req, res) => {
+  res.send('I am healthy server!!!!');
+});
+
 // 404 error handling
 // eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {
