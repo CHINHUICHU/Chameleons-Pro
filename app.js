@@ -324,7 +324,7 @@ app.post(
 );
 
 app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
-  res.send('I am healthy server!!!!');
+  res.status(200).send('I am healthy server!!!!');
 });
 
 // 404 error handling
