@@ -2,7 +2,7 @@
 require('dotenv').config();
 const express = require('express');
 const nodejieba = require('@node-rs/jieba');
-
+const { Client } = require('@elastic/elasticsearch');
 const _ = require('lodash');
 const fs = require('fs');
 const { promisify } = require('util');
@@ -18,6 +18,17 @@ app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(cors());
+
+const client = new Client({
+  node: `https://${process.env.DB_HOST}:${process.env.DB_PORT}`,
+  auth: {
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false,
+  },
+});
 
 async function buildStopWordsMap() {
   // search stop words in file
@@ -204,6 +215,18 @@ app.post(
     const articleAsplit = nodejieba.cut(articleA);
     const articleBsplit = nodejieba.cut(articleB);
 
+    const tagNumber = 20;
+
+    const articleAtag = nodejieba.extract(articleA, tagNumber);
+    const articleBtag = nodejieba.extract(articleB, tagNumber);
+
+    const articleAtagKeywords = articleAtag.map((element) => element.keyword);
+    const articleBtagKeywords = articleBtag.map((element) => element.keyword);
+
+    console.log(articleAtagKeywords);
+    console.log('-----------');
+    console.log(articleBtagKeywords);
+
     try {
       const stopwordMap = await buildStopWordsMap();
       const synonymMap = await buildSynonymMap();
@@ -230,6 +253,39 @@ app.post(
         synonymMap,
         articleBFiltered
       );
+
+      const responseFromES = await client.bulk({
+        body: [
+          {
+            index: {
+              _index: 'test_articles',
+            },
+          },
+          {
+            title: 'test title',
+            author: 'test author',
+            tag: articleAtagKeywords,
+            processed_content: articleAsynonymized,
+            content: articleA,
+          },
+          {
+            index: {
+              _index: 'test_articles',
+            },
+          },
+          {
+            title: 'test title',
+            author: 'test author',
+            tag: articleBtagKeywords,
+            processed_content: articleBsynonymized,
+            content: articleB,
+          },
+        ],
+      });
+
+      console.log('response from elasticSearch!!');
+      console.log(responseFromES);
+      responseFromES.items.forEach((ele) => console.log(ele));
 
       console.log(articleAsynonymized);
       console.log('--------------------');
@@ -287,6 +343,26 @@ app.post(
     const data = req.body['articles[]'];
     console.log(data);
 
+    const tagNumber = 20;
+
+    const articleTags = [];
+    data.forEach((element) => {
+      articleTags.push(nodejieba.extract(element, tagNumber));
+    });
+
+    console.log(articleTags);
+    console.log('---------------');
+
+    const articleKeyowrds = [];
+
+    articleTags.forEach((element) => {
+      let newElement = element.map((tag) => tag.keyword);
+      console.log(newElement);
+      articleKeyowrds.push(newElement);
+    });
+
+    console.log(articleKeyowrds);
+    console.log('---------------');
     const articleNumber = data.length;
     console.log(articleNumber);
 
@@ -308,12 +384,34 @@ app.post(
       })
     );
 
+    const esBulkBody = [];
+    for (let i = 0; i < articleNumber; i += 1) {
+      esBulkBody.push({
+        index: {
+          _index: 'test_articles',
+        },
+      });
+      esBulkBody.push({
+        title: 'test title',
+        author: 'test author',
+        tag: articleKeyowrds[i],
+        processed_content: processedData[i],
+        content: data[i],
+      });
+    }
+
+    const responseFromES = await client.bulk({ body: esBulkBody });
+
+    console.log('response from elasticSearch!!');
+    console.log(responseFromES);
+    responseFromES.items.forEach((ele) => console.log(ele));
+
     const articlesGraph = Graph();
 
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
         let similarity = calculateSimilary(processedData[i], processedData[j]);
-        articlesGraph.addEdge(i, j, -Math.log(similarity));
+        articlesGraph.addEdge(i, j, similarity);
       }
     }
 
@@ -323,7 +421,7 @@ app.post(
   }
 );
 
-app.get(`/api/${process.env.API_VERSION}/multiple/comparison`, (req, res) => {
+app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
   res.send('I am healthy server!!!!');
 });
 
