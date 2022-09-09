@@ -484,10 +484,20 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
   });
 });
 
-app.get(
-  `/api/${process.env.API_VERSION}/article/search`,
-  async (req, res) => {}
-);
+app.get(`/api/${process.env.API_VERSION}/article/search`, async (req, res) => {
+  const { keyword } = req.body;
+  const searchResult = await client.search({
+    index: 'test_articles',
+    body: {
+      size: 100,
+      query: {
+        multi_match: { query: keyword },
+      },
+    },
+  });
+  console.dir(searchResult.hits.hits);
+  res.send(searchResult);
+});
 
 app.get(`/api/${process.env.API_VERSION}/articles`, async (req, res) => {});
 
