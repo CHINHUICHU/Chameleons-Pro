@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 $(document).ready(() => {
   $.fn.showFlex = function () {
     this.show();
@@ -113,7 +114,7 @@ $(document).ready(() => {
     const response = await $.ajax({
       method: 'POST',
       url: '/api/1.0/multiple/comparison',
-      data: { articles: articles },
+      data: { articles },
       dataType: 'json',
       crossDomain: true,
     });
@@ -122,7 +123,7 @@ $(document).ready(() => {
 
     const edges = response.data.links;
 
-    let edgeNumber = edges.length;
+    const edgeNumber = edges.length;
 
     for (let i = 0; i < edgeNumber; i += 1) {
       $('#multiple-result').append(
