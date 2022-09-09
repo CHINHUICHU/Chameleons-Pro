@@ -452,7 +452,6 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
 
   console.log('response from elasticSearch!!');
   console.log(responseFromES);
-  // responseFromES.items.forEach((ele) => console.log(ele));
 
   const searchResponse = await client.search({
     index: 'test_articles',
@@ -485,8 +484,17 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
   });
 });
 
+app.get(
+  `/api/${process.env.API_VERSION}/article/search`,
+  async (req, res) => {}
+);
+
+app.get(`/api/${process.env.API_VERSION}/articles`, async (req, res) => {});
+
+// app.delete(`/api/${process.env.API_VERSION}/article`, async (req, res) => {});
+
 app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
-  res.send('I am healthy server!!!!');
+  res.send('I am a healthy server!!!!');
 });
 
 // 404 error handling
