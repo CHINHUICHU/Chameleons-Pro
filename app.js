@@ -187,7 +187,7 @@ function findSimilarSentenseIndex(article, matchedKeywords) {
   return markingArray;
 }
 
-function calculateSimilary(articleA, articleB) {
+function calculateSimilarity(articleA, articleB) {
   const articleAset = new Set();
   articleA.forEach((element) => {
     articleAset.add(element);
@@ -293,7 +293,7 @@ app.post(
       console.log(articleBsynonymized);
       console.log('-------------------');
 
-      const articleSimilarity = calculateSimilary(
+      const articleSimilarity = calculateSimilarity(
         articleAsynonymized,
         articleBsynonymized
       );
@@ -411,7 +411,7 @@ app.post(
 
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
-        const similarity = calculateSimilary(
+        const similarity = calculateSimilarity(
           processedData[i],
           processedData[j]
         );
@@ -472,7 +472,7 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
     articleGraph.addEdge(
       article.title,
       searchResponse.hits.hits[i]._source.title,
-      calculateSimilary(
+      calculateSimilarity(
         articleSynonymized,
         searchResponse.hits.hits[i]._source.processed_content
       )
