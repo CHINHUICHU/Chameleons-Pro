@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 require('dotenv').config();
 const express = require('express');
@@ -356,7 +357,7 @@ app.post(
     const articleKeyowrds = [];
 
     articleTags.forEach((element) => {
-      let newElement = element.map((tag) => tag.keyword);
+      const newElement = element.map((tag) => tag.keyword);
       console.log(newElement);
       articleKeyowrds.push(newElement);
     });
@@ -410,7 +411,10 @@ app.post(
 
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
-        let similarity = calculateSimilary(processedData[i], processedData[j]);
+        const similarity = calculateSimilary(
+          processedData[i],
+          processedData[j]
+        );
         articlesGraph.addEdge(i, j, similarity);
       }
     }
@@ -420,6 +424,66 @@ app.post(
     res.send({ data: articlesGraph.serialize() });
   }
 );
+
+app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
+  const article = req.body;
+  const articleSplit = nodejieba.cut(article.content);
+  const tagNumber = 20;
+  const articleTag = nodejieba.extract(article.content, tagNumber);
+  const articleTagKeywords = articleTag.map((element) => element.keyword);
+
+  const stopwordMap = await buildStopWordsMap();
+  const synonymMap = await buildSynonymMap();
+
+  const articleFiltered = await filterStopWords(stopwordMap, articleSplit);
+
+  const articleSynonymized = await findSynonym(synonymMap, articleFiltered);
+
+  const responseFromES = await client.index({
+    index: 'test_articles',
+    body: {
+      title: article.title,
+      author: article.author,
+      tag: articleTagKeywords,
+      processed_content: articleSynonymized,
+      content: article.content,
+    },
+  });
+
+  console.log('response from elasticSearch!!');
+  console.log(responseFromES);
+  // responseFromES.items.forEach((ele) => console.log(ele));
+
+  const searchResponse = await client.search({
+    index: 'test_articles',
+    body: {
+      size: 100,
+      query: {
+        terms: { tag: articleTagKeywords },
+      },
+    },
+  });
+
+  console.dir(searchResponse.hits.hits);
+  const articleGraph = new Graph();
+
+  console.log(searchResponse.hits.total.value);
+
+  for (let i = 0; i < Math.min(searchResponse.hits.total.value, 100); i += 1) {
+    articleGraph.addEdge(
+      article.title,
+      searchResponse.hits.hits[i]._source.title,
+      calculateSimilary(
+        articleSynonymized,
+        searchResponse.hits.hits[i]._source.processed_content
+      )
+    );
+  }
+  res.send({
+    data: searchResponse,
+    similarity: articleGraph.serialize(),
+  });
+});
 
 app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
   res.send('I am healthy server!!!!');
