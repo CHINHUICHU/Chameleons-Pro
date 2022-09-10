@@ -10,6 +10,7 @@ const { promisify } = require('util');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const Graph = require('graph-data-structure');
+// const { stopWordMap, synonymMap } = require('./util');
 
 nodejieba.load({ userDict: './dict.utf8' });
 
@@ -58,11 +59,11 @@ async function buildSynonymMap() {
   return synonymMap;
 }
 
-async function filterStopWords(stopwordMap, splitedParagraphArray) {
+async function filterStopWords(stopWordMap, splitedParagraphArray) {
   const newArray = _.cloneDeep(splitedParagraphArray);
   const paragraphLength = splitedParagraphArray.length;
   for (let i = 0; i < paragraphLength; i += 1) {
-    if (newArray[i].length <= 1 || stopwordMap.get(newArray[i])) {
+    if (newArray[i].length <= 1 || stopWordMap.get(newArray[i])) {
       newArray[i] = -1;
     }
   }
@@ -266,6 +267,7 @@ app.post(
             title: 'test title',
             author: 'test author',
             tag: articleAtagKeywords,
+            filtered_content: articleAsynonymized,
             processed_content: articleAsynonymized,
             content: articleA,
           },
@@ -278,6 +280,7 @@ app.post(
             title: 'test title',
             author: 'test author',
             tag: articleBtagKeywords,
+            filtered_content: articleBsynonymized,
             processed_content: articleBsynonymized,
             content: articleB,
           },
@@ -344,6 +347,9 @@ app.post(
     const data = req.body['articles[]'];
     console.log(data);
 
+    const stopwordMap = await buildStopWordsMap();
+    const synonymMap = await buildSynonymMap();
+
     const tagNumber = 20;
 
     const articleTags = [];
@@ -367,8 +373,6 @@ app.post(
     const articleNumber = data.length;
     console.log(articleNumber);
 
-    const stopwordMap = await buildStopWordsMap();
-    const synonymMap = await buildSynonymMap();
     const filteredArticles = [];
 
     const synonymiedArticles = await Promise.all(
@@ -401,6 +405,7 @@ app.post(
         title: 'test title',
         author: 'test author',
         tag: articleKeyowrds[i],
+        filtered_content: filteredArticles[i],
         processed_content: synonymiedArticles[i],
         content: data[i],
       });
@@ -463,10 +468,14 @@ app.post(
 
 app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
   const article = req.body;
+
+  console.log(article);
   const articleSplit = nodejieba.cut(article.content);
   const tagNumber = 20;
   const articleTag = nodejieba.extract(article.content, tagNumber);
   const articleTagKeywords = articleTag.map((element) => element.keyword);
+
+  console.log(articleTagKeywords);
 
   const stopwordMap = await buildStopWordsMap();
   const synonymMap = await buildSynonymMap();
@@ -474,6 +483,29 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
   const articleFiltered = await filterStopWords(stopwordMap, articleSplit);
 
   const articleSynonymized = await findSynonym(synonymMap, articleFiltered);
+
+  const responseSize = 10;
+  const esQuery = [];
+  articleTagKeywords.forEach((element) => {
+    esQuery.push({ match: { tag: element } });
+  });
+
+  console.log('---------es query----------');
+  console.log(esQuery);
+
+  const searchResponse = await client.search({
+    index: 'test_articles',
+    body: {
+      size: responseSize,
+      query: {
+        bool: {
+          should: esQuery,
+          minimum_should_match: 1,
+        },
+      },
+    },
+  });
+  console.log(searchResponse);
 
   const responseFromES = await client.index({
     index: 'test_articles',
@@ -489,31 +521,30 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
   console.log('response from elasticSearch!!');
   console.log(responseFromES);
 
-  const searchResponse = await client.search({
-    index: 'test_articles',
-    body: {
-      size: 100,
-      query: {
-        terms: { tag: articleTagKeywords },
-      },
-    },
-  });
-
-  console.dir(searchResponse.hits.hits);
   const articleGraph = new Graph();
 
   console.log(searchResponse.hits.total.value);
 
-  for (let i = 0; i < Math.min(searchResponse.hits.total.value, 100); i += 1) {
+  for (
+    let i = 0;
+    i < Math.min(searchResponse.hits.total.value, responseSize);
+    i += 1
+  ) {
     articleGraph.addEdge(
-      article.title,
-      searchResponse.hits.hits[i]._source.title,
+      { title: article.title, author: article.author },
+      {
+        title: searchResponse.hits.hits[i]._source.title,
+        author: searchResponse.hits.hits[i]._source.arthor,
+      },
       calculateSimilarity(
         articleSynonymized,
         searchResponse.hits.hits[i]._source.processed_content
       )
     );
   }
+
+  console.log(articleGraph.serialize());
+  console.log(articleGraph.nodes());
   res.send({
     data: searchResponse,
     similarity: articleGraph.serialize(),
