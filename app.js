@@ -369,14 +369,16 @@ app.post(
 
     const stopwordMap = await buildStopWordsMap();
     const synonymMap = await buildSynonymMap();
+    const filteredArticles = [];
 
-    const processedData = await Promise.all(
+    const synonymiedArticles = await Promise.all(
       data.map(async (element) => {
         const tokenizedArticle = nodejieba.cut(element);
         const filteredArticle = await filterStopWords(
           stopwordMap,
           tokenizedArticle
         );
+        filteredArticles.push(filteredArticle);
         const synonymiedArticle = await findSynonym(
           synonymMap,
           filteredArticle
@@ -384,6 +386,9 @@ app.post(
         return synonymiedArticle;
       })
     );
+
+    console.log('---------filtered articles----------');
+    console.dir(filteredArticles);
 
     const esBulkBody = [];
     for (let i = 0; i < articleNumber; i += 1) {
@@ -396,7 +401,7 @@ app.post(
         title: 'test title',
         author: 'test author',
         tag: articleKeyowrds[i],
-        processed_content: processedData[i],
+        processed_content: synonymiedArticles[i],
         content: data[i],
       });
     }
@@ -408,20 +413,46 @@ app.post(
     responseFromES.items.forEach((ele) => console.log(ele));
 
     const articlesGraph = Graph();
+    const matchedArticles = [];
 
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
         const similarity = calculateSimilarity(
-          processedData[i],
-          processedData[j]
+          synonymiedArticles[i],
+          synonymiedArticles[j]
         );
         articlesGraph.addEdge(i, j, similarity);
+        const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+          synonymiedArticles[i],
+          synonymiedArticles[j],
+          filteredArticles[i],
+          filteredArticles[j]
+        );
+
+        const matchedArticleAindices = findSimilarSentenseIndex(
+          data[i],
+          matchedArticleA
+        );
+        const matchedBrticleAindices = findSimilarSentenseIndex(
+          data[j],
+          matchedArticleB
+        );
+
+        matchedArticles.push([i, j]);
+        matchedArticles.push([matchedArticleAindices, matchedBrticleAindices]);
       }
     }
 
+    console.dir(matchedArticles);
+
     console.log(articlesGraph.serialize());
 
-    res.send({ data: articlesGraph.serialize() });
+    const response = {
+      similarity: articlesGraph.serialize(),
+      sentenseIndex: matchedArticles,
+    };
+
+    res.send({ data: response });
   }
 );
 
