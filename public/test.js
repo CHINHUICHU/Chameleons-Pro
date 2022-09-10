@@ -21,8 +21,8 @@ $(document).ready(() => {
     $('#multiple-finish').showFlex();
   });
 
-  let comparedArticles = 2;
   $('#new-article').click(() => {
+    let comparedArticles = 2;
     comparedArticles += 1;
     $('#multiple').append(`<h2>文章${comparedArticles}</h2>`);
     const $textarea = $('<textarea>', { class: 'article' });
@@ -130,6 +130,21 @@ $(document).ready(() => {
         `<div>文章${+edges[i].source + 1}與文章${
           +edges[i].target + 1
         }的相似度為${(+edges[i].weight * 100).toFixed(2)}%</div>`
+      );
+      $('<button>查看相似段落</button>')
+        .attr(
+          'id',
+          `${+edges[i].source + 1}-and-${+edges[i].target + 1}-button`
+        )
+        .addClass('check-similar-paragraph')
+        .appendTo('#multiple-result');
+    }
+
+    for (let i = 0; i < edgeNumber; i += 1) {
+      $(`#${+edges[i].source + 1}-and-${+edges[i].target + 1}-button`).click(
+        async () => {
+          console.log('hey');
+        }
       );
     }
   });
