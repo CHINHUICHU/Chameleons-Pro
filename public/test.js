@@ -20,13 +20,14 @@ $(document).ready(() => {
     $('#nav').showFlex();
     $('#multiple-finish').showFlex();
   });
-
+  let comparedArticles = 2;
   $('#new-article').click(() => {
-    let comparedArticles = 2;
     comparedArticles += 1;
     $('#multiple').append(`<h2>文章${comparedArticles}</h2>`);
-    const $textarea = $('<textarea>', { class: 'article' });
-    $('#multiple').append($textarea);
+    $('<textarea></textarea>')
+      .attr('id', `article-${comparedArticles}`)
+      .addClass('article')
+      .appendTo('#multiple');
   });
 
   $('.upload').click(() => {
@@ -119,33 +120,76 @@ $(document).ready(() => {
       crossDomain: true,
     });
 
-    console.log(response.data.links.length);
+    localStorage.setItem(
+      'sentence-index',
+      JSON.stringify(response.data.sentenseIndex)
+    );
 
-    const edges = response.data.links;
+    const edges = response.data.similarity.links;
 
     const edgeNumber = edges.length;
 
     for (let i = 0; i < edgeNumber; i += 1) {
       $('#multiple-result').append(
-        `<div>文章${+edges[i].source + 1}與文章${
-          +edges[i].target + 1
-        }的相似度為${(+edges[i].weight * 100).toFixed(2)}%</div>`
+        `<div>文章${+edges[i].source}與文章${+edges[i].target}的相似度為${(
+          +edges[i].weight * 100
+        ).toFixed(2)}%</div>`
       );
       $('<button>查看相似段落</button>')
-        .attr(
-          'id',
-          `${+edges[i].source + 1}-and-${+edges[i].target + 1}-button`
-        )
+        .attr('id', `${+edges[i].source}-and-${+edges[i].target}`)
         .addClass('check-similar-paragraph')
         .appendTo('#multiple-result');
     }
 
-    for (let i = 0; i < edgeNumber; i += 1) {
-      $(`#${+edges[i].source + 1}-and-${+edges[i].target + 1}-button`).click(
-        async () => {
-          console.log('hey');
+    $('.check-similar-paragraph').click(function (e) {
+      e.stopPropagation();
+      $('.article-result').remove();
+      const articleIds = $(this).attr('id').split('-');
+      const [article1, article2] = [articleIds[0], articleIds[2]];
+
+      $('<div></div>')
+        .attr('id', `article-${article1}-result`)
+        .addClass('article-result')
+        .appendTo('#multiple-result');
+      $(`#article-${article1}-result`).html($(`#article-${article1}`).val());
+
+      $('<div></div>')
+        .attr('id', `article-${article2}-result`)
+        .addClass('article-result')
+        .appendTo('#multiple-result');
+      $(`#article-${article2}-result`).html($(`#article-${article2}`).val());
+
+      const article1split = $(`#article-${article1}`)
+        .val()
+        .split(/(?:，|。|\n|！|？|：|；)+/);
+      const article1splitLength = article1split.length;
+
+      console.log(article1split);
+
+      const article2split = $(`#article-${article2}`)
+        .val()
+        .split(/(?:，|。|\n|！|？|：|；)+/);
+      const article2splitLength = article2split.length;
+
+      console.log(article2split);
+
+      const similarSentenceIndex = JSON.parse(
+        localStorage.getItem('sentence-index')
+      )[`${$(this).attr('id')}`];
+
+      // console.log(JSON.parse(similarSentenceIndex));
+
+      for (let i = 0; i < article1splitLength; i += 1) {
+        if (similarSentenceIndex[0][i]) {
+          $(`#article-${article1}-result`).mark(article1split[i]);
         }
-      );
-    }
+      }
+
+      for (let i = 0; i < article2splitLength; i += 1) {
+        if (similarSentenceIndex[1][i]) {
+          $(`#article-${article2}-result`).mark(article2split[i]);
+        }
+      }
+    });
   });
 });
