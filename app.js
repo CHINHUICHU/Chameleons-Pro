@@ -413,15 +413,15 @@ app.post(
     responseFromES.items.forEach((ele) => console.log(ele));
 
     const articlesGraph = Graph();
-    const matchedArticles = [];
-
+    // const matchedArticles = [];
+    const matchedArticles = {};
     for (let i = 0; i < articleNumber; i += 1) {
       for (let j = i + 1; j < articleNumber; j += 1) {
         const similarity = calculateSimilarity(
           synonymiedArticles[i],
           synonymiedArticles[j]
         );
-        articlesGraph.addEdge(i, j, similarity);
+        articlesGraph.addEdge(i + 1, j + 1, similarity);
         const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
           synonymiedArticles[i],
           synonymiedArticles[j],
@@ -438,8 +438,13 @@ app.post(
           matchedArticleB
         );
 
-        matchedArticles.push([i, j]);
-        matchedArticles.push([matchedArticleAindices, matchedBrticleAindices]);
+        matchedArticles[`${i + 1}-and-${j + 1}`] = [
+          matchedArticleAindices,
+          matchedBrticleAindices,
+        ];
+
+        // matchedArticles.push([i, j]);
+        // matchedArticles.push([matchedArticleAindices, matchedBrticleAindices]);
       }
     }
 
