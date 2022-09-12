@@ -267,7 +267,7 @@ app.post(
             title: 'test title',
             author: 'test author',
             tag: articleAtagKeywords,
-            filtered_content: articleAsynonymized,
+            filtered_content: articleAFiltered,
             processed_content: articleAsynonymized,
             content: articleA,
           },
@@ -280,7 +280,7 @@ app.post(
             title: 'test title',
             author: 'test author',
             tag: articleBtagKeywords,
-            filtered_content: articleBsynonymized,
+            filtered_content: articleBFiltered,
             processed_content: articleBsynonymized,
             content: articleB,
           },
@@ -398,7 +398,7 @@ app.post(
     for (let i = 0; i < articleNumber; i += 1) {
       esBulkBody.push({
         index: {
-          _index: 'test_articles',
+          _index: process.env.DB_NAME,
         },
       });
       esBulkBody.push({
@@ -494,7 +494,7 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
   console.log(esQuery);
 
   const searchResponse = await client.search({
-    index: 'test_articles',
+    index: process.env.DB_NAME,
     body: {
       size: responseSize,
       query: {
@@ -505,49 +505,76 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
       },
     },
   });
+
   console.log(searchResponse);
 
-  const responseFromES = await client.index({
-    index: 'test_articles',
-    body: {
-      title: article.title,
-      author: article.author,
-      tag: articleTagKeywords,
-      processed_content: articleSynonymized,
-      content: article.content,
-    },
-  });
+  // const responseFromES = await client.index({
+  //   index: process.env.DB_NAME,
+  //   body: {
+  //     title: article.title,
+  //     author: article.author,
+  //     tag: articleTagKeywords,
+  //     filtered_content: articleFiltered,
+  //     processed_content: articleSynonymized,
+  //     content: article.content,
+  //   },
+  // });
 
-  console.log('response from elasticSearch!!');
-  console.log(responseFromES);
+  // console.log('response from elasticSearch!!');
+  // console.log(responseFromES);
 
-  const articleGraph = new Graph();
+  // const articleGraph = new Graph();
 
   console.log(searchResponse.hits.total.value);
+
+  const similarSentenceIndex = [];
+  const articleSimilarities = [];
 
   for (
     let i = 0;
     i < Math.min(searchResponse.hits.total.value, responseSize);
     i += 1
   ) {
-    articleGraph.addEdge(
-      { title: article.title, author: article.author },
-      {
-        title: searchResponse.hits.hits[i]._source.title,
-        author: searchResponse.hits.hits[i]._source.arthor,
-      },
+    articleSimilarities.push(
       calculateSimilarity(
         articleSynonymized,
         searchResponse.hits.hits[i]._source.processed_content
       )
     );
+    // articleGraph.addEdge(
+    //   { title: article.title, author: article.author },
+    //   {
+    //     title: searchResponse.hits.hits[i]._source.title,
+    //     author: searchResponse.hits.hits[i]._source.arthor,
+    //   },
+    //   calculateSimilarity(
+    //     articleSynonymized,
+    //     searchResponse.hits.hits[i]._source.processed_content
+    //   )
+    // );
+    const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+      articleSynonymized,
+      searchResponse.hits.hits[i]._source.processed_content,
+      articleFiltered,
+      searchResponse.hits.hits[i]._source.filtered_content
+    );
+    const matchedArticleAindices = findSimilarSentenseIndex(
+      article.content,
+      matchedArticleA
+    );
+    const matchedBrticleBindices = findSimilarSentenseIndex(
+      searchResponse.hits.hits[i]._source.content,
+      matchedArticleB
+    );
+    similarSentenceIndex.push([matchedArticleAindices, matchedBrticleBindices]);
   }
 
-  console.log(articleGraph.serialize());
-  console.log(articleGraph.nodes());
+  // console.log(articleGraph.serialize());
+  // console.log(articleGraph.nodes());
   res.send({
-    data: searchResponse,
-    similarity: articleGraph.serialize(),
+    similarity: articleSimilarities,
+    data: similarSentenceIndex,
+    article: searchResponse.hits.hits,
   });
 });
 
