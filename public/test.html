@@ -17,8 +17,9 @@
 <body>
     <h1>Chameleons Pro</h1>
     <div id="index">
-        <button class="1-1-article comparison">單篇文章比對</button>
-        <button class="multiple-article comparison">多篇文章比對</button>
+        <button class="1-1-article comparison">一對一文章比對</button>
+        <button class="multiple-article comparison">多對多文章比對</button>
+        <button class="upload-article comparison">單一文章相似度分析</button>
     </div>
     <div id="top">
         <div id="similarity"></div>
@@ -68,8 +69,19 @@
     </div>
 
     <div id="multiple-result">
-
     </div>
+
+    <div id="upload-article-area">
+        <label>標題</label>
+        <input id="upload-title"/>
+        <label>作者</label>
+        <input id="upload-author"/>
+        <label>文章</label>
+        <textarea class="upload-article" id="upload-content"></textarea>
+        <button id="upload-submit">上傳文章</button>
+    </div>
+
+    <div id="upload-result"></div>
     
 </body>
 </html>

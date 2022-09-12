@@ -38,7 +38,11 @@
 #multiple {
     display: none;
 }
-.article {
+.article, #upload-content {
     width: 800px;
     height: 400px;
+}
+
+#upload-article-area{
+    display: none;
 }

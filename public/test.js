@@ -192,4 +192,66 @@ $(document).ready(() => {
       }
     });
   });
+
+  $('.upload-article').click(() => {
+    $('#index').hide();
+    $('#upload-article-area').showFlex();
+    $('#upload-article-area').css('flex-direction', 'column');
+  });
+
+  $('#upload-submit').click(async () => {
+    $('#upload-article-area').hide();
+    const response = await $.ajax({
+      method: 'POST',
+      url: '/api/1.0/analysis',
+      data: {
+        title: $('#upload-title').val(),
+        author: $('#upload-author').val(),
+        content: $('#upload-content').val(),
+      },
+      dataType: 'json',
+      crossDomain: true,
+    });
+
+    console.log(response);
+
+    const articleNumber = response.article.length;
+    $(`<h4>該篇文章共與${articleNumber}相似度超過10%</h4>`).appendTo(
+      '#upload-result'
+    );
+    for (let i = 0; i < articleNumber; i += 1) {
+      $(
+        `<div>第${i + 1}篇相似度為：${(response.similarity[i] * 100).toFixed(
+          2
+        )}%</div>`
+      ).appendTo('#upload-result');
+      $('<div></div>')
+        .attr('id', `article-A-${i + 1}`)
+        .html($('#upload-content').val())
+        .appendTo('#upload-result');
+      const articleAsplit = $(`#article-A-${i + 1}`)
+        .html()
+        .split(/(?:，|。|\n|！|？|：|；)+/);
+      console.log('articleAsplit', articleAsplit);
+      for (let j = 0; j < articleAsplit.length; j += 1) {
+        if (response.sentenceIndex[i][0][j]) {
+          $(`#article-A-${i + 1}`).mark(articleAsplit[j]);
+        }
+      }
+
+      $('<div></div>')
+        .attr('id', `article-B-${i + 1}`)
+        .html(response.article[i])
+        .appendTo('#upload-result');
+      const articleBsplit = $(`#article-B-${i + 1}`)
+        .html()
+        .split(/(?:，|。|\n|！|？|：|；)+/);
+      console.log('articleBsplit', articleBsplit);
+      for (let j = 0; j < articleBsplit.length; j += 1) {
+        if (response.sentenceIndex[i][1][j]) {
+          $(`#article-B-${i + 1}`).mark(articleBsplit[j]);
+        }
+      }
+    }
+  });
 });
