@@ -529,52 +529,45 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
 
   const similarSentenceIndex = [];
   const articleSimilarities = [];
+  const similarArticles = [];
 
   for (
     let i = 0;
     i < Math.min(searchResponse.hits.total.value, responseSize);
     i += 1
   ) {
-    articleSimilarities.push(
-      calculateSimilarity(
-        articleSynonymized,
-        searchResponse.hits.hits[i]._source.processed_content
-      )
-    );
-    // articleGraph.addEdge(
-    //   { title: article.title, author: article.author },
-    //   {
-    //     title: searchResponse.hits.hits[i]._source.title,
-    //     author: searchResponse.hits.hits[i]._source.arthor,
-    //   },
-    //   calculateSimilarity(
-    //     articleSynonymized,
-    //     searchResponse.hits.hits[i]._source.processed_content
-    //   )
-    // );
-    const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+    const articleSimilarity = calculateSimilarity(
       articleSynonymized,
-      searchResponse.hits.hits[i]._source.processed_content,
-      articleFiltered,
-      searchResponse.hits.hits[i]._source.filtered_content
+      searchResponse.hits.hits[i]._source.processed_content
     );
-    const matchedArticleAindices = findSimilarSentenseIndex(
-      article.content,
-      matchedArticleA
-    );
-    const matchedBrticleBindices = findSimilarSentenseIndex(
-      searchResponse.hits.hits[i]._source.content,
-      matchedArticleB
-    );
-    similarSentenceIndex.push([matchedArticleAindices, matchedBrticleBindices]);
+    if (articleSimilarity >= 0.1) {
+      articleSimilarities.push(articleSimilarity);
+      const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+        articleSynonymized,
+        searchResponse.hits.hits[i]._source.processed_content,
+        articleFiltered,
+        searchResponse.hits.hits[i]._source.filtered_content
+      );
+      const matchedArticleAindices = findSimilarSentenseIndex(
+        article.content,
+        matchedArticleA
+      );
+      const matchedBrticleBindices = findSimilarSentenseIndex(
+        searchResponse.hits.hits[i]._source.content,
+        matchedArticleB
+      );
+      similarSentenceIndex.push([
+        matchedArticleAindices,
+        matchedBrticleBindices,
+      ]);
+      similarArticles.push(searchResponse.hits.hits[i]._source.content);
+    }
   }
 
-  // console.log(articleGraph.serialize());
-  // console.log(articleGraph.nodes());
   res.send({
     similarity: articleSimilarities,
-    data: similarSentenceIndex,
-    article: searchResponse.hits.hits,
+    sentenceIndex: similarSentenceIndex,
+    article: similarArticles,
   });
 });
 
