@@ -1,6 +1,42 @@
+#header, #header-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#search-input-area {
+    display: none;
+}
+#header-button {
+    width: 200px
+}
+
+#user, #search {
+    width: 75px;
+    height: 30px;
+}
+
+#search-input-area {
+    display: none;
+}
+
+.search-input {
+    width: 300px;
+}
+
+#search-button {
+    width: 300px;
+    display: flex;
+    justify-content: space-around;
+    margin-top: 30px;
+}
+
 #top, #main, #index, #nav{
     display: flex;
     justify-content: space-around;
+}
+
+#main {
+    margin-top: 50px;
 }
 #article-A, #article-B, #result-A, #result-B {
     height: 800px;
@@ -38,7 +74,15 @@
 #multiple {
     display: none;
 }
-.article {
+
+.multiple-arthor, .multiple-title {
+    width:800px
+}
+.article, #upload-content {
     width: 800px;
     height: 400px;
+}
+
+#upload-article-area{
+    display: none;
 }

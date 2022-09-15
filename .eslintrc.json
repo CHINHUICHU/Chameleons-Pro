@@ -2,8 +2,9 @@
     "env": {
         "browser": true,
         "commonjs": true,
-        "es2021": true,
-        "jQuery": true
+        "es2022": true,
+        "jquery": true,
+        "node": true
     },
     "extends": "airbnb-base",
     "overrides": [
