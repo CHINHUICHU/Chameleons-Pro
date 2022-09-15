@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 $(document).ready(() => {
   $.fn.showFlex = function () {
@@ -24,6 +25,11 @@ $(document).ready(() => {
   $('#new-article').click(() => {
     comparedArticles += 1;
     $('#multiple').append(`<h2>文章${comparedArticles}</h2>`);
+    $('<lable>標題</label>').appendTo('#multiple');
+    $('<input></input>').appendTo('#multiple').addClass('multiple-title');
+    $('<lable>作者</label>').appendTo('#multiple');
+    $('<input></input>').appendTo('#multiple').addClass('multiple-arthor');
+    $('<lable>內容</label>').appendTo('#multiple');
     $('<textarea></textarea>')
       .attr('id', `article-${comparedArticles}`)
       .addClass('article')
@@ -150,6 +156,7 @@ $(document).ready(() => {
       $('<div></div>')
         .attr('id', `article-${article1}-result`)
         .addClass('article-result')
+        .html('margin-bottom', '20px')
         .appendTo('#multiple-result');
       $(`#article-${article1}-result`).html($(`#article-${article1}`).val());
 
@@ -228,9 +235,10 @@ $(document).ready(() => {
       $('<div></div>')
         .attr('id', `article-A-${i + 1}`)
         .html($('#upload-content').val())
+        .css()
         .appendTo('#upload-result');
       const articleAsplit = $(`#article-A-${i + 1}`)
-        .html()
+        .html('margin-bottom', '20px')
         .split(/(?:，|。|\n|！|？|：|；)+/);
       console.log('articleAsplit', articleAsplit);
       for (let j = 0; j < articleAsplit.length; j += 1) {
@@ -242,6 +250,7 @@ $(document).ready(() => {
       $('<div></div>')
         .attr('id', `article-B-${i + 1}`)
         .html(response.article[i])
+        .css('margin-bottom', '50px')
         .appendTo('#upload-result');
       const articleBsplit = $(`#article-B-${i + 1}`)
         .html()
@@ -253,5 +262,43 @@ $(document).ready(() => {
         }
       }
     }
+  });
+
+  $('#search').click(() => {
+    $('#index').hide();
+    $('#search-input-area').showFlex();
+    $('#search-input-area').css('flex-direction', 'column');
+    $('#search-input-area').css('align-items', 'center');
+  });
+
+  $('#search-go-back').click(() => {
+    $('#index').show();
+    $('#search-input-area').hide();
+  });
+
+  $('#search-submit').click(async () => {
+    $('#search-input-area').hide();
+    const response = await $.ajax({
+      method: 'POST',
+      url: '/api/1.0/article/search',
+      data: {
+        title: $('#search-title').val(),
+        author: $('#search-author').val(),
+        content: $('#search-content').val(),
+      },
+      dataType: 'json',
+      crossDomain: true,
+    });
+    console.log(response);
+    const articles = response.hits.hits;
+    articles.forEach((element) => {
+      $(`<div>標題：${element._source.title}</div>`).appendTo('#search-result');
+      $(`<div>作者：${element._source.author}</div>`).appendTo(
+        '#search-result'
+      );
+      $(`<div>內容：${element._source.content}</div>`).appendTo(
+        '#search-result'
+      );
+    });
   });
 });

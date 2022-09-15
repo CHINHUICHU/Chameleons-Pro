@@ -508,22 +508,20 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
 
   console.log(searchResponse);
 
-  // const responseFromES = await client.index({
-  //   index: process.env.DB_NAME,
-  //   body: {
-  //     title: article.title,
-  //     author: article.author,
-  //     tag: articleTagKeywords,
-  //     filtered_content: articleFiltered,
-  //     processed_content: articleSynonymized,
-  //     content: article.content,
-  //   },
-  // });
+  const responseFromES = await client.index({
+    index: process.env.DB_NAME,
+    body: {
+      title: article.title,
+      author: article.author,
+      tag: articleTagKeywords,
+      filtered_content: articleFiltered,
+      processed_content: articleSynonymized,
+      content: article.content,
+    },
+  });
 
-  // console.log('response from elasticSearch!!');
-  // console.log(responseFromES);
-
-  // const articleGraph = new Graph();
+  console.log('response from elasticSearch!!');
+  console.log(responseFromES);
 
   console.log(searchResponse.hits.total.value);
 
@@ -560,7 +558,7 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
         matchedArticleAindices,
         matchedBrticleBindices,
       ]);
-      similarArticles.push(searchResponse.hits.hits[i]._source.content);
+      similarArticles.push(searchResponse.hits.hits[i]._source);
     }
   }
 
@@ -571,14 +569,84 @@ app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
   });
 });
 
-app.get(`/api/${process.env.API_VERSION}/article/search`, async (req, res) => {
-  const { keyword } = req.body;
+app.post(`/api/${process.env.API_VERSION}/article/search`, async (req, res) => {
+  const esSearchQuery = {
+    must: [],
+    must_not: [],
+    should: [],
+  };
+  const title = req.body.title.split(' ');
+  const author = req.body.author.split(' ');
+  const content = req.body.content.split(' ');
+
+  console.log(title);
+  console.log(author);
+  console.log(content);
+
+  if (title.length > 0) {
+    title.forEach((element) => {
+      if (element.length > 0) {
+        if (element[0] === '+') {
+          esSearchQuery.must.push({ match: { title: element.substring(1) } });
+        } else if (element[0] === '-') {
+          esSearchQuery.must_not.push({
+            match: { title: element.substring(1) },
+          });
+        } else if (element[0] === '"') {
+          esSearchQuery.must.push({
+            match: { title: element.substring(1, -2) },
+          });
+        } else {
+          esSearchQuery.should.push({ match: { title: element } });
+        }
+      }
+    });
+  }
+  if (author.length > 0) {
+    author.forEach((element) => {
+      if (element.length > 0) {
+        if (element[0] === '+') {
+          esSearchQuery.must.push({ match: { author: element.substring(1) } });
+        } else if (element[0] === '-') {
+          esSearchQuery.must_not.push({
+            match: { author: element.substring(1) },
+          });
+        } else if (element[0] === '"') {
+          esSearchQuery.must.push({
+            match: { author: element.substring(1, -2) },
+          });
+        } else {
+          esSearchQuery.should.push({ match: { author: element } });
+        }
+      }
+    });
+  }
+  if (content.length > 0) {
+    content.forEach((element) => {
+      if (element.length > 0) {
+        if (element[0] === '+') {
+          esSearchQuery.must.push({ match: { content: element.substring(1) } });
+        } else if (element[0] === '-') {
+          esSearchQuery.must_not.push({
+            match: { content: element.substring(1) },
+          });
+        } else if (element[0] === '"') {
+          esSearchQuery.must.push({
+            match: { content: element.substring(1, -2) },
+          });
+        } else {
+          esSearchQuery.should.push({ match: { content: element } });
+        }
+      }
+    });
+  }
+  console.log(esSearchQuery);
   const searchResult = await client.search({
-    index: 'test_articles',
+    index: process.env.DB_NAME,
     body: {
       size: 100,
       query: {
-        multi_match: { query: keyword },
+        bool: esSearchQuery,
       },
     },
   });
