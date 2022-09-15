@@ -10,11 +10,13 @@ const { promisify } = require('util');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const Graph = require('graph-data-structure');
-// const { stopWordMap, synonymMap } = require('./util');
+const argon2 = require('argon2');
+const jwt = require('jsonwebtoken');
+const validator = require('validator');
 
 nodejieba.load({ userDict: './dict.utf8' });
 
-const readAsync = promisify(fs.readFile);
+const readFileAsync = promisify(fs.readFile);
 const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -35,7 +37,9 @@ const client = new Client({
 async function buildStopWordsMap() {
   // search stop words in file
   const stopwordMap = new Map();
-  const stopWords = (await readAsync('./stops.utf8')).toString().split('\n');
+  const stopWords = (await readFileAsync('./stops.utf8'))
+    .toString()
+    .split('\n');
   for (const word of stopWords) {
     stopwordMap.set(word, -1);
   }
@@ -47,7 +51,7 @@ async function buildStopWordsMap() {
 async function buildSynonymMap() {
   // build synonym map
   const synonymMap = new Map();
-  const synonyms = (await readAsync('./dict_synonym.txt'))
+  const synonyms = (await readFileAsync('./dict_synonym.txt'))
     .toString()
     .split('\n');
   for (const sysnonym of synonyms) {
@@ -654,9 +658,92 @@ app.post(`/api/${process.env.API_VERSION}/article/search`, async (req, res) => {
   res.send(searchResult);
 });
 
-app.get(`/api/${process.env.API_VERSION}/articles`, async (req, res) => {});
+// app.get(`/api/${process.env.API_VERSION}/articles`, async (req, res) => {});
 
 // app.delete(`/api/${process.env.API_VERSION}/article`, async (req, res) => {});
+
+app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
+  const user = req.body;
+  if (
+    !user.name ||
+    !user.email ||
+    !user.password ||
+    validator.isEmpty(user.name)
+  ) {
+    return res.status(400).send({
+      status_code: 400,
+      message: 'Error: Email, name and password are required',
+    });
+  }
+
+  if (!validator.isEmail(user.email)) {
+    return res.status(400).send({
+      status_code: 400,
+      message: 'Error: Invalid email format',
+    });
+  }
+
+  if (!validator.isStrongPassword(user.password)) {
+    return res.status(400).send({
+      status_code: 400,
+      message:
+        'Error: Weak password. (min length: 8, min lwercase: 1, min uppercase: 1, min numbers: 1, min symbols: 1)',
+    });
+  }
+
+  try {
+    const checkEmail = await client.search({
+      index: 'test_user',
+      body: {
+        query: {
+          term: {
+            email: user.email,
+          },
+        },
+      },
+    });
+
+    if (checkEmail.hits.total.value) {
+      return res.status(400).send({
+        status_code: 400,
+        message: 'Error: The email has been signed up',
+      });
+    }
+
+    const hash = await argon2.hash(user.password);
+    const result = await client.index({
+      index: 'test_user',
+      body: {
+        name: user.name,
+        email: user.email,
+        password: hash,
+      },
+    });
+
+    const accessToken = jwt.sign(
+      {
+        name: user.name,
+        email: user.email,
+      },
+      process.env.SECRET_TOKEN,
+      { expiresIn: '30d' }
+    );
+
+    console.log(result);
+
+    res.send({
+      data: {
+        name: user.name,
+        email: user.email,
+        access_token: accessToken,
+        expires: '30 days',
+      },
+    });
+  } catch (err) {
+    console.log(err);
+    res.send('internal server error');
+  }
+});
 
 app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
   res.send('I am a healthy server!!!!');
