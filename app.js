@@ -17,6 +17,7 @@ const validator = require('validator');
 nodejieba.load({ userDict: './dict.utf8' });
 
 const readFileAsync = promisify(fs.readFile);
+// const jwtVerifyAsync = promisify(jwt.verify);
 const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -216,15 +217,19 @@ function calculateSimilarity(articleA, articleB) {
 app.post(
   `/api/${process.env.API_VERSION}/comparison`,
   async (req, res, next) => {
-    const { articleA, articleB } = req.body;
+    // console.log(req.body);
+    const { articleA, articleB } = req.body.data;
 
-    const articleAsplit = nodejieba.cut(articleA);
-    const articleBsplit = nodejieba.cut(articleB);
+    const articleAsplit = nodejieba.cut(articleA.content);
+    const articleBsplit = nodejieba.cut(articleB.content);
+
+    console.dir(articleAsplit);
+    console.log('----------------------');
 
     const tagNumber = 20;
 
-    const articleAtag = nodejieba.extract(articleA, tagNumber);
-    const articleBtag = nodejieba.extract(articleB, tagNumber);
+    const articleAtag = nodejieba.extract(articleA.content, tagNumber);
+    const articleBtag = nodejieba.extract(articleB.content, tagNumber);
 
     const articleAtagKeywords = articleAtag.map((element) => element.keyword);
     const articleBtagKeywords = articleBtag.map((element) => element.keyword);
@@ -236,7 +241,6 @@ app.post(
     try {
       const stopwordMap = await buildStopWordsMap();
       const synonymMap = await buildSynonymMap();
-
       const articleAFiltered = await filterStopWords(
         stopwordMap,
         articleAsplit
@@ -245,12 +249,10 @@ app.post(
         stopwordMap,
         articleBsplit
       );
-
       console.log(articleAFiltered);
       console.log('--------------------');
       console.log(articleBFiltered);
       console.log('-------------------');
-
       const articleAsynonymized = await findSynonym(
         synonymMap,
         articleAFiltered
@@ -259,7 +261,6 @@ app.post(
         synonymMap,
         articleBFiltered
       );
-
       const responseFromES = await client.bulk({
         body: [
           {
@@ -268,12 +269,12 @@ app.post(
             },
           },
           {
-            title: 'test title',
-            author: 'test author',
+            title: articleA.title,
+            author: articleA.author,
             tag: articleAtagKeywords,
             filtered_content: articleAFiltered,
             processed_content: articleAsynonymized,
-            content: articleA,
+            content: articleA.content,
           },
           {
             index: {
@@ -281,62 +282,53 @@ app.post(
             },
           },
           {
-            title: 'test title',
-            author: 'test author',
+            title: articleB.title,
+            author: articleB.author,
             tag: articleBtagKeywords,
             filtered_content: articleBFiltered,
             processed_content: articleBsynonymized,
-            content: articleB,
+            content: articleB.content,
           },
         ],
       });
-
       console.log('response from elasticSearch!!');
       console.log(responseFromES);
       responseFromES.items.forEach((ele) => console.log(ele));
-
       console.log(articleAsynonymized);
       console.log('--------------------');
       console.log(articleBsynonymized);
       console.log('-------------------');
-
       const articleSimilarity = calculateSimilarity(
         articleAsynonymized,
         articleBsynonymized
       );
-
       const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
         articleAsynonymized,
         articleBsynonymized,
         articleAFiltered,
         articleBFiltered
       );
-
       console.log(matchedArticleA);
       console.log('-------------------');
       console.log(matchedArticleB);
       console.log('-------------------');
-
       const matchedArticleAindices = findSimilarSentenseIndex(
-        articleA,
+        articleA.content,
         matchedArticleA
       );
       const matchedBrticleAindices = findSimilarSentenseIndex(
-        articleB,
+        articleB.content,
         matchedArticleB
       );
-
       console.log('matched index');
       console.log(matchedArticleAindices);
       console.log('--------------------');
       console.log(matchedBrticleAindices);
-
       const response = {
         similarity: articleSimilarity,
         articleA: matchedArticleAindices,
         articleB: matchedBrticleAindices,
       };
-
       res.send({ data: response });
     } catch (err) {
       console.log(err);
@@ -348,125 +340,127 @@ app.post(
 app.post(
   `/api/${process.env.API_VERSION}/multiple/comparison`,
   async (req, res) => {
-    const data = req.body['articles[]'];
-    console.log(data);
+    console.log(req.body.data);
+    res.send({ status: 'ok' });
+    // const data = req.body['articles[]'];
+    // console.log(data);
 
-    const stopwordMap = await buildStopWordsMap();
-    const synonymMap = await buildSynonymMap();
+    // const stopwordMap = await buildStopWordsMap();
+    // const synonymMap = await buildSynonymMap();
 
-    const tagNumber = 20;
+    // const tagNumber = 20;
 
-    const articleTags = [];
-    data.forEach((element) => {
-      articleTags.push(nodejieba.extract(element, tagNumber));
-    });
+    // const articleTags = [];
+    // data.forEach((element) => {
+    //   articleTags.push(nodejieba.extract(element, tagNumber));
+    // });
 
-    console.log(articleTags);
-    console.log('---------------');
+    // console.log(articleTags);
+    // console.log('---------------');
 
-    const articleKeyowrds = [];
+    // const articleKeyowrds = [];
 
-    articleTags.forEach((element) => {
-      const newElement = element.map((tag) => tag.keyword);
-      console.log(newElement);
-      articleKeyowrds.push(newElement);
-    });
+    // articleTags.forEach((element) => {
+    //   const newElement = element.map((tag) => tag.keyword);
+    //   console.log(newElement);
+    //   articleKeyowrds.push(newElement);
+    // });
 
-    console.log(articleKeyowrds);
-    console.log('---------------');
-    const articleNumber = data.length;
-    console.log(articleNumber);
+    // console.log(articleKeyowrds);
+    // console.log('---------------');
+    // const articleNumber = data.length;
+    // console.log(articleNumber);
 
-    const filteredArticles = [];
+    // const filteredArticles = [];
 
-    const synonymiedArticles = await Promise.all(
-      data.map(async (element) => {
-        const tokenizedArticle = nodejieba.cut(element);
-        const filteredArticle = await filterStopWords(
-          stopwordMap,
-          tokenizedArticle
-        );
-        filteredArticles.push(filteredArticle);
-        const synonymiedArticle = await findSynonym(
-          synonymMap,
-          filteredArticle
-        );
-        return synonymiedArticle;
-      })
-    );
+    // const synonymiedArticles = await Promise.all(
+    //   data.map(async (element) => {
+    //     const tokenizedArticle = nodejieba.cut(element);
+    //     const filteredArticle = await filterStopWords(
+    //       stopwordMap,
+    //       tokenizedArticle
+    //     );
+    //     filteredArticles.push(filteredArticle);
+    //     const synonymiedArticle = await findSynonym(
+    //       synonymMap,
+    //       filteredArticle
+    //     );
+    //     return synonymiedArticle;
+    //   })
+    // );
 
-    console.log('---------filtered articles----------');
-    console.dir(filteredArticles);
+    // console.log('---------filtered articles----------');
+    // console.dir(filteredArticles);
 
-    const esBulkBody = [];
-    for (let i = 0; i < articleNumber; i += 1) {
-      esBulkBody.push({
-        index: {
-          _index: process.env.DB_NAME,
-        },
-      });
-      esBulkBody.push({
-        title: 'test title',
-        author: 'test author',
-        tag: articleKeyowrds[i],
-        filtered_content: filteredArticles[i],
-        processed_content: synonymiedArticles[i],
-        content: data[i],
-      });
-    }
+    // const esBulkBody = [];
+    // for (let i = 0; i < articleNumber; i += 1) {
+    //   esBulkBody.push({
+    //     index: {
+    //       _index: process.env.DB_NAME,
+    //     },
+    //   });
+    //   esBulkBody.push({
+    //     title: 'test title',
+    //     author: 'test author',
+    //     tag: articleKeyowrds[i],
+    //     filtered_content: filteredArticles[i],
+    //     processed_content: synonymiedArticles[i],
+    //     content: data[i],
+    //   });
+    // }
 
-    const responseFromES = await client.bulk({ body: esBulkBody });
+    // const responseFromES = await client.bulk({ body: esBulkBody });
 
-    console.log('response from elasticSearch!!');
-    console.log(responseFromES);
-    responseFromES.items.forEach((ele) => console.log(ele));
+    // console.log('response from elasticSearch!!');
+    // console.log(responseFromES);
+    // responseFromES.items.forEach((ele) => console.log(ele));
 
-    const articlesGraph = Graph();
-    // const matchedArticles = [];
-    const matchedArticles = {};
-    for (let i = 0; i < articleNumber; i += 1) {
-      for (let j = i + 1; j < articleNumber; j += 1) {
-        const similarity = calculateSimilarity(
-          synonymiedArticles[i],
-          synonymiedArticles[j]
-        );
-        articlesGraph.addEdge(i + 1, j + 1, similarity);
-        const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
-          synonymiedArticles[i],
-          synonymiedArticles[j],
-          filteredArticles[i],
-          filteredArticles[j]
-        );
+    // const articlesGraph = Graph();
+    // // const matchedArticles = [];
+    // const matchedArticles = {};
+    // for (let i = 0; i < articleNumber; i += 1) {
+    //   for (let j = i + 1; j < articleNumber; j += 1) {
+    //     const similarity = calculateSimilarity(
+    //       synonymiedArticles[i],
+    //       synonymiedArticles[j]
+    //     );
+    //     articlesGraph.addEdge(i + 1, j + 1, similarity);
+    //     const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+    //       synonymiedArticles[i],
+    //       synonymiedArticles[j],
+    //       filteredArticles[i],
+    //       filteredArticles[j]
+    //     );
 
-        const matchedArticleAindices = findSimilarSentenseIndex(
-          data[i],
-          matchedArticleA
-        );
-        const matchedBrticleAindices = findSimilarSentenseIndex(
-          data[j],
-          matchedArticleB
-        );
+    //     const matchedArticleAindices = findSimilarSentenseIndex(
+    //       data[i],
+    //       matchedArticleA
+    //     );
+    //     const matchedBrticleAindices = findSimilarSentenseIndex(
+    //       data[j],
+    //       matchedArticleB
+    //     );
 
-        matchedArticles[`${i + 1}-and-${j + 1}`] = [
-          matchedArticleAindices,
-          matchedBrticleAindices,
-        ];
+    //     matchedArticles[`${i + 1}-and-${j + 1}`] = [
+    //       matchedArticleAindices,
+    //       matchedBrticleAindices,
+    //     ];
 
-        // matchedArticles.push([i, j]);
-        // matchedArticles.push([matchedArticleAindices, matchedBrticleAindices]);
-      }
-    }
+    //     // matchedArticles.push([i, j]);
+    //     // matchedArticles.push([matchedArticleAindices, matchedBrticleAindices]);
+    //   }
+    // }
 
-    console.dir(matchedArticles);
+    // console.dir(matchedArticles);
 
-    console.log(articlesGraph.serialize());
+    // console.log(articlesGraph.serialize());
 
-    const response = {
-      similarity: articlesGraph.serialize(),
-      sentenseIndex: matchedArticles,
-    };
+    // const response = {
+    //   similarity: articlesGraph.serialize(),
+    //   sentenseIndex: matchedArticles,
+    // };
 
-    res.send({ data: response });
+    // res.send({ data: response });
   }
 );
 
@@ -739,6 +733,61 @@ app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
         expires: '30 days',
       },
     });
+  } catch (err) {
+    console.log(err);
+    res.send('internal server error');
+  }
+});
+
+app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
+  const user = req.body;
+  if (validator.isEmpty(user.email) || validator.isEmpty(user.password)) {
+    return res.status(400).send({
+      status_code: 400,
+      message: 'Error: Email and password are required',
+    });
+  }
+  try {
+    const checkEmail = await client.search({
+      index: 'test_user',
+      body: {
+        query: {
+          term: {
+            email: user.email,
+          },
+        },
+      },
+    });
+
+    if (!checkEmail.hits.total.value) {
+      return res.status(400).send({
+        status_code: 400,
+        message: 'Error: The email has not been signed up',
+      });
+    }
+    if (await argon2.verify(checkEmail.hits.hits[0]._source.password)) {
+      const accessToken = jwt.sign(
+        {
+          name: user.name,
+          email: user.email,
+        },
+        process.env.SECRET_TOKEN,
+        { expiresIn: '30d' }
+      );
+      res.send({
+        data: {
+          name: user.name,
+          email: user.email,
+          access_token: accessToken,
+          expires: '30 days',
+        },
+      });
+    } else {
+      return res.status(400).send({
+        status_code: 400,
+        message: 'Error: Wrong password',
+      });
+    }
   } catch (err) {
     console.log(err);
     res.send('internal server error');

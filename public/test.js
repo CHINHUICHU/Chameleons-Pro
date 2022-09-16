@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 $(document).ready(() => {
@@ -21,19 +22,22 @@ $(document).ready(() => {
     $('#nav').showFlex();
     $('#multiple-finish').showFlex();
   });
-  let comparedArticles = 2;
+  let comparedArticles = 1;
   $('#new-article').click(() => {
     comparedArticles += 1;
-    $('#multiple').append(`<h2>文章${comparedArticles}</h2>`);
-    $('<lable>標題</label>').appendTo('#multiple');
-    $('<input></input>').appendTo('#multiple').addClass('multiple-title');
-    $('<lable>作者</label>').appendTo('#multiple');
-    $('<input></input>').appendTo('#multiple').addClass('multiple-arthor');
-    $('<lable>內容</label>').appendTo('#multiple');
-    $('<textarea></textarea>')
-      .attr('id', `article-${comparedArticles}`)
-      .addClass('article')
+    $('#multiple-compare-article-1')
+      .clone()
+      .attr('id', `multiple-compare-article-${comparedArticles}`)
       .appendTo('#multiple');
+    $(
+      `#multiple-compare-article-${comparedArticles} div:nth-child(1) input`
+    ).attr('id', `article-${comparedArticles}-title`);
+    $(
+      `#multiple-compare-article-${comparedArticles} div:nth-child(2) input`
+    ).attr('id', `article-${comparedArticles}-author`);
+    $(`#multiple-compare-article-${comparedArticles} div:nth-child(3) textarea`)
+      .attr('id', `article-${comparedArticles}-content`)
+      .css('height', '300px');
   });
 
   $('.upload').click(() => {
@@ -48,41 +52,49 @@ $(document).ready(() => {
     $('#index').showFlex();
   });
 
-  $('#submit').click(async () => {
-    const response = await $.ajax({
-      // contentType: 'application/json',
-      method: 'POST',
-      url: '/api/1.0/comparison',
+  $('#finish>button').click(async () => {
+    const response = await axios.post('/api/1.0/comparison', {
       data: {
-        articleA: $('#article-A').val(),
-        articleB: $('#article-B').val(),
+        articleA: {
+          title: $('#article-A-title').val(),
+          author: $('#article-A-author').val(),
+          content: $('#article-A-content').val(),
+        },
+        articleB: {
+          title: $('#article-B-title').val(),
+          author: $('#article-B-author').val(),
+          content: $('#article-B-content').val(),
+        },
       },
-      dataType: 'json',
-      crossDomain: true,
     });
 
     console.log(response);
+
+    const { articleA, articleB, similarity } = response.data.data;
 
     $('#top').showFlex();
     $('#nav').hide();
     $('#main').hide();
     $('#finish').hide();
     $('#result').showFlex();
+    $('#main-result').showFlex();
 
-    $('#similarity').html(
-      `相似度${(response.data.similarity * 100).toFixed(2)}%`
-    );
+    $('#similarity').html(`相似度：${(similarity * 100).toFixed(2)}%`);
 
-    $('#progress-bar').progressbar({
-      value: (response.data.similarity * 100).toFixed(2),
+    $('#progress>div').css({
+      style: `width: ${similarity}`,
     });
 
-    const articleAsplit = $('#article-A')
+    // $('#progress-bar').progressbar({
+    //   value: (response.data.similarity * 100).toFixed(2),
+    // });
+
+    const articleAsplit = $('#article-A-content')
       .val()
       .split(/(?:，|。|\n|！|？|：|；)+/);
     const articleAsplitLength = articleAsplit.length;
 
-    const articleBsplit = $('#article-B')
+    const articleBsplit = $('#article-B-content')
       .val()
       .split(/(?:，|。|\n|！|？|：|；)+/);
     const articleBsplitLength = articleBsplit.length;
@@ -90,20 +102,26 @@ $(document).ready(() => {
     console.log(articleAsplit);
     console.log(articleBsplit);
 
-    const { articleA, articleB } = response.data;
+    $('#result-A-title').val($('#article-A-title').val());
+    $('#result-A-author').val($('#article-A-author').val());
+    $('#result-A-content').html($('#article-A-content').val());
 
-    $('#result-A').html($('#article-A').val());
-    $('#result-B').html($('#article-B').val());
+    $('#result-B-title').val($('#article-B-title').val());
+    $('#result-B-author').val($('#article-B-author').val());
+    $('#result-B-content').html($('#article-B-content').val());
+
+    // $('#result-A').html($('#article-A').val());
+    // $('#result-B').html($('#article-B').val());
 
     for (let i = 0; i < articleAsplitLength; i += 1) {
       if (articleA[i]) {
-        $('#result-A').mark(articleAsplit[i]);
+        $('#result-A-content').mark(articleAsplit[i]);
       }
     }
 
     for (let i = 0; i < articleBsplitLength; i += 1) {
       if (articleB[i]) {
-        $('#result-B').mark(articleBsplit[i]);
+        $('#result-B-content').mark(articleBsplit[i]);
       }
     }
   });
@@ -114,17 +132,25 @@ $(document).ready(() => {
     $('#multiple-finish').hide();
 
     const articles = [];
-    $('.article').each(function () {
-      articles.push(this.value);
+    for (let i = 1; i <= comparedArticles; i += 1) {
+      articles.push({
+        title: $(`#article-${i}-title`).val(),
+        author: $(`#article-${i}-author`).val(),
+        content: $(`#article-${i}-content`).val(),
+      });
+    }
+
+    const response = await axios.post('/api/1.0/multiple/comparison', {
+      data: articles,
     });
 
-    const response = await $.ajax({
-      method: 'POST',
-      url: '/api/1.0/multiple/comparison',
-      data: { articles },
-      dataType: 'json',
-      crossDomain: true,
-    });
+    // const response = await $.ajax({
+    //   method: 'POST',
+    //   url: '/api/1.0/multiple/comparison',
+    //   data: { articles },
+    //   dataType: 'json',
+    //   crossDomain: true,
+    // });
 
     localStorage.setItem(
       'sentence-index',
