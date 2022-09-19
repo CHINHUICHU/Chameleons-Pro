@@ -33,7 +33,7 @@ $(document).ready(async () => {
     $('#similarity').empty();
     $('#main-result').empty();
     $('#multiple-result').empty();
-    $('upload-result').empty();
+    $('#upload-result').empty();
     $('#nav').showFlex();
     $('#main').showFlex();
     $('#finish').showFlex();
@@ -48,7 +48,7 @@ $(document).ready(async () => {
     $('#similarity').empty();
     $('#main-result').empty();
     $('#multiple-result').empty();
-    $('upload-result').empty();
+    $('#upload-result').empty();
     $('#multiple').css('display', 'flex');
     $('#multiple').css('flex-direction', 'column');
     $('#nav').showFlex();
