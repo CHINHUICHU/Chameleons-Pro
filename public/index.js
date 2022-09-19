@@ -47,7 +47,6 @@ $(document).ready(async () => {
     $('#main-result').remove();
     $('#multiple-result').remove();
     $('upload-result').remove();
-
     $('#multiple').css('display', 'flex');
     $('#multiple').css('flex-direction', 'column');
     $('#nav').showFlex();
@@ -64,6 +63,7 @@ $(document).ready(async () => {
     $('#multiple-result').remove();
     $('upload-result').remove();
     $('#upload-article-area').showFlex();
+    $('#upload-finish').show();
     $('#upload-article-area').css('flex-direction', 'column');
   });
 
