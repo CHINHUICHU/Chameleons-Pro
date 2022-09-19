@@ -658,7 +658,7 @@ app.post(`/api/${process.env.API_VERSION}/article/search`, async (req, res) => {
 // app.delete(`/api/${process.env.API_VERSION}/article`, async (req, res) => {});
 
 app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
-  const user = req.body;
+  const user = req.body.data;
   if (
     !user.name ||
     !user.email ||
@@ -678,13 +678,13 @@ app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
     });
   }
 
-  if (!validator.isStrongPassword(user.password)) {
-    return res.status(400).send({
-      status_code: 400,
-      message:
-        'Error: Weak password. (min length: 8, min lwercase: 1, min uppercase: 1, min numbers: 1, min symbols: 1)',
-    });
-  }
+  // if (!validator.isStrongPassword(user.password)) {
+  //   return res.status(400).send({
+  //     status_code: 400,
+  //     message:
+  //       'Error: Weak password. (min length: 8, min lwercase: 1, min uppercase: 1, min numbers: 1, min symbols: 1)',
+  //   });
+  // }
 
   try {
     const checkEmail = await client.search({
@@ -741,7 +741,7 @@ app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
 });
 
 app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
-  const user = req.body;
+  const user = req.body.data;
   if (validator.isEmpty(user.email) || validator.isEmpty(user.password)) {
     return res.status(400).send({
       status_code: 400,
@@ -766,7 +766,12 @@ app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
         message: 'Error: The email has not been signed up',
       });
     }
-    if (await argon2.verify(checkEmail.hits.hits[0]._source.password)) {
+    if (
+      await argon2.verify(
+        checkEmail.hits.hits[0]._source.password,
+        user.password
+      )
+    ) {
       const accessToken = jwt.sign(
         {
           name: user.name,
@@ -775,7 +780,8 @@ app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
         process.env.SECRET_TOKEN,
         { expiresIn: '30d' }
       );
-      res.send({
+      res.status(200).send({
+        status_code: 200,
         data: {
           name: user.name,
           email: user.email,
@@ -792,6 +798,28 @@ app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
   } catch (err) {
     console.log(err);
     res.send('internal server error');
+  }
+});
+
+app.get(`/api/${process.env.API_VERSION}/user/profile`, async (req, res) => {
+  let accessToken = req.headers.authorization;
+  accessToken = accessToken.replace('Bearer ', '');
+  if (accessToken === 'null') {
+    res.status(401).send({ error: 'Unauthorized' });
+  }
+  try {
+    const user = await promisify(jwt.verify)(
+      accessToken,
+      process.env.SECRET_TOKEN
+    );
+    res.send({
+      data: {
+        name: user.name,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(403).send({ error: 'Wrong token' });
   }
 });
 
