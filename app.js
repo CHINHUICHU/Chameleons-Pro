@@ -467,114 +467,110 @@ app.post(
   }
 );
 
-app.post(
-  `/api/${process.env.API_VERSION}/analysis`,
-  authentication,
-  async (req, res) => {
-    const article = req.body.data;
+app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
+  const article = req.body.data;
 
-    console.log(article);
-    const articleSplit = nodejieba.cut(article.content);
-    const tagNumber = 20;
-    const articleTag = nodejieba.extract(article.content, tagNumber);
-    const articleTagKeywords = articleTag.map((element) => element.keyword);
+  console.log(article);
+  const articleSplit = nodejieba.cut(article.content);
+  const tagNumber = 20;
+  const articleTag = nodejieba.extract(article.content, tagNumber);
+  const articleTagKeywords = articleTag.map((element) => element.keyword);
 
-    console.log(articleTagKeywords);
+  console.log(articleTagKeywords);
 
-    const stopwordMap = await buildStopWordsMap();
-    const synonymMap = await buildSynonymMap();
+  const stopwordMap = await buildStopWordsMap();
+  const synonymMap = await buildSynonymMap();
 
-    const articleFiltered = await filterStopWords(stopwordMap, articleSplit);
+  const articleFiltered = await filterStopWords(stopwordMap, articleSplit);
 
-    const articleSynonymized = await findSynonym(synonymMap, articleFiltered);
+  const articleSynonymized = await findSynonym(synonymMap, articleFiltered);
 
-    const responseSize = 10;
-    const esQuery = [];
-    articleTagKeywords.forEach((element) => {
-      esQuery.push({ match: { tag: element } });
-    });
+  const responseSize = 10;
+  const esQuery = [];
+  articleTagKeywords.forEach((element) => {
+    esQuery.push({ match: { tag: element } });
+  });
 
-    console.log('---------es query----------');
-    console.log(esQuery);
+  console.log('---------es query----------');
+  console.log(esQuery);
 
-    const searchResponse = await client.search({
-      index: process.env.DB_NAME,
-      body: {
-        size: responseSize,
-        query: {
-          bool: {
-            should: esQuery,
-            minimum_should_match: 1,
-          },
+  const searchResponse = await client.search({
+    index: process.env.DB_NAME,
+    body: {
+      size: responseSize,
+      query: {
+        bool: {
+          should: esQuery,
+          minimum_should_match: 1,
         },
       },
-    });
+    },
+  });
 
-    console.log(searchResponse);
+  console.log(searchResponse);
 
-    const responseFromES = await client.index({
-      index: 'test_articles',
-      body: {
-        title: article.title,
-        author: article.author,
-        tag: articleTagKeywords,
-        filtered_content: articleFiltered,
-        processed_content: articleSynonymized,
-        content: article.content,
-      },
-    });
+  const responseFromES = await client.index({
+    index: 'test_articles',
+    body: {
+      title: article.title,
+      author: article.author,
+      tag: articleTagKeywords,
+      filtered_content: articleFiltered,
+      processed_content: articleSynonymized,
+      content: article.content,
+    },
+  });
 
-    console.log('response from elasticSearch!!');
-    console.log(responseFromES);
+  console.log('response from elasticSearch!!');
+  console.log(responseFromES);
 
-    console.log(searchResponse.hits.total.value);
+  console.log(searchResponse.hits.total.value);
 
-    const similarSentenceIndex = [];
-    const articleSimilarities = [];
-    const similarArticles = [];
+  const similarSentenceIndex = [];
+  const articleSimilarities = [];
+  const similarArticles = [];
 
-    for (
-      let i = 0;
-      i < Math.min(searchResponse.hits.total.value, responseSize);
-      i += 1
-    ) {
-      const articleSimilarity = calculateSimilarity(
+  for (
+    let i = 0;
+    i < Math.min(searchResponse.hits.total.value, responseSize);
+    i += 1
+  ) {
+    const articleSimilarity = calculateSimilarity(
+      articleSynonymized,
+      searchResponse.hits.hits[i]._source.processed_content
+    );
+    if (articleSimilarity >= 0.1) {
+      articleSimilarities.push(articleSimilarity);
+      const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
         articleSynonymized,
-        searchResponse.hits.hits[i]._source.processed_content
+        searchResponse.hits.hits[i]._source.processed_content,
+        articleFiltered,
+        searchResponse.hits.hits[i]._source.filtered_content
       );
-      if (articleSimilarity >= 0.1) {
-        articleSimilarities.push(articleSimilarity);
-        const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
-          articleSynonymized,
-          searchResponse.hits.hits[i]._source.processed_content,
-          articleFiltered,
-          searchResponse.hits.hits[i]._source.filtered_content
-        );
-        const matchedArticleAindices = findSimilarSentenseIndex(
-          article.content,
-          matchedArticleA
-        );
-        const matchedBrticleBindices = findSimilarSentenseIndex(
-          searchResponse.hits.hits[i]._source.content,
-          matchedArticleB
-        );
-        similarSentenceIndex.push([
-          matchedArticleAindices,
-          matchedBrticleBindices,
-        ]);
-        similarArticles.push(searchResponse.hits.hits[i]._source);
-      }
+      const matchedArticleAindices = findSimilarSentenseIndex(
+        article.content,
+        matchedArticleA
+      );
+      const matchedBrticleBindices = findSimilarSentenseIndex(
+        searchResponse.hits.hits[i]._source.content,
+        matchedArticleB
+      );
+      similarSentenceIndex.push([
+        matchedArticleAindices,
+        matchedBrticleBindices,
+      ]);
+      similarArticles.push(searchResponse.hits.hits[i]._source);
     }
-
-    res.send({
-      data: {
-        similarity: articleSimilarities,
-        sentenceIndex: similarSentenceIndex,
-        article: similarArticles,
-      },
-    });
   }
-);
+
+  res.send({
+    data: {
+      similarity: articleSimilarities,
+      sentenceIndex: similarSentenceIndex,
+      article: similarArticles,
+    },
+  });
+});
 
 app.post(`/api/${process.env.API_VERSION}/article/search`, async (req, res) => {
   const esSearchQuery = {
