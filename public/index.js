@@ -1,18 +1,35 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
-$(document).ready(() => {
+$(document).ready(async () => {
   $.fn.showFlex = function () {
     this.show();
     this.css('display', 'flex');
     this.css('justify-content', 'space-around');
   };
 
+  const token = localStorage.getItem('jwt');
+
+  console.log(token);
+
+  const header = {
+    'Content-Type': 'application/json',
+    Authorization: token,
+  };
+
+  if (token) {
+    const response = await axios.get('/api/1.0/user/profile', {
+      headers: header,
+    });
+    console.log(response);
+  }
+
   $('#single-compare-link').click(() => {
     $('#multiple').hide();
     $('#multiple-finish').hide();
     $('#upload-article-area').hide();
     $('#upload-finish').hide();
+    $('#user-signin-signup').hide();
     $('#main-result').remove();
     $('#multiple-result').remove();
     $('upload-result').remove();
@@ -26,6 +43,7 @@ $(document).ready(() => {
     $('#finish').hide();
     $('#upload-article-area').hide();
     $('#upload-finish').hide();
+    $('#user-signin-signup').hide();
     $('#main-result').remove();
     $('#multiple-result').remove();
     $('upload-result').remove();
@@ -41,11 +59,68 @@ $(document).ready(() => {
     $('#finish').hide();
     $('#multiple').hide();
     $('#multiple-finish').hide();
+    $('#user-signin-signup').hide();
     $('#main-result').remove();
     $('#multiple-result').remove();
     $('upload-result').remove();
     $('#upload-article-area').showFlex();
     $('#upload-article-area').css('flex-direction', 'column');
+  });
+
+  $('#signup-signin-link').click(() => {
+    $('#main').hide();
+    $('#finish').hide();
+    $('#multiple').hide();
+    $('#multiple-finish').hide();
+    $('#upload-article-area').hide();
+    $('#upload-finish').hide();
+    $('#main-result').remove();
+    $('#multiple-result').remove();
+    $('upload-result').remove();
+    $('#user-signin-signup').show();
+  });
+
+  $('#choose-signup-btn').click(() => {
+    $('#signup-area').show();
+    $('#signin-area').hide();
+  });
+
+  $('#choose-signin-btn').click(() => {
+    $('#signin-area').show();
+    $('#signup-area').hide();
+  });
+
+  $('#signup-submit').click(async () => {
+    const response = await axios.post('/api/1.0/user/signup', {
+      data: {
+        name: $('#signup-name').val(),
+        email: $('#signup-email').val(),
+        password: $('#signup-password').val(),
+      },
+    });
+
+    console.log(response);
+
+    localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
+    $('#signup-signin-link').hide();
+    $('#logout-link').show();
+    $('#member-link').show();
+  });
+
+  $('#signin-submit').click(async () => {
+    const response = await axios.post('/api/1.0/user/signin', {
+      data: {
+        email: $('#signin-email').val(),
+        password: $('#signin-password').val(),
+      },
+    });
+
+    console.log(response);
+
+    localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
+    $('#signup-signin-link').hide();
+    $('#logout-link').show();
+    $('#member-link').show();
   });
 
   let comparedArticles = 1;

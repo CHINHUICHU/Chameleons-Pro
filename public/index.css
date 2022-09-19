@@ -15,7 +15,50 @@
     width: 75px;
     height: 30px;
 }
+#logout-link, #member-link {
+    display: none;
+}
+#user-signin-signup{
+    width: 30%;
+    height: 400px;
+    margin-left: 35%;
+    margin-bottom: 3%;
+    display: none;
+}
+#choose-login-or-signup{
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 5%;
+    margin-top: 10%;
+}
+#signin-title, #signup-title{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10%;
+}
 
+
+
+#signup-form, #signin-form {
+    margin-bottom: 10%;
+}
+
+
+
+#signup-submit-area, #signin-submit-area {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10%;
+}
+
+#signin-area {
+    display: none;
+}
+
+
+.user-btn {
+    width: 40%
+}
 #search-input-area {
     display: none;
 }

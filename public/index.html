@@ -20,36 +20,9 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Bootstrap core CSS -->
     <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    
-    
     <script src="index.js"></script>
 </head>
 <body>
-
-      <!-- <main class="form-signin">
-        <form>
-          <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
-          <h1 class="h3 mb-3 fw-normal">Please sign in</h1>
-      
-          <div class="form-floating">
-            <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-            <label for="floatingInput">Email address</label>
-          </div>
-          <div class="form-floating">
-            <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-            <label for="floatingPassword">Password</label>
-          </div>
-      
-          <div class="checkbox mb-3">
-            <label>
-              <input type="checkbox" value="remember-me"> Remember me
-            </label>
-          </div>
-          <button class="w-100 btn btn-lg btn-primary" type="submit">Sign in</button>
-          <p class="mt-5 mb-3 text-muted">&copy; 2017–2021</p>
-        </form>
-      </main> -->
 
     <div id="header" class="shadow p-3 mb-5 bg-white rounded">
 
@@ -58,7 +31,7 @@
               <img src="./images/logo_160x54.png">
             </li>
         </ul>
-        <ul class="nav justify-content-end">
+        <ul class="nav justify-content-end" id="nav-bar">
             <li class="nav-item">
                 <div class="input-group rounded">
                     <input type="search" class="form-control rounded" placeholder="搜尋文章" aria-label="Search" aria-describedby="search-addon" />
@@ -78,6 +51,12 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" id="signup-signin-link">註冊｜登入</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="member-link">會員</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="logout-link">登出</a>
             </li>
 
         </ul>
@@ -154,10 +133,6 @@
 
             <div class="border" id="result-A-content"></div>
 
-            <!-- <div class="form-group" id="result-A-content-div">
-                <textarea class="form-control rounded-0" id="result-A-content" rows="30" placeholder="內文" readonly></textarea>
-            </div> -->
-
         </div>
         <div>
             <h1>比對文章</h1>
@@ -176,9 +151,6 @@
 
             <div class="border" id="result-B-content"></div>
 
-            <!-- <div class="form-group" id="result-B-content-div">
-                <textarea class="form-control rounded-0 single-article-content" id="result-B-content" rows="30" placeholder="內文" readonly></textarea>
-            </div> -->
         </div>
     </div>
 
@@ -215,9 +187,10 @@
     <div id="multiple-result">
     </div>
 
+    <!-- upload article comparison -->
+
     <div id="upload-article-area">
         <h2>請上傳欲比對的文章</h2>
-        <!-- <h2 class="article-num">文章1</h2> -->
         <div class="multiple-article-area" id="upload-compare-article">
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
@@ -244,6 +217,64 @@
     </div>
 
     <div id="upload-result"></div>
+
+    <!-- user signin and signup -->
+    <div id="user-signin-signup" class="border">
+        <div id="choose-login-or-signup">
+            <button type="button" class="btn btn-outline-secondary user-btn" id="choose-signup-btn">註冊</button>
+            <button type="button" class="btn btn-outline-secondary user-btn" id="choose-signin-btn">登入</button>
+        </div>
+
+        <div id="signin-area">
+
+            <div id="signin-title">
+                <h3>登入Chameleons Pro</h3>
+            </div>
+
+            <div id="signin-form">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">信箱</span>
+                    <input type="email" id="signin-email" class="form-control" aria-label="Sizing example input" placeholder="example@app.com" aria-describedby="inputGroup-sizing-default" required>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">密碼</span>
+                    <input type="password" id="signin-password" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                </div>
+            </div>
+
+            <div id="signin-submit-area">
+                <button type="button" class="btn btn-outline-secondary" id="signin-submit">送出</button>
+            </div>
+
+        </div>
+
+        <div id="signup-area">
+            <div id="signup-title">
+                <h3>創辦新帳號</h3>
+            </div>
+
+            <div id="signup-form">
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">姓名</span>
+                    <input type="text" id="signup-name" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">信箱</span>
+                    <input type="email" id="signup-email" class="form-control" aria-label="Sizing example input" placeholder="example@app.com" aria-describedby="inputGroup-sizing-default" required>
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text" id="inputGroup-sizing-default">密碼</span>
+                    <input type="password" id="signup-password" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" required>
+                </div>
+            </div>
+            <div id="signup-submit-area">
+                <button type="button" class="btn btn-outline-secondary" id="signup-submit">送出</button>
+            </div>
+        </div>
+
+
+
+    </div>
 
     <div id="search-input-area">
         <div>
