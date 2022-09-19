@@ -89,6 +89,9 @@
     height: 600px;
     width: 500px;
 }
+#result-A-content, #result-B-content {
+    overflow-y: scroll;
+}
 #submit {
     height: 30px;
     width: 100px;

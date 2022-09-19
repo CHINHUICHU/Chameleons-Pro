@@ -30,6 +30,7 @@ $(document).ready(async () => {
     $('#upload-article-area').hide();
     $('#upload-finish').hide();
     $('#user-signin-signup').hide();
+    $('#similarity').remove();
     $('#main-result').remove();
     $('#multiple-result').remove();
     $('upload-result').remove();
@@ -44,6 +45,7 @@ $(document).ready(async () => {
     $('#upload-article-area').hide();
     $('#upload-finish').hide();
     $('#user-signin-signup').hide();
+    $('#similarity').remove();
     $('#main-result').remove();
     $('#multiple-result').remove();
     $('upload-result').remove();
@@ -59,6 +61,7 @@ $(document).ready(async () => {
     $('#multiple').hide();
     $('#multiple-finish').hide();
     $('#user-signin-signup').hide();
+    $('#similarity').remove();
     $('#main-result').remove();
     $('#multiple-result').remove();
     $('upload-result').remove();
@@ -319,6 +322,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
       $(`#article-${article1}-result`).html(
@@ -331,6 +335,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
       $(`#article-${article2}-result`).html(
@@ -456,6 +461,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
       $('#article-source-content').html($('#upload-article-content').val());
@@ -466,6 +472,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
       $('#article-target-content').html(article[articleId].content);
