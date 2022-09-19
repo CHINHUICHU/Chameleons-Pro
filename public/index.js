@@ -32,7 +32,7 @@ $(document).ready(async () => {
     $('#user-signin-signup').hide();
     $('#similarity').remove();
     $('#main-result').remove();
-    $('#multiple-result').remove();
+    $('#multiple-result').empty();
     $('upload-result').remove();
     $('#nav').showFlex();
     $('#main').showFlex();
@@ -47,7 +47,7 @@ $(document).ready(async () => {
     $('#user-signin-signup').hide();
     $('#similarity').remove();
     $('#main-result').remove();
-    $('#multiple-result').remove();
+    $('#multiple-result').empty();
     $('upload-result').remove();
     $('#multiple').css('display', 'flex');
     $('#multiple').css('flex-direction', 'column');
@@ -63,7 +63,7 @@ $(document).ready(async () => {
     $('#user-signin-signup').hide();
     $('#similarity').remove();
     $('#main-result').remove();
-    $('#multiple-result').remove();
+    $('#multiple-result').empty();
     $('upload-result').remove();
     $('#upload-article-area').showFlex();
     $('#upload-finish').show();
@@ -78,7 +78,7 @@ $(document).ready(async () => {
     $('#upload-article-area').hide();
     $('#upload-finish').hide();
     $('#main-result').remove();
-    $('#multiple-result').remove();
+    $('#multiple-result').empty();
     $('upload-result').remove();
     $('#user-signin-signup').show();
   });
@@ -322,6 +322,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          height: '500px',
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
@@ -335,6 +336,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          height: '500px',
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
@@ -461,6 +463,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          height: '500px',
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
@@ -472,6 +475,7 @@ $(document).ready(async () => {
         .css({
           'margin-bottom': '20px',
           width: '35%',
+          height: '500px',
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
