@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chameleons Pro</title>
-    <link rel="stylesheet" type="text/css" href="test.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="index.css" media="all" />
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
@@ -23,19 +23,10 @@
 
     
     
-    <script src="test.js"></script>
+    <script src="index.js"></script>
 </head>
 <body>
 
-
-
-
-
-
-
-
-
-   
       <!-- <main class="form-signin">
         <form>
           <img class="mb-4" src="../assets/brand/bootstrap-logo.svg" alt="" width="72" height="57">
@@ -60,27 +51,13 @@
         </form>
       </main> -->
 
-
-
-
-
-
-
-
-
-    <div id="header">
+    <div id="header" class="shadow p-3 mb-5 bg-white rounded">
 
         <ul class="nav justify-content-start">
             <li class="nav-item">
               <img src="./images/logo_160x54.png">
             </li>
-
         </ul>
-
-
-
-
-
         <ul class="nav justify-content-end">
             <li class="nav-item">
                 <div class="input-group rounded">
@@ -91,36 +68,25 @@
                 </div>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">登入</a>
+                <a class="nav-link" id="upload-compare-link">上傳文章</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">註冊</a>
+                <a class="nav-link" id="multiple-compare-link">多篇文章比對</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="single-compare-link">單篇文章比對</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="signup-signin-link">註冊｜登入</a>
             </li>
 
         </ul>
-        <!-- <div id="header-button">
-            <button id="search">搜尋文章</button>
-            <button id="user">登入</button>
-        </div> -->
     </div>
 
-
-
-
-    <div id="index">
-        <button class="1-1-article comparison">一對一文章比對</button>
-        <button class="multiple-article comparison">多對多文章比對</button>
-        <button class="upload-article comparison">單一文章相似度分析</button>
-    </div>
-
-    <!-- <div id="nav">
-        <button class="paste">貼上文章</button>
-        <button class="upload">上傳檔案</button>
-    </div> -->
     <!-- 1-1-article comparison -->
     <div id="main">
         <div>
-            <h1>來源文章</h1>
+            <h1 id="single-source">來源文章</h1>
 
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
@@ -141,7 +107,7 @@
 
         </div>
         <div>
-            <h1>比對文章</h1>
+            <h1 id="single-target">比對文章</h1>
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                   <span class="input-group-text article-B-title">標題</span>
@@ -164,7 +130,6 @@
     <div id="finish">
         <button type="button" class="btn btn-secondary" color="black">進行比對</button>
     </div>
-
 
     <div id="top">
         <h1 id="similarity"></h1>
@@ -221,7 +186,7 @@
     <div id="multiple">
         <h2>請依序上傳欲比對的文章</h2>
         <!-- <h2 class="article-num">文章1</h2> -->
-        <div class="multiple-article-area" id="multiple-compare-article-1">
+        <div class="multiple-article-area" id="multiple-compare-article">
             <div class="input-group mb-3">
                 <div class="input-group-prepend">
                 <span class="input-group-text">標題</span>
@@ -239,45 +204,43 @@
                 <textarea class="form-control rounded-0 single-article-content"  id="article-1-content" rows="30" placeholder="內文"></textarea>
             </div>
         </div>
-        
-            <!-- <label>標題</label>
-            <input id="search-author" class="multiple-title">
-
-
-            <label>作者</label>
-            <input id="search-title" class="multiple-arthor">
-  
-        <label>內容</label>
-        <textarea class="article" id="article-1"></textarea> -->
-        <!-- <h2 class="article-num">文章2</h2>
-
-            <label>標題</label>
-            <input id="search-author" class="multiple-title">
-
-            <label>作者</label>
-            <input id="search-title" class="multiple-arthor">
-
-        <label>內容</label>
-        <textarea class="article" id="article-2"></textarea> -->
     </div>
 
     <div id="multiple-finish">
-        <button id="go-back-index">返回</button>
-        <button id="new-article">新增文章</button>
-        <button id="multiple-submit">送出</button>
+        <button type="button" class="btn btn-secondary" color="black" id="remove-article">移除文章</button>
+        <button type="button" class="btn btn-secondary" color="black" id="new-article">新增文章</button>
+        <button type="button" class="btn btn-secondary" color="black" id="multiple-submit">進行比對</button>
     </div>
 
     <div id="multiple-result">
     </div>
 
     <div id="upload-article-area">
-        <label>標題</label>
-        <input class="title"/>
-        <label>作者</label>
-        <input class="author"/>
-        <label>文章</label>
-        <textarea class="upload-article" id="upload-content"></textarea>
-        <button id="upload-submit">上傳文章</button>
+        <h2>請上傳欲比對的文章</h2>
+        <!-- <h2 class="article-num">文章1</h2> -->
+        <div class="multiple-article-area" id="upload-compare-article">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                <span class="input-group-text">標題</span>
+                </div>
+                <input type="text" class="form-control" id="upload-article-title" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+            </div>
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                <span class="input-group-text">作者</span>
+                </div>
+                <input type="text" class="form-control" id="upload-article-author" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+            </div>
+
+            <div class="form-group">
+                <textarea class="form-control rounded-0 single-article-content"  id="upload-article-content" rows="30" placeholder="內文"></textarea>
+            </div>
+        </div>
+
+        <div id="upload-finish">
+            <button type="button" class="btn btn-secondary" color="black" id="upload-submit">進行比對</button>
+        </div>
+
     </div>
 
     <div id="upload-result"></div>
