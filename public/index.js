@@ -94,36 +94,54 @@ $(document).ready(async () => {
   });
 
   $('#signup-submit').click(async () => {
-    const response = await axios.post('/api/1.0/user/signup', {
-      data: {
-        name: $('#signup-name').val(),
-        email: $('#signup-email').val(),
-        password: $('#signup-password').val(),
-      },
-    });
+    try {
+      const response = await axios.post('/api/1.0/user/signup', {
+        data: {
+          name: $('#signup-name').val(),
+          email: $('#signup-email').val(),
+          password: $('#signup-password').val(),
+        },
+      });
 
-    console.log(response);
+      console.log(response);
 
-    localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
-    $('#signup-signin-link').hide();
-    $('#logout-link').show();
-    $('#member-link').show();
+      localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
+      $('#signup-signin-link').hide();
+      $('#logout-link').show();
+      $('#member-link').show();
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response.data.message,
+      });
+      // alert(error.response.data.message);
+    }
   });
 
   $('#signin-submit').click(async () => {
-    const response = await axios.post('/api/1.0/user/signin', {
-      data: {
-        email: $('#signin-email').val(),
-        password: $('#signin-password').val(),
-      },
-    });
+    try {
+      const response = await axios.post('/api/1.0/user/signin', {
+        data: {
+          email: $('#signin-email').val(),
+          password: $('#signin-password').val(),
+        },
+      });
 
-    console.log(response);
+      console.log(response);
 
-    localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
-    $('#signup-signin-link').hide();
-    $('#logout-link').show();
-    $('#member-link').show();
+      localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
+      $('#signup-signin-link').hide();
+      $('#logout-link').show();
+      $('#member-link').show();
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response.data.message,
+      });
+      // alert(error.response.data.message);
+    }
   });
 
   let comparedArticles = 1;

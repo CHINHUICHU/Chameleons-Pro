@@ -3,7 +3,7 @@
 require('dotenv').config();
 const express = require('express');
 const nodejieba = require('@node-rs/jieba');
-const { Client } = require('@elastic/elasticsearch');
+// const { Client } = require('@elastic/elasticsearch');
 const _ = require('lodash');
 const fs = require('fs');
 const { promisify } = require('util');
@@ -16,11 +16,11 @@ const validator = require('validator');
 const path = require('path');
 
 const { authentication } = require('./util');
+const { client } = require('./database');
 
 nodejieba.load({ userDict: './dict.utf8' });
 
 const readFileAsync = promisify(fs.readFile);
-// const jwtVerifyAsync = promisify(jwt.verify);
 const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -28,16 +28,16 @@ app.use(bodyParser.json({ limit: '50mb' }));
 app.set('view engine', 'ejs');
 app.use(cors());
 
-const client = new Client({
-  node: `https://${process.env.DB_HOST}:${process.env.DB_PORT}`,
-  auth: {
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
-});
+// const client = new Client({
+//   node: `https://${process.env.DB_HOST}:${process.env.DB_PORT}`,
+//   auth: {
+//     username: process.env.DB_USERNAME,
+//     password: process.env.DB_PASSWORD,
+//   },
+//   tls: {
+//     rejectUnauthorized: false,
+//   },
+// });
 
 async function buildStopWordsMap() {
   // search stop words in file
@@ -732,6 +732,7 @@ app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
 
     res.send({
       data: {
+        user_id: result._id,
         name: user.name,
         email: user.email,
         access_token: accessToken,
@@ -740,7 +741,10 @@ app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    res.send('internal server error');
+    res.status(500).send({
+      status_code: 500,
+      message: 'internal server error',
+    });
   }
 });
 
@@ -753,7 +757,7 @@ app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
     });
   }
   try {
-    const checkEmail = await client.search({
+    const result = await client.search({
       index: 'test_user',
       body: {
         query: {
@@ -764,17 +768,16 @@ app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
       },
     });
 
-    if (!checkEmail.hits.total.value) {
+    console.log(result.hits.hits);
+
+    if (!result.hits.total.value) {
       return res.status(400).send({
         status_code: 400,
         message: 'Error: The email has not been signed up',
       });
     }
     if (
-      await argon2.verify(
-        checkEmail.hits.hits[0]._source.password,
-        user.password
-      )
+      await argon2.verify(result.hits.hits[0]._source.password, user.password)
     ) {
       const accessToken = jwt.sign(
         {
@@ -787,6 +790,7 @@ app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
       res.status(200).send({
         status_code: 200,
         data: {
+          user_id: result.hits.hits[0]._id,
           name: user.name,
           email: user.email,
           access_token: accessToken,
@@ -801,7 +805,10 @@ app.post(`/api/${process.env.API_VERSION}/user/signin`, async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.send('internal server error');
+    res.status(500).send({
+      status_code: 500,
+      message: 'internal server error',
+    });
   }
 });
 
@@ -810,10 +817,7 @@ app.get(
   authentication,
   (req, res) => {
     res.send({
-      data: {
-        name: req.user.name,
-        email: req.user.email,
-      },
+      data: req.user,
     });
   }
 );
