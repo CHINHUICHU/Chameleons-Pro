@@ -257,7 +257,7 @@ $(document).ready(async () => {
 
       $(`<div class="input-group mb-3">
       <div class="input-group-prepend">
-        <span class="input-group-text" id="inputGroup-sizing-default">來源</span>
+        <span class="input-group-text" >來源</span>
       </div>
       <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="source-title-${i}" readonly>
     </div>`)
@@ -268,7 +268,7 @@ $(document).ready(async () => {
 
       $(`<div class="input-group mb-3">
     <div class="input-group-prepend">
-      <span class="input-group-text" id="inputGroup-sizing-default">比對</span>
+      <span class="input-group-text" >比對</span>
     </div>
     <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="target-title-${i}" readonly>
   </div>`)
@@ -279,7 +279,7 @@ $(document).ready(async () => {
 
       $(`<div class="input-group mb-3">
   <div class="input-group-prepend">
-    <span class="input-group-text" id="inputGroup-sizing-default">相似度</span>
+    <span class="input-group-text" >相似度</span>
   </div>
   <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="similartiy-${+edges[
     i
@@ -401,7 +401,7 @@ $(document).ready(async () => {
     for (let i = 0; i < articleNumber; i += 1) {
       $(`<div class="input-group mb-3">
       <div class="input-group-prepend">
-        <span class="input-group-text" id="inputGroup-sizing-default">標題</span>
+        <span class="input-group-text" >標題</span>
       </div>
       <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-title-${i}" readonly>
     </div>`)
@@ -412,7 +412,7 @@ $(document).ready(async () => {
 
       $(`<div class="input-group mb-3">
     <div class="input-group-prepend">
-      <span class="input-group-text" id="inputGroup-sizing-default">作者</span>
+      <span class="input-group-text" >作者</span>
     </div>
     <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-author-${i}" readonly>
   </div>`)
@@ -423,7 +423,7 @@ $(document).ready(async () => {
 
       $(`<div class="input-group mb-3">
   <div class="input-group-prepend">
-    <span class="input-group-text" id="inputGroup-sizing-default">相似度</span>
+    <span class="input-group-text" >相似度</span>
   </div>
   <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-similartiy-${i}" readonly>
 </div>`)
