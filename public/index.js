@@ -188,6 +188,21 @@ $(document).ready(async () => {
       style: `width: ${similarity}`,
     });
 
+    console.log($('#article-A-content').val());
+    console.log($('#article-B-content').val());
+
+    const articleAparagraphs = $('#article-A-content').val().split('\n');
+    const articleBparagraphs = $('#article-B-content').val().split('\n');
+
+    let articleAwithParagraph = '';
+    let articleBwithParagraph = '';
+    for (const paragraph of articleAparagraphs) {
+      articleAwithParagraph += `<p>${paragraph}</p>`;
+    }
+    for (const paragraph of articleBparagraphs) {
+      articleBwithParagraph += `<p>${paragraph}</p>`;
+    }
+
     const articleAsplit = $('#article-A-content')
       .val()
       .split(/(?:，|。|\n|！|？|：|；)+/);
@@ -203,11 +218,11 @@ $(document).ready(async () => {
 
     $('#result-A-title').val($('#article-A-title').val());
     $('#result-A-author').val($('#article-A-author').val());
-    $('#result-A-content').html($('#article-A-content').val());
+    $('#result-A-content').html(articleAwithParagraph);
 
     $('#result-B-title').val($('#article-B-title').val());
     $('#result-B-author').val($('#article-B-author').val());
-    $('#result-B-content').html($('#article-B-content').val());
+    $('#result-B-content').html(articleBwithParagraph);
 
     for (let i = 0; i < articleAsplitLength; i += 1) {
       if (articleA[i]) {
@@ -326,9 +341,23 @@ $(document).ready(async () => {
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
-      $(`#article-${article1}-result`).html(
-        $(`#article-${article1}-content`).val()
-      );
+
+      const article1paragraphs = $(`#article-${article1}-content`)
+        .val()
+        .split('\n');
+      const article2paragraphs = $(`#article-${article2}-content`)
+        .val()
+        .split('\n');
+
+      let article1withParagraph = '';
+      let article2withParagraph = '';
+      for (const paragraph of article1paragraphs) {
+        article1withParagraph += `<p>${paragraph}</p>`;
+      }
+      for (const paragraph of article2paragraphs) {
+        article2withParagraph += `<p>${paragraph}</p>`;
+      }
+      $(`#article-${article1}-result`).html(article1withParagraph);
 
       $('<div></div>')
         .attr('id', `article-${article2}-result`)
@@ -340,9 +369,7 @@ $(document).ready(async () => {
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
-      $(`#article-${article2}-result`).html(
-        $(`#article-${article2}-content`).val()
-      );
+      $(`#article-${article2}-result`).html(article2withParagraph);
 
       const article1split = $(`#article-${article1}-content`)
         .val()
@@ -467,7 +494,22 @@ $(document).ready(async () => {
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
-      $('#article-source-content').html($('#upload-article-content').val());
+
+      const articleSourceParagraphs = $('#upload-article-content')
+        .val()
+        .split('\n');
+      const articleTargetParagraphs = article[articleId].content.split('\n');
+
+      let articleSourceWithParagraph = '';
+      let articleTargetWithParagraph = '';
+      for (const paragraph of articleSourceParagraphs) {
+        articleSourceWithParagraph += `<p>${paragraph}</p>`;
+      }
+      for (const paragraph of articleTargetParagraphs) {
+        articleTargetWithParagraph += `<p>${paragraph}</p>`;
+      }
+
+      $('#article-source-content').html(articleSourceWithParagraph);
 
       $('<div></div>')
         .attr('id', 'article-target-content')
@@ -479,7 +521,8 @@ $(document).ready(async () => {
           'overflow-y': 'scroll',
         })
         .appendTo('#article-result');
-      $('#article-target-content').html(article[articleId].content);
+
+      $('#article-target-content').html(articleTargetWithParagraph);
 
       const article1split = $('#upload-article-content')
         .val()
