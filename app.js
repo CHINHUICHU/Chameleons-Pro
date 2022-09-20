@@ -833,6 +833,21 @@ app.get('/user', (req, res, next) => {
   });
 });
 
+app.get('/', (req, res, next) => {
+  const options = {
+    root: path.join(__dirname, 'public'),
+  };
+
+  const fileName = 'index.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
+
 app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
   res.send('I am a healthy server!!!!');
 });
