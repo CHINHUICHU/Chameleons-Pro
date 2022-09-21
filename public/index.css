@@ -1,7 +1,24 @@
+@import url(//fonts.googleapis.com/earlyaccess/notosanstc.css);
+body{
+  font-family: 'Noto Sans TC',sans-serif !important;
+  background-color: #f8f9fa !important;
+} 
+
 #header, #header-button {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.nav {
+    --bs-nav-link-color: #6c757d !important;
+    cursor: pointer;
+}
+/* a:link {
+    color: #495057 !important;
+    text-decoration: none !important;
+} */
+a:hover {
+    color: #343a40 !important;
 }
 
 #search-input-area {
@@ -15,6 +32,7 @@
     width: 75px;
     height: 30px;
 }
+
 #logout-link, #member-link {
     display: none;
 }
@@ -83,6 +101,7 @@
     height: 600px;
     width: 500px;
 }
+
 #result-A-content, #result-B-content {
     overflow-y: scroll;
 }

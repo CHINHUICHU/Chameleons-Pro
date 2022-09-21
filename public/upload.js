@@ -2,6 +2,29 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
+  const token = localStorage.getItem('jwt');
+
+  console.log(token);
+
+  const header = {
+    'Content-Type': 'application/json',
+    Authorization: token,
+  };
+
+  if (token) {
+    try {
+      await axios.get('/api/1.0/user/profile', {
+        headers: header,
+      });
+      $('#signup-signin-link').hide();
+      $('#user-signin-signup').hide();
+      $('#logout-link').show().css({ display: 'block' });
+      $('#member-link').show().css({ display: 'block' });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   $('#upload-submit').click(async () => {
     $('#upload-article-area').hide();
     const uploadArticle = {

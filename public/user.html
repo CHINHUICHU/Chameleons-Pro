@@ -20,7 +20,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Bootstrap core CSS -->
     <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="index.js"></script>
+    <script src="user.js"></script>
 </head>
 <body>
 
@@ -28,7 +28,7 @@
 
         <ul class="nav justify-content-start">
             <li class="nav-item">
-              <img src="./images/main-logo.png">
+              <a href="/"><img src="./images/main-logo-2.jpeg"></a>
             </li>
         </ul>
         <ul class="nav justify-content-end" id="nav-bar">
@@ -50,11 +50,75 @@
                 <a class="nav-link" id="single-compare-link" href="/">單篇文章比對</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" id="logout-link">會員</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" id="logout-link">登出</a>
             </li>
 
         </ul>
     </div>
+
+    <div class="container">
+        <div class="row">
+          <div class="col" id="sidebar-div">
+            <div id="sidebar" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                        <span class="fs-5 d-none d-sm-inline">選單</span>
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+                        <li class="nav-item">
+                            <a class="nav-link align-middle px-0">
+                                <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline" id="history">歷史比對記錄</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <hr>
+                </div>
+            </div> 
+          </div>
+          <div class="col-9">
+            <h1 id="history-title">歷史比對記錄</h1>
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">標題</th>
+                        <th scope="col">作者</th>
+                        <th scope="col">相似度超過10％篇數</th>
+                        <th scope="col">最高相似度％</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+          </div>
+        </div>
+      </div>
+
+
+
+    <!-- <div id="sidebar" class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
+        <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+                <span class="fs-5 d-none d-sm-inline">選單</span>
+            <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start" id="menu">
+                <li class="nav-item">
+                    <a class="nav-link align-middle px-0">
+                        <i class="fs-4 bi-house"></i> <span class="ms-1 d-none d-sm-inline" id="history">歷史比對記錄</span>
+                    </a>
+                </li>
+            </ul>
+            <hr>
+        </div>
+    </div>  -->
+
+
+
+
+
+
+
+
+
 
 
 

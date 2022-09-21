@@ -18,10 +18,17 @@ $(document).ready(async () => {
   };
 
   if (token) {
-    const response = await axios.get('/api/1.0/user/profile', {
-      headers: header,
-    });
-    console.log(response);
+    try {
+      await axios.get('/api/1.0/user/profile', {
+        headers: header,
+      });
+      $('#signup-signin-link').hide();
+      $('#user-signin-signup').hide();
+      $('#logout-link').show().css({ display: 'block' });
+      $('#member-link').show().css({ display: 'block' });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // $('#single-compare-link').click(() => {
@@ -103,8 +110,11 @@ $(document).ready(async () => {
 
       localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
       $('#signup-signin-link').hide();
-      $('#logout-link').show();
-      $('#member-link').show();
+      $('#user-signin-signup').hide();
+      $('#logout-link').show().css({ display: 'block' });
+      $('#member-link').show().css({ display: 'block' });
+      $('#main').show();
+      $('#finish').show();
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -128,8 +138,11 @@ $(document).ready(async () => {
 
       localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
       $('#signup-signin-link').hide();
-      $('#logout-link').show();
-      $('#member-link').show();
+      $('#logout-link').show().css({ display: 'block' });
+      $('#member-link').show().css({ display: 'block' });
+      $('#user-signin-signup').hide();
+      $('#main').show();
+      $('#finish').show();
     } catch (error) {
       Swal.fire({
         icon: 'error',
