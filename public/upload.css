@@ -135,7 +135,7 @@
     width: 500px;
 }
 
-#multiple, #upload-article-area {
+#multiple {
     margin-left: 3%;
     display: none;
 }
@@ -151,7 +151,6 @@
     width: 800px;
     height: 400px;
 }
-
-#upload-article-area{
-    display: none;
+#upload-article-area {
+    margin-left: 15%;
 }
