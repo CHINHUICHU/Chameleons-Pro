@@ -3,7 +3,6 @@
 require('dotenv').config();
 const express = require('express');
 const nodejieba = require('@node-rs/jieba');
-// const { Client } = require('@elastic/elasticsearch');
 const _ = require('lodash');
 const fs = require('fs');
 const { promisify } = require('util');
@@ -15,6 +14,10 @@ const jwt = require('jsonwebtoken');
 const validator = require('validator');
 const path = require('path');
 
+const options = {
+  root: path.join(__dirname, 'public'),
+};
+
 const { authentication } = require('./util');
 const { client } = require('./database');
 
@@ -25,19 +28,9 @@ const app = express();
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json({ limit: '50mb' }));
+// app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(cors());
-
-// const client = new Client({
-//   node: `https://${process.env.DB_HOST}:${process.env.DB_PORT}`,
-//   auth: {
-//     username: process.env.DB_USERNAME,
-//     password: process.env.DB_PASSWORD,
-//   },
-//   tls: {
-//     rejectUnauthorized: false,
-//   },
-// });
 
 async function buildStopWordsMap() {
   // search stop words in file
@@ -217,6 +210,72 @@ function calculateSimilarity(articleA, articleB) {
 
   return similarity;
 }
+
+app.get('/', (req, res, next) => {
+  const fileName = 'index.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
+
+app.get('/multiple', (req, res, next) => {
+  const fileName = 'multiple.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
+
+app.get('/upload', (req, res, next) => {
+  const fileName = 'upload.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
+
+app.get('/user', (req, res, next) => {
+  const fileName = 'user.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
+
+app.get('/search', (req, res, next) => {
+  const fileName = 'search.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
+
+app.get('/article', (req, res, next) => {
+  const fileName = 'article.html';
+  res.sendFile(fileName, options, (err) => {
+    if (err) {
+      next(err);
+    } else {
+      console.log('Sent:', fileName);
+    }
+  });
+});
 
 app.post(
   `/api/${process.env.API_VERSION}/comparison`,
@@ -467,199 +526,219 @@ app.post(
   }
 );
 
-app.post(`/api/${process.env.API_VERSION}/analysis`, async (req, res) => {
-  const article = req.body.data;
+app.post(
+  `/api/${process.env.API_VERSION}/analysis`,
+  authentication,
+  async (req, res) => {
+    const article = req.body.data;
 
-  console.log(article);
-  const articleSplit = nodejieba.cut(article.content);
-  const tagNumber = 20;
-  const articleTag = nodejieba.extract(article.content, tagNumber);
-  const articleTagKeywords = articleTag.map((element) => element.keyword);
+    console.log(article);
+    const articleSplit = nodejieba.cut(article.content);
+    const tagNumber = 20;
+    const articleTag = nodejieba.extract(article.content, tagNumber);
+    const articleTagKeywords = articleTag.map((element) => element.keyword);
 
-  console.log(articleTagKeywords);
+    console.log(articleTagKeywords);
 
-  const stopwordMap = await buildStopWordsMap();
-  const synonymMap = await buildSynonymMap();
+    const stopwordMap = await buildStopWordsMap();
+    const synonymMap = await buildSynonymMap();
 
-  const articleFiltered = await filterStopWords(stopwordMap, articleSplit);
+    const articleFiltered = await filterStopWords(stopwordMap, articleSplit);
 
-  const articleSynonymized = await findSynonym(synonymMap, articleFiltered);
+    const articleSynonymized = await findSynonym(synonymMap, articleFiltered);
 
-  const responseSize = 10;
-  const esQuery = [];
-  articleTagKeywords.forEach((element) => {
-    esQuery.push({ match: { tag: element } });
-  });
+    const responseSize = 10;
+    const esQuery = [];
+    articleTagKeywords.forEach((element) => {
+      esQuery.push({ match: { tag: element } });
+    });
 
-  console.log('---------es query----------');
-  console.log(esQuery);
+    console.log('---------es query----------');
+    console.log(esQuery);
 
-  const searchResponse = await client.search({
-    index: process.env.DB_NAME,
-    body: {
-      size: responseSize,
-      query: {
-        bool: {
-          should: esQuery,
-          minimum_should_match: 1,
+    const searchResponse = await client.search({
+      index: process.env.DB_NAME,
+      body: {
+        size: responseSize,
+        query: {
+          bool: {
+            should: esQuery,
+            minimum_should_match: 1,
+          },
         },
       },
-    },
-  });
+    });
 
-  console.log(searchResponse);
+    console.log(searchResponse);
 
-  const responseFromES = await client.index({
-    index: 'test_articles',
-    body: {
-      title: article.title,
-      author: article.author,
-      tag: articleTagKeywords,
-      filtered_content: articleFiltered,
-      processed_content: articleSynonymized,
-      content: article.content,
-    },
-  });
+    console.log(searchResponse.hits.total.value);
 
-  console.log('response from elasticSearch!!');
-  console.log(responseFromES);
+    const similarSentenceIndex = [];
+    const articleSimilarities = [];
+    const similarArticles = [];
 
-  console.log(searchResponse.hits.total.value);
-
-  const similarSentenceIndex = [];
-  const articleSimilarities = [];
-  const similarArticles = [];
-
-  for (
-    let i = 0;
-    i < Math.min(searchResponse.hits.total.value, responseSize);
-    i += 1
-  ) {
-    const articleSimilarity = calculateSimilarity(
-      articleSynonymized,
-      searchResponse.hits.hits[i]._source.processed_content
-    );
-    if (articleSimilarity >= 0.1) {
-      articleSimilarities.push(articleSimilarity);
-      const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+    for (
+      let i = 0;
+      i < Math.min(searchResponse.hits.total.value, responseSize);
+      i += 1
+    ) {
+      const articleSimilarity = calculateSimilarity(
         articleSynonymized,
-        searchResponse.hits.hits[i]._source.processed_content,
-        articleFiltered,
-        searchResponse.hits.hits[i]._source.filtered_content
+        searchResponse.hits.hits[i]._source.processed_content
       );
-      const matchedArticleAindices = findSimilarSentenseIndex(
-        article.content,
-        matchedArticleA
-      );
-      const matchedBrticleBindices = findSimilarSentenseIndex(
-        searchResponse.hits.hits[i]._source.content,
-        matchedArticleB
-      );
-      similarSentenceIndex.push([
-        matchedArticleAindices,
-        matchedBrticleBindices,
-      ]);
-      similarArticles.push(searchResponse.hits.hits[i]._source);
+      if (articleSimilarity >= 0.1) {
+        articleSimilarities.push(articleSimilarity);
+        const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+          articleSynonymized,
+          searchResponse.hits.hits[i]._source.processed_content,
+          articleFiltered,
+          searchResponse.hits.hits[i]._source.filtered_content
+        );
+        const matchedArticleAindices = findSimilarSentenseIndex(
+          article.content,
+          matchedArticleA
+        );
+        const matchedBrticleBindices = findSimilarSentenseIndex(
+          searchResponse.hits.hits[i]._source.content,
+          matchedArticleB
+        );
+        similarSentenceIndex.push([
+          matchedArticleAindices,
+          matchedBrticleBindices,
+        ]);
+        similarArticles.push(searchResponse.hits.hits[i]._source);
+      }
     }
+
+    const maxSimilarity = articleSimilarities.reduce(
+      (a, b) => Math.max(a, b),
+      -Infinity
+    );
+
+    console.log('user_id', req.user.user_id);
+
+    const responseFromES = await client.index({
+      index: 'test_articles',
+      body: {
+        title: article.title,
+        author: article.author,
+        tag: articleTagKeywords,
+        filtered_content: articleFiltered,
+        processed_content: articleSynonymized,
+        content: article.content,
+        user_id: req.user.user_id,
+        similar_articles: articleSimilarities.length,
+        highest_similarity: maxSimilarity,
+      },
+    });
+
+    console.log('response from elasticSearch!!');
+    console.log(responseFromES);
+
+    res.send({
+      data: {
+        similarity: articleSimilarities,
+        sentenceIndex: similarSentenceIndex,
+        article: similarArticles,
+      },
+    });
   }
+);
 
-  res.send({
-    data: {
-      similarity: articleSimilarities,
-      sentenceIndex: similarSentenceIndex,
-      article: similarArticles,
-    },
-  });
-});
-
-app.post(`/api/${process.env.API_VERSION}/article/search`, async (req, res) => {
+app.get(`/api/${process.env.API_VERSION}/articles/search`, async (req, res) => {
   const esSearchQuery = {
     must: [],
     must_not: [],
     should: [],
   };
-  const title = req.body.title.split(' ');
-  const author = req.body.author.split(' ');
-  const content = req.body.content.split(' ');
+  console.log(req.query);
+  const pageSize = 10;
+  const { page } = req.query;
+  const searchConditions = req.query.key.split(' ');
+  console.log(searchConditions);
 
-  console.log(title);
-  console.log(author);
-  console.log(content);
+  if (searchConditions.length > 0) {
+    searchConditions.forEach((element) => {
+      if (element[0] === '+') {
+        esSearchQuery.must.push({
+          multi_match: { query: element.substring(1) },
+        });
+      } else if (element[0] === '-') {
+        esSearchQuery.must_not.push({
+          multi_match: { query: element.substring(1) },
+        });
+      } else {
+        esSearchQuery.should.push({ multi_match: { query: element } });
+      }
+    });
+  }
 
-  if (title.length > 0) {
-    title.forEach((element) => {
-      if (element.length > 0) {
-        if (element[0] === '+') {
-          esSearchQuery.must.push({ match: { title: element.substring(1) } });
-        } else if (element[0] === '-') {
-          esSearchQuery.must_not.push({
-            match: { title: element.substring(1) },
-          });
-        } else if (element[0] === '"') {
-          esSearchQuery.must.push({
-            match: { title: element.substring(1, -2) },
-          });
-        } else {
-          esSearchQuery.should.push({ match: { title: element } });
-        }
-      }
-    });
-  }
-  if (author.length > 0) {
-    author.forEach((element) => {
-      if (element.length > 0) {
-        if (element[0] === '+') {
-          esSearchQuery.must.push({ match: { author: element.substring(1) } });
-        } else if (element[0] === '-') {
-          esSearchQuery.must_not.push({
-            match: { author: element.substring(1) },
-          });
-        } else if (element[0] === '"') {
-          esSearchQuery.must.push({
-            match: { author: element.substring(1, -2) },
-          });
-        } else {
-          esSearchQuery.should.push({ match: { author: element } });
-        }
-      }
-    });
-  }
-  if (content.length > 0) {
-    content.forEach((element) => {
-      if (element.length > 0) {
-        if (element[0] === '+') {
-          esSearchQuery.must.push({ match: { content: element.substring(1) } });
-        } else if (element[0] === '-') {
-          esSearchQuery.must_not.push({
-            match: { content: element.substring(1) },
-          });
-        } else if (element[0] === '"') {
-          esSearchQuery.must.push({
-            match: { content: element.substring(1, -2) },
-          });
-        } else {
-          esSearchQuery.should.push({ match: { content: element } });
-        }
-      }
-    });
-  }
   console.log(esSearchQuery);
+
   const searchResult = await client.search({
-    index: process.env.DB_NAME,
+    index: process.env.DB_ARTICLE_NAME,
     body: {
-      size: 100,
+      from: (page - 1) * pageSize,
       query: {
         bool: esSearchQuery,
       },
     },
   });
-  console.dir(searchResult.hits.hits);
-  res.send(searchResult);
+
+  const searchArticles = searchResult.hits.hits.map((element) => ({
+    id: element._id,
+    title: element._source.title,
+    author: element._source.author,
+    content: element._source.content,
+  }));
+  const response = {
+    total: searchResult.hits.total.value,
+    article: searchArticles,
+  };
+  res.send({ data: response });
 });
 
-// app.get(`/api/${process.env.API_VERSION}/articles`, async (req, res) => {});
+app.get(
+  `/api/${process.env.API_VERSION}/articles/details`,
+  async (req, res) => {
+    const { id } = req.query;
+    const result = await client.search({
+      index: 'test_articles',
+      body: {
+        query: {
+          term: { _id: id },
+        },
+      },
+    });
+    res.send(result);
+  }
+);
 
-// app.delete(`/api/${process.env.API_VERSION}/article`, async (req, res) => {});
+app.get(
+  `/api/${process.env.API_VERSION}/articles`,
+  authentication,
+  async (req, res) => {
+    console.log(req.user.user_id);
+    const result = await client.search({
+      index: 'test_articles',
+      body: {
+        query: {
+          term: { 'user_id.keyword': req.user.user_id },
+        },
+      },
+    });
+    const response = [];
+    for (const article of result.hits.hits) {
+      response.push({
+        title: article._source.title,
+        author: article._source.author,
+        similar_articles: article._source.similar_articles,
+        highest_similarity: article._source.highest_similarity,
+      });
+    }
+    res.status(200).send({ data: response });
+  }
+);
 
 app.post(`/api/${process.env.API_VERSION}/user/signup`, async (req, res) => {
   const user = req.body.data;
@@ -821,36 +900,6 @@ app.get(
     });
   }
 );
-
-app.get('/user', (req, res, next) => {
-  const options = {
-    root: path.join(__dirname, 'public'),
-  };
-
-  const fileName = 'user.html';
-  res.sendFile(fileName, options, (err) => {
-    if (err) {
-      next(err);
-    } else {
-      console.log('Sent:', fileName);
-    }
-  });
-});
-
-app.get('/', (req, res, next) => {
-  const options = {
-    root: path.join(__dirname, 'public'),
-  };
-
-  const fileName = 'index.html';
-  res.sendFile(fileName, options, (err) => {
-    if (err) {
-      next(err);
-    } else {
-      console.log('Sent:', fileName);
-    }
-  });
-});
 
 app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
   res.send('I am a healthy server!!!!');
