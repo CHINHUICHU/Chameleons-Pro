@@ -31,49 +31,6 @@ $(document).ready(async () => {
     }
   }
 
-  // $('#single-compare-link').click(() => {
-  //   $('#multiple').hide();
-  //   $('#multiple-finish').hide();
-  //   $('#upload-article-area').hide();
-  //   $('#upload-finish').hide();
-  //   $('#user-signin-signup').hide();
-  //   $('#similarity').empty();
-  //   $('#multiple-result').empty();
-  //   $('#upload-result').empty();
-  //   $('#nav').showFlex();
-  //   $('#main').showFlex();
-  //   $('#finish').showFlex();
-  // });
-
-  // $('#multiple-compare-link').click(() => {
-  //   $('#main').hide();
-  //   $('#finish').hide();
-  //   $('#upload-article-area').hide();
-  //   $('#upload-finish').hide();
-  //   $('#user-signin-signup').hide();
-  //   $('#similarity').empty();
-  //   $('#multiple-result').empty();
-  //   $('#upload-result').empty();
-  //   $('#multiple').css('display', 'flex');
-  //   $('#multiple').css('flex-direction', 'column');
-  //   $('#nav').showFlex();
-  //   $('#multiple-finish').showFlex();
-  // });
-
-  // $('#upload-compare-link').click(() => {
-  //   $('#main').hide();
-  //   $('#finish').hide();
-  //   $('#multiple').hide();
-  //   $('#multiple-finish').hide();
-  //   $('#user-signin-signup').hide();
-  //   $('#similarity').empty();
-  //   $('#multiple-result').empty();
-  //   $('#upload-result').empty();
-  //   $('#upload-article-area').showFlex();
-  //   $('#upload-finish').show();
-  //   $('#upload-article-area').css('flex-direction', 'column');
-  // });
-
   $('#signup-signin-link').click(() => {
     $('#main').hide();
     $('#finish').hide();
@@ -153,29 +110,10 @@ $(document).ready(async () => {
     }
   });
 
-  // let comparedArticles = 1;
-  // $('#new-article').click(() => {
-  //   comparedArticles += 1;
-  //   $('#multiple-compare-article-1')
-  //     .clone()
-  //     .attr('id', `multiple-compare-article-${comparedArticles}`)
-  //     .appendTo('#multiple');
-  //   $(`#multiple-compare-article-${comparedArticles} div:nth-child(1) input`)
-  //     .attr('id', `article-${comparedArticles}-title`)
-  //     .val('');
-  //   $(`#multiple-compare-article-${comparedArticles} div:nth-child(2) input`)
-  //     .attr('id', `article-${comparedArticles}-author`)
-  //     .val('');
-  //   $(`#multiple-compare-article-${comparedArticles} div:nth-child(3) textarea`)
-  //     .attr('id', `article-${comparedArticles}-content`)
-  //     .css('height', '300px')
-  //     .val('');
-  // });
-
-  // $('#remove-article').click(() => {
-  //   $(`#multiple-compare-article-${comparedArticles}`).remove();
-  //   comparedArticles -= 1;
-  // });
+  $('#article-search').change(() => {
+    localStorage.setItem('search', $('#article-search').val());
+    window.location.href = '/search';
+  });
 
   $('.upload').click(() => {
     $('#main').hide();
