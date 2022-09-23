@@ -31,7 +31,8 @@ $(document).ready(async () => {
     $('#multiple-compare-article-1')
       .clone()
       .attr('id', `multiple-compare-article-${comparedArticles}`)
-      .appendTo('#multiple');
+      .css({ 'margin-top': '5%' })
+      .insertBefore('#multiple-finish');
     $(`#multiple-compare-article-${comparedArticles} div:nth-child(1) input`)
       .attr('id', `article-${comparedArticles}-title`)
       .val('');

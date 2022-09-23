@@ -14,6 +14,13 @@ body{
 #header-button {
     width: 200px
 }
+a {
+    color: #495057 !important;
+    text-decoration: none !important;
+}
+a:hover {
+    color: #343a40 !important;
+}
 
 #user, #search {
     width: 75px;

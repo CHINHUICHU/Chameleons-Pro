@@ -13,7 +13,7 @@ body{
     --bs-nav-link-color: #6c757d !important;
     cursor: pointer;
 }
-a:link {
+a {
     color: #495057 !important;
     text-decoration: none !important;
 }

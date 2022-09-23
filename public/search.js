@@ -45,6 +45,10 @@ $(document).ready(async () => {
     $(this).addClass('pagination-active');
     const page = $(this).attr('id').split('-')[1];
     await getArticles(page);
+    $('.article-title a').click(function () {
+      console.log($(this).attr('id'));
+      localStorage.setItem('articleId', $(this).attr('id'));
+    });
   });
 
   $('.pagination-older').click(async () => {
@@ -71,6 +75,10 @@ $(document).ready(async () => {
         $(this).addClass('pagination-active');
         const page = $(this).attr('id').split('-')[1];
         await getArticles(page);
+      });
+      $('.article-title a').click(function () {
+        console.log($(this).attr('id'));
+        localStorage.setItem('articleId', $(this).attr('id'));
       });
     }
   });
@@ -101,9 +109,13 @@ $(document).ready(async () => {
         await getArticles(page);
       });
     }
+    $('.article-title a').click(function () {
+      console.log($(this).attr('id'));
+      localStorage.setItem('articleId', $(this).attr('id'));
+    });
   });
-
   $('.article-title a').click(function () {
+    console.log($(this).attr('id'));
     localStorage.setItem('articleId', $(this).attr('id'));
   });
 });

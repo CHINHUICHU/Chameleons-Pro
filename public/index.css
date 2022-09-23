@@ -38,10 +38,11 @@ a:hover {
 }
 #user-signin-signup{
     width: 30%;
-    height: 400px;
+    height: 500px;
     margin-left: 35%;
     margin-bottom: 3%;
     display: none;
+    
 }
 #choose-login-or-signup{
     display: flex;
