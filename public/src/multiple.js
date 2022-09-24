@@ -46,7 +46,7 @@ $(document).ready(async () => {
       });
     }
 
-    const response = await axios.post('/api/1.0/multiple/comparison', {
+    const response = await axios.post('/api/1.0/articles/multiple', {
       data: articles,
     });
 

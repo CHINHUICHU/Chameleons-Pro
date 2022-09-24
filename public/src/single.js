@@ -14,14 +14,14 @@ $(document).ready(async () => {
   });
 
   $('#finish>button').click(async () => {
-    const response = await axios.post('/api/1.0/comparison', {
+    const response = await axios.post('/api/1.0/articles/single', {
       data: {
-        articleA: {
+        sourceArticle: {
           title: $('#article-A-title').val(),
           author: $('#article-A-author').val(),
           content: $('#article-A-content').val(),
         },
-        articleB: {
+        targetArticle: {
           title: $('#article-B-title').val(),
           author: $('#article-B-author').val(),
           content: $('#article-B-content').val(),
@@ -29,9 +29,9 @@ $(document).ready(async () => {
       },
     });
 
-    console.log(response);
+    console.log('response', response);
 
-    const { articleA, articleB, similarity } = response.data.data;
+    const { sourceArticle, targetArticle, similarity } = response.data.data;
 
     $('#top').showFlex();
     $('#nav').hide();
@@ -49,48 +49,48 @@ $(document).ready(async () => {
     console.log($('#article-A-content').val());
     console.log($('#article-B-content').val());
 
-    const articleAparagraphs = $('#article-A-content').val().split('\n');
-    const articleBparagraphs = $('#article-B-content').val().split('\n');
+    const sourceArticleParagraphs = $('#article-A-content').val().split('\n');
+    const targetArticleParagraphs = $('#article-B-content').val().split('\n');
 
-    let articleAwithParagraph = '';
-    let articleBwithParagraph = '';
-    for (const paragraph of articleAparagraphs) {
-      articleAwithParagraph += `<p>${paragraph}</p>`;
+    let sourceArticleWithParagraph = '';
+    let targetArticleWithParagraph = '';
+    for (const paragraph of sourceArticleParagraphs) {
+      sourceArticleWithParagraph += `<p>${paragraph}</p>`;
     }
-    for (const paragraph of articleBparagraphs) {
-      articleBwithParagraph += `<p>${paragraph}</p>`;
+    for (const paragraph of targetArticleParagraphs) {
+      targetArticleWithParagraph += `<p>${paragraph}</p>`;
     }
 
-    const articleAsplit = $('#article-A-content')
+    const sourceArticlesSplit = $('#article-A-content')
       .val()
       .split(/(?:，|。|\n|！|？|：|；)+/);
-    const articleAsplitLength = articleAsplit.length;
+    const sourceArticlesSplitLength = sourceArticlesSplit.length;
 
-    const articleBsplit = $('#article-B-content')
+    const targetArticleSplit = $('#article-B-content')
       .val()
       .split(/(?:，|。|\n|！|？|：|；)+/);
-    const articleBsplitLength = articleBsplit.length;
+    const targetArticleSplitLength = targetArticleSplit.length;
 
-    console.log(articleAsplit);
-    console.log(articleBsplit);
+    console.log(sourceArticlesSplit);
+    console.log(targetArticleSplit);
 
     $('#result-A-title').val($('#article-A-title').val());
     $('#result-A-author').val($('#article-A-author').val());
-    $('#result-A-content').html(articleAwithParagraph);
+    $('#result-A-content').html(sourceArticleWithParagraph);
 
     $('#result-B-title').val($('#article-B-title').val());
     $('#result-B-author').val($('#article-B-author').val());
-    $('#result-B-content').html(articleBwithParagraph);
+    $('#result-B-content').html(targetArticleWithParagraph);
 
-    for (let i = 0; i < articleAsplitLength; i += 1) {
-      if (articleA[i]) {
-        $('#result-A-content').mark(articleAsplit[i]);
+    for (let i = 0; i < sourceArticlesSplitLength; i += 1) {
+      if (sourceArticle[i]) {
+        $('#result-A-content').mark(sourceArticlesSplit[i]);
       }
     }
 
-    for (let i = 0; i < articleBsplitLength; i += 1) {
-      if (articleB[i]) {
-        $('#result-B-content').mark(articleBsplit[i]);
+    for (let i = 0; i < targetArticleSplitLength; i += 1) {
+      if (targetArticle[i]) {
+        $('#result-B-content').mark(targetArticleSplit[i]);
       }
     }
   });
