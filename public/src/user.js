@@ -1,15 +1,10 @@
 $(document).ready(async () => {
-  localStorage.setItem(
-    'jwt',
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRlc3QzMzNAdGVzdC5jb20iLCJpYXQiOjE2NjM3MjUyMDksImV4cCI6MTY2NjMxNzIwOX0.d-AAdkPtx-D0adzknFVgfYvNs6k1Kev5dp8Eny-ZpL0'
-  );
   const token = localStorage.getItem('jwt');
   const header = {
     'Content-Type': 'application/json',
     Authorization: token,
   };
   const response = await axios.get('/api/1.0/articles', { headers: header });
-  console.log(response.data.data);
   const records = response.data.data;
   for (let i = 0; i < records.length; i += 1) {
     $('<tr></tr>')

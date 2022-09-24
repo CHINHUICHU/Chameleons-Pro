@@ -1,0 +1,13 @@
+mark {
+    background-color: #ffcad4 !important;
+}
+#upload-introduction {
+    margin-bottom: 5%;
+}
+#upload-article-content {
+    height: 500px;
+}
+.swal2-styled.swal2-confirm {
+    background-color: #8d99ae !important;
+}
+

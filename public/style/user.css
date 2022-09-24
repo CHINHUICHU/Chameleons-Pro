@@ -1,0 +1,40 @@
+#header {
+    margin-bottom: 0% !important;
+} 
+
+.container {
+    margin: 0% !important;
+    padding: 0% !important;
+}
+
+#sidebar-div {
+    padding: 0% !important;
+}
+
+#sidebar {
+    background-color: #ced4da !important;
+    width: 70% !important;
+    height: 100% !important;
+}
+
+#sidebar div {
+    height: 100vh !important;
+}
+
+#history-title {
+    margin-top: 10%;
+    color: #212529
+}
+
+table {
+    width: 850px !important;
+    margin-bottom: 5% !important;
+}
+
+.table {
+    margin-top: 3%;
+}
+
+.row {
+    margin-bottom: 0%;
+}

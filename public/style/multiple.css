@@ -1,0 +1,34 @@
+#multiple-finish {
+    display: flex;
+    justify-content: space-between;
+    width: 93%;
+}
+
+#multiple-introduction {
+    margin-bottom: 5%;
+}
+
+.multiple-article-area, #article-1-content {
+    width: 800px;
+}
+
+#article-1-content {
+    height: 300px;
+}
+
+.multiple-article-area {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.multiple-arthor, .multiple-title {
+    width:800px
+}
+
+mark {
+    background-color: #ffcad4 !important;
+}
+
+
+

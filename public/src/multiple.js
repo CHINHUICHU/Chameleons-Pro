@@ -2,32 +2,12 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
-  const token = localStorage.getItem('jwt');
-
-  console.log(token);
-
-  const header = {
-    'Content-Type': 'application/json',
-    Authorization: token,
-  };
-
-  if (token) {
-    try {
-      await axios.get('/api/1.0/user/profile', {
-        headers: header,
-      });
-      $('#signup-signin-link').hide();
-      $('#user-signin-signup').hide();
-      $('#logout-link').show().css({ display: 'block' });
-      $('#member-link').show().css({ display: 'block' });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   let comparedArticles = 1;
   $('#new-article').click(() => {
     comparedArticles += 1;
+    if (comparedArticles > 1) {
+      $('#remove-article').attr('disabled', false);
+    }
     $('#multiple-compare-article-1')
       .clone()
       .attr('id', `multiple-compare-article-${comparedArticles}`)
@@ -45,13 +25,15 @@ $(document).ready(async () => {
       .val('');
   });
 
-  $('#remove-article').click(() => {
+  $('#remove-article').click(function () {
     $(`#multiple-compare-article-${comparedArticles}`).remove();
     comparedArticles -= 1;
+    if (comparedArticles === 1) {
+      $(this).attr('disabled', true);
+    }
   });
 
   $('#multiple-submit').click(async () => {
-    $('#nav').hide();
     $('#multiple').hide();
     $('#multiple-finish').hide();
 
@@ -84,7 +66,7 @@ $(document).ready(async () => {
       const targetTitle = $(`#article-${+edges[i].target}-title`).val();
 
       $(`<div class="input-group mb-3">
-        <div class="input-group-prepend">
+        <div class="input-group-prepend shadow-sm">
           <span class="input-group-text" >來源</span>
         </div>
         <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="source-title-${i}" readonly>
@@ -95,7 +77,7 @@ $(document).ready(async () => {
       $(`#source-title-${i}`).val(sourceTitle);
 
       $(`<div class="input-group mb-3">
-      <div class="input-group-prepend">
+      <div class="input-group-prepend shadow-sm">
         <span class="input-group-text" >比對</span>
       </div>
       <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="target-title-${i}" readonly>
@@ -106,7 +88,7 @@ $(document).ready(async () => {
       $(`#target-title-${i}`).val(targetTitle);
 
       $(`<div class="input-group mb-3">
-    <div class="input-group-prepend">
+    <div class="input-group-prepend shadow-sm">
       <span class="input-group-text" >相似度</span>
     </div>
     <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="similartiy-${+edges[
@@ -133,7 +115,7 @@ $(document).ready(async () => {
       const articleIds = $(this).attr('id').split('-');
       const [article1, article2] = [articleIds[0], articleIds[2]];
 
-      $('<div></div>')
+      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
         .attr('id', 'article-result')
         .css({
           display: 'flex',
@@ -144,7 +126,7 @@ $(document).ready(async () => {
         })
         .insertAfter($(this));
 
-      $('<div></div>')
+      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
         .attr('id', `article-${article1}-result`)
         .addClass('article-result border')
         .css({
@@ -202,8 +184,6 @@ $(document).ready(async () => {
         localStorage.getItem('sentence-index')
       )[`${$(this).attr('id')}`];
 
-      // console.log(JSON.parse(similarSentenceIndex));
-
       for (let i = 0; i < article1splitLength; i += 1) {
         if (similarSentenceIndex[0][i]) {
           $(`#article-${article1}-result`).mark(article1split[i]);
@@ -216,5 +196,9 @@ $(document).ready(async () => {
         }
       }
     });
+  });
+
+  $('#signup-signin-link').click(() => {
+    localStorage.setItem('previous-page', window.location.href);
   });
 });

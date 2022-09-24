@@ -2,90 +2,110 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
-  const token = localStorage.getItem('jwt');
+  // const token = localStorage.getItem('jwt');
 
-  console.log(token);
+  // console.log(token);
 
-  const header = {
-    'Content-Type': 'application/json',
-    Authorization: token,
-  };
+  // const header = {
+  //   'Content-Type': 'application/json',
+  //   Authorization: token,
+  // };
 
-  if (token) {
-    try {
-      await axios.get('/api/1.0/user/profile', {
-        headers: header,
-      });
-      $('#signup-signin-link').hide();
-      $('#user-signin-signup').hide();
-      $('#logout-link').show().css({ display: 'block' });
-      $('#member-link').show().css({ display: 'block' });
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // if (token) {
+  //   try {
+  //     await axios.get('/api/1.0/user/profile', {
+  //       headers: header,
+  //     });
+  //     $('#signup-signin-link').hide();
+  //     $('#user-signin-signup').hide();
+  //     $('#logout-link').show().css({ display: 'block' });
+  //     $('#member-link').show().css({ display: 'block' });
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
 
   $('#upload-submit').click(async () => {
     $('#upload-article-area').hide();
+    const token = localStorage.getItem('jwt');
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    };
     const uploadArticle = {
       title: $('#upload-article-title').val(),
       author: $('#upload-article-author').val(),
       content: $('#upload-article-content').val(),
     };
-    const response = await axios.post('/api/1.0/analysis', {
-      data: uploadArticle,
-    });
+    try {
+      const response = await axios.post(
+        '/api/1.0/analysis',
+        {
+          data: uploadArticle,
+        },
+        { headers: header }
+      );
 
-    console.log(response.data.data);
+      console.log(response.data.data);
 
-    const { article, similarity, sentenceIndex } = response.data.data;
+      const { article, similarity, sentenceIndex } = response.data.data;
 
-    const articleNumber = article.length;
-    $(`<h4>該文章共與${articleNumber}篇文章相似度超過10%</h4>`)
-      .css({ 'padding-left': '5%' })
-      .appendTo('#upload-result');
+      const articleNumber = article.length;
+      $(`<h4>該文章共與${articleNumber}篇文章相似度超過10%</h4>`)
+        .css({ 'padding-left': '5%' })
+        .appendTo('#upload-result');
 
-    for (let i = 0; i < articleNumber; i += 1) {
-      $(`<div class="input-group mb-3">
-        <div class="input-group-prepend">
+      for (let i = 0; i < articleNumber; i += 1) {
+        $(`<div class="input-group mb-3">
+        <div class="input-group-prepend shadow-sm">
           <span class="input-group-text" >標題</span>
         </div>
         <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-title-${i}" readonly>
       </div>`)
-        .css({ 'padding-left': '5%', 'padding-right': '5%' })
-        .appendTo('#upload-result');
+          .css({ 'padding-left': '5%', 'padding-right': '5%' })
+          .appendTo('#upload-result');
 
-      $(`#upload-result-title-${i}`).val(article[i].title);
+        $(`#upload-result-title-${i}`).val(article[i].title);
 
-      $(`<div class="input-group mb-3">
-      <div class="input-group-prepend">
+        $(`<div class="input-group mb-3">
+      <div class="input-group-prepend shadow-sm">
         <span class="input-group-text" >作者</span>
       </div>
       <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-author-${i}" readonly>
     </div>`)
-        .css({ 'padding-left': '5%', 'padding-right': '5%' })
-        .appendTo('#upload-result');
+          .css({ 'padding-left': '5%', 'padding-right': '5%' })
+          .appendTo('#upload-result');
 
-      $(`#upload-result-author-${i}`).val(article[i].author);
+        $(`#upload-result-author-${i}`).val(article[i].author);
 
-      $(`<div class="input-group mb-3">
-    <div class="input-group-prepend">
+        $(`<div class="input-group mb-3">
+    <div class="input-group-prepend shadow-sm">
       <span class="input-group-text" >相似度</span>
     </div>
     <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-similartiy-${i}" readonly>
   </div>`)
-        .css({ 'padding-left': '5%', 'padding-right': '5%' })
-        .appendTo('#upload-result');
+          .css({ 'padding-left': '5%', 'padding-right': '5%' })
+          .appendTo('#upload-result');
 
-      $(`#upload-result-similartiy-${i}`).val(
-        `${(similarity[i] * 100).toFixed(2)}%`
-      );
+        $(`#upload-result-similartiy-${i}`).val(
+          `${(similarity[i] * 100).toFixed(2)}%`
+        );
 
-      $('<button type="button">查看相似段落</button>')
-        .attr('id', `check-similar-paragraph-${i}`)
-        .css({ 'margin-left': '5%', 'margin-bottom': '3%' })
-        .addClass('check-upload-similar-paragraph btn btn-secondary')
-        .appendTo('#upload-result');
+        $('<button type="button">查看相似段落</button>')
+          .attr('id', `check-similar-paragraph-${i}`)
+          .css({ 'margin-left': '5%', 'margin-bottom': '3%' })
+          .addClass('check-upload-similar-paragraph btn btn-secondary')
+          .appendTo('#upload-result');
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: error.response.data.message,
+      });
+      $('.swal2-confirm').click(() => {
+        window.location.href = '/';
+      });
     }
 
     $('.check-upload-similar-paragraph').click(function (e) {
@@ -93,7 +113,7 @@ $(document).ready(async () => {
       $('#article-result').remove();
       const articleId = $(this).attr('id').split('-')[3];
 
-      $('<div></div>')
+      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
         .attr('id', 'article-result')
         .css({
           display: 'flex',
@@ -104,7 +124,7 @@ $(document).ready(async () => {
         })
         .insertAfter($(this));
 
-      $('<div></div>')
+      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
         .attr('id', 'article-source-content')
         .addClass('article-result border')
         .css({

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CHAMELEONS PRO</title>
-    <link rel="stylesheet" type="text/css" href="./style/main.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="main.css" media="all" />
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
@@ -22,7 +22,7 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Bootstrap core CSS -->
     <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="./src/index.js"></script>
+    <script src="article.js"></script>
 </head>
 <body>
 
@@ -33,10 +33,10 @@
               <a href="/"><img src="./images/ChamELEONS-2_400x174.png" id="main-logo"></a>
             </li>
         </ul>
-        <ul class="nav justify-content-end">
+        <ul class="nav justify-content-end" id="nav-bar">
             <li class="nav-item">
                 <div class="input-group rounded">
-                    <input type="search" id="article-search" class="form-control rounded" placeholder="搜尋文章" aria-label="Search" aria-describedby="search-addon"/>
+                    <input type="search" class="form-control rounded" placeholder="搜尋文章" aria-label="Search" aria-describedby="search-addon" />
                     <span class="input-group-text border-0" id="search-addon" >
                         <i class="fa fa-search"></i>
                     </span>
@@ -49,7 +49,7 @@
                 <a class="nav-link" id="multiple-compare-link" href="/multiple">多篇文章比對</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="single-compare-link" href="/single">單篇文章比對</a>
+                <a class="nav-link" id="single-compare-link" href="/">單篇文章比對</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" id="signup-signin-link" href="/login">註冊｜登入</a>
@@ -58,7 +58,7 @@
                 <a class="nav-link" id="member-link" href="/user">會員</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="logout-link" href="/">登出</a>
+                <a class="nav-link" id="logout-link">登出</a>
             </li>
 
         </ul>
@@ -87,6 +87,8 @@
           </div>
         </div>
       </div>
+
+
 
     <!-- Footer -->
     <footer class="bg-light text-center "> 

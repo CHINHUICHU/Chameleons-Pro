@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chameleons Pro</title>
-    <link rel="stylesheet" type="text/css" href="multiple.css" media="all" />
+    <title>CHAMELEONS PRO</title>
+    <link rel="stylesheet" type="text/css" href="./style/main.css" media="all" />
+    <link rel="stylesheet" type="text/css" href="./style/multiple.css" media="all" />
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
@@ -21,7 +22,8 @@
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Bootstrap core CSS -->
     <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="multiple.js"></script>
+    <script src="./src/index.js"></script>
+    <script src="./src/multiple.js"></script>
 </head>
 <body>
 
@@ -29,13 +31,13 @@
 
         <ul class="nav justify-content-start">
             <li class="nav-item">
-              <a href="/"><img src="./images/main-logo-2.jpeg"></a>
+              <a href="/"><img src="./images/ChamELEONS-2_400x174.png" id="main-logo"></a>
             </li>
         </ul>
         <ul class="nav justify-content-end" id="nav-bar">
             <li class="nav-item">
                 <div class="input-group rounded">
-                    <input type="search" class="form-control rounded" placeholder="搜尋文章" aria-label="Search" aria-describedby="search-addon" />
+                    <input type="search" id="article-search" class="form-control rounded" placeholder="搜尋文章" aria-label="Search" aria-describedby="search-addon" />
                     <span class="input-group-text border-0" id="search-addon" >
                         <i class="fa fa-search"></i>
                     </span>
@@ -48,16 +50,16 @@
                 <a class="nav-link" id="multiple-compare-link" href="/multiple">多篇文章比對</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="single-compare-link" href="/">單篇文章比對</a>
+                <a class="nav-link" id="single-compare-link" href="/single">單篇文章比對</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" id="signup-signin-link" href="/">註冊｜登入</a>
+              <a class="nav-link" id="signup-signin-link" href="/login">註冊｜登入</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="member-link">會員</a>
+                <a class="nav-link" id="member-link" href="/user">會員</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" id="logout-link">登出</a>
+                <a class="nav-link" id="logout-link" href="/">登出</a>
             </li>
 
         </ul>
@@ -69,28 +71,27 @@
           </div>
           <div class="col-8">
             <div id="multiple">
-                <h2>請依序上傳欲比對的文章</h2>
+                <h2 id="multiple-introduction">請依序上傳欲比對的文章</h2>
                 <!-- <h2 class="article-num">文章1</h2> -->
                 <div class="multiple-article-area" id="multiple-compare-article-1">
-                    <div class="input-group mb-3">
+                    <div class="input-group mb-3 shadow-sm">
                         <div class="input-group-prepend">
                         <span class="input-group-text">標題</span>
                         </div>
                         <input type="text" class="form-control" id="article-1-title" aria-label="Default" aria-describedby="inputGroup-sizing-default">
                     </div>
-                    <div class="input-group mb-3">
+                    <div class="input-group mb-3 shadow-sm">
                         <div class="input-group-prepend">
                         <span class="input-group-text">作者</span>
                         </div>
                         <input type="text" class="form-control" id="article-1-author" aria-label="Default" aria-describedby="inputGroup-sizing-default">
                     </div>
-        
                     <div class="form-group">
-                        <textarea class="form-control rounded-0 single-article-content"  id="article-1-content" rows="30" placeholder="內文"></textarea>
+                        <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="article-1-content" rows="30" placeholder="內文"></textarea>
                     </div>
                 </div>
                 <div id="multiple-finish">
-                    <button type="button" class="btn btn-secondary" color="black" id="remove-article">移除文章</button>
+                    <button type="button" class="btn btn-secondary" color="black" id="remove-article" disabled>移除文章</button>
                     <button type="button" class="btn btn-secondary" color="black" id="new-article">新增文章</button>
                     <button type="button" class="btn btn-secondary" color="black" id="multiple-submit">進行比對</button>
                 </div>
@@ -101,7 +102,6 @@
         </div>
       </div>
 
-    <!-- multiple article comparison -->
 
 
 
@@ -121,7 +121,7 @@
 
 
 
-    </div>
+
 
 
 
@@ -129,7 +129,7 @@
     <footer class="bg-light text-center "> 
         <!-- Copyright -->
         <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2)">
-        © 2022 Copyright: Chameleons Pro
+        © 2022 Copyright: CHAMELEONS PRO
         </div>
         <!-- Copyright -->
     </footer>

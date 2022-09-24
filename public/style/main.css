@@ -1,0 +1,54 @@
+@import url(//fonts.googleapis.com/earlyaccess/notosanstc.css);
+body{
+  font-family: 'Noto Sans TC',sans-serif !important;
+}
+
+#main-logo {
+    width: 200px;
+}
+
+#main-image-area{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#main-image {
+    width: 80%;
+}
+
+.discription {
+    margin-bottom: 5%;
+}
+
+#introduction {
+    color: #495057;
+}
+
+#header, #header-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+a {
+    color: #495057 !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: #343a40 !important;
+}
+
+.text-center {
+    color: #495057;
+}
+
+#member-link, #logout-link {
+    display: none;
+}
+
+.row {
+    margin-bottom: 4%;
+}
+
