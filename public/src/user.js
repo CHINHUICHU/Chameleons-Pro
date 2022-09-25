@@ -4,7 +4,9 @@ $(document).ready(async () => {
     'Content-Type': 'application/json',
     Authorization: token,
   };
-  const response = await axios.get('/api/1.0/articles', { headers: header });
+  const response = await axios.get('/api/1.0/articles/records', {
+    headers: header,
+  });
   const records = response.data.data;
   for (let i = 0; i < records.length; i += 1) {
     $('<tr></tr>')

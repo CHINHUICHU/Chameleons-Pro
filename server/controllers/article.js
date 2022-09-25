@@ -1,10 +1,18 @@
+/* eslint-disable no-underscore-dangle */
+require('dotenv').config();
 const nodejieba = require('@node-rs/jieba');
+
+nodejieba.load({ userDict: './dict.utf8' });
 const Graph = require('graph-data-structure');
 
 const {
   insertTwoArticles,
   insertMultipleArticles,
   searchArticles,
+  searchArticlesByTag,
+  insertUploadArticle,
+  searchArticleById,
+  getRecords,
 } = require('../models/article');
 
 const {
@@ -284,4 +292,134 @@ const getArticles = async (req, res) => {
   res.send({ data: response });
 };
 
-module.exports = { comparison, multipleComparison, getArticles };
+const analyzeArticle = async (req, res) => {
+  const article = req.body.data;
+
+  console.log(article);
+  const articleSplit = nodejieba.cut(article.content);
+  const tagNumber = 20;
+  const articleTag = nodejieba.extract(article.content, tagNumber);
+  const articleTagKeywords = articleTag.map((element) => element.keyword);
+
+  console.log(articleTagKeywords);
+
+  const articleFiltered = await filterStopWords(articleSplit);
+
+  const articleSynonymized = await findSynonym(articleFiltered);
+
+  const responseSize = 10;
+  const esQuery = [];
+  articleTagKeywords.forEach((element) => {
+    esQuery.push({ match: { tag: element } });
+  });
+
+  console.log('---------es query----------');
+  console.log(esQuery);
+
+  const searchResponse = await searchArticlesByTag(responseSize, esQuery);
+
+  console.log(searchResponse);
+
+  console.log(searchResponse.hits.total.value);
+
+  const similarSentenceIndex = [];
+  const articleSimilarities = [];
+  const similarArticles = [];
+
+  for (
+    let i = 0;
+    i < Math.min(searchResponse.hits.total.value, responseSize);
+    i += 1
+  ) {
+    const articleSimilarity = calculateSimilarity(
+      articleSynonymized,
+      searchResponse.hits.hits[i]._source.processed_content
+    );
+    if (articleSimilarity >= 0.1) {
+      articleSimilarities.push(articleSimilarity);
+      const [matchedArticleA, matchedArticleB] = findMatchedKeyword(
+        articleSynonymized,
+        searchResponse.hits.hits[i]._source.processed_content,
+        articleFiltered,
+        searchResponse.hits.hits[i]._source.filtered_content
+      );
+      const matchedArticleAindices = findSimilarSentenseIndex(
+        article.content,
+        matchedArticleA
+      );
+      const matchedBrticleBindices = findSimilarSentenseIndex(
+        searchResponse.hits.hits[i]._source.content,
+        matchedArticleB
+      );
+      similarSentenceIndex.push([
+        matchedArticleAindices,
+        matchedBrticleBindices,
+      ]);
+      similarArticles.push(searchResponse.hits.hits[i]._source);
+    }
+  }
+
+  const maxSimilarity = articleSimilarities.reduce(
+    (a, b) => Math.max(a, b),
+    -Infinity
+  );
+
+  console.log('user_id', req.user.user_id);
+
+  const responseFromES = await insertUploadArticle(
+    article,
+    articleTagKeywords,
+    articleFiltered,
+    articleSynonymized,
+    req.user.user_id,
+    articleSimilarities,
+    maxSimilarity
+  );
+
+  console.log('response from elasticSearch!!');
+  console.log(responseFromES);
+
+  res.send({
+    data: {
+      similarity: articleSimilarities,
+      sentenceIndex: similarSentenceIndex,
+      article: similarArticles,
+    },
+  });
+};
+
+const getArticleDetails = async (req, res) => {
+  const { id } = req.query;
+  const result = await searchArticleById(id);
+
+  const response = {
+    title: result.hits.hits[0]._source.title,
+    author: result.hits.hits[0]._source.author,
+    content: result.hits.hits[0]._source.content,
+  };
+  res.status(200).send({ data: response });
+};
+
+const getArticleRecords = async (req, res) => {
+  console.log(req.user.user_id);
+  const result = await getRecords(req.user.user_id);
+  const response = [];
+  for (const article of result.hits.hits) {
+    response.push({
+      title: article._source.title,
+      author: article._source.author,
+      similar_articles: article._source.similar_articles,
+      highest_similarity: article._source.highest_similarity,
+    });
+  }
+  res.status(200).send({ data: response });
+};
+
+module.exports = {
+  comparison,
+  multipleComparison,
+  getArticles,
+  analyzeArticle,
+  getArticleDetails,
+  getArticleRecords,
+};
