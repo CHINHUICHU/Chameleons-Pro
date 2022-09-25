@@ -150,14 +150,25 @@ a{color:inherit;text-decoration:none}
 .foot{
 	text-align:center;
 }
-.card{
+/* .card{
 	width: 500px;
 	left: 100px;
-}
+	margin-left: 15%;
+    margin-top: 10%;
+} */
 
+.card {
+	border: none !important;
+	margin-bottom: 4%;
+}
 ::placeholder{
 color: #b3b3b3;
-} 
+}
+
 .swal2-styled.swal2-confirm {
     background-color: #8d99ae !important;
 }
+
+/* .row {
+	height: 75vh;
+} */

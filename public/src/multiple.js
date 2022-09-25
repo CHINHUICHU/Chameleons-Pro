@@ -2,10 +2,10 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
-  let comparedArticles = 1;
+  let comparedArticles = 2;
   $('#new-article').click(() => {
     comparedArticles += 1;
-    if (comparedArticles > 1) {
+    if (comparedArticles > 2) {
       $('#remove-article').attr('disabled', false);
     }
     $('#multiple-compare-article-1')
@@ -28,7 +28,7 @@ $(document).ready(async () => {
   $('#remove-article').click(function () {
     $(`#multiple-compare-article-${comparedArticles}`).remove();
     comparedArticles -= 1;
-    if (comparedArticles === 1) {
+    if (comparedArticles === 2) {
       $(this).attr('disabled', true);
     }
   });
