@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { client } = require('./database');
 
+const { DB_ARTICLE_INDEX } = process.env;
+
 const insertTwoArticles = async (
   sourceArticle,
   targetArticle,
@@ -16,7 +18,7 @@ const insertTwoArticles = async (
       body: [
         {
           index: {
-            _index: 'test_articles',
+            _index: DB_ARTICLE_INDEX,
           },
         },
         {
@@ -29,7 +31,7 @@ const insertTwoArticles = async (
         },
         {
           index: {
-            _index: 'test_articles',
+            _index: DB_ARTICLE_INDEX,
           },
         },
         {
@@ -62,7 +64,7 @@ const insertMultipleArticles = async (queryBody) => {
 const searchArticles = async (page, pageSize, searchQuery) => {
   try {
     const searchResult = await client.search({
-      index: process.env.DB_ARTICLE_NAME,
+      index: process.env.DB_ARTICLE_INDEXE,
       body: {
         from: (page - 1) * pageSize,
         query: {
@@ -109,7 +111,7 @@ const insertUploadArticle = async (
 ) => {
   try {
     const responseFromES = await client.index({
-      index: 'test_articles',
+      index: DB_ARTICLE_INDEX,
       body: {
         title: article.title,
         author: article.author,
@@ -132,7 +134,7 @@ const insertUploadArticle = async (
 const searchArticleById = async (id) => {
   try {
     const result = await client.search({
-      index: 'test_articles',
+      index: DB_ARTICLE_INDEX,
       body: {
         query: {
           term: { _id: id },
@@ -149,7 +151,7 @@ const searchArticleById = async (id) => {
 const getRecords = async (userId) => {
   try {
     const result = await client.search({
-      index: 'test_articles',
+      index: DB_ARTICLE_INDEX,
       body: {
         query: {
           term: { 'user_id.keyword': userId },

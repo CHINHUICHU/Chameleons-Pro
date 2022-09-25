@@ -68,35 +68,6 @@ const comparison = async (req, res, next) => {
       targetArticlesynonymized
     );
 
-    //   body: [
-    //     {
-    //       index: {
-    //         _index: 'test_articles',
-    //       },
-    //     },
-    //     {
-    //       title: sourceArticle.title,
-    //       author: sourceArticle.author,
-    //       tag: sourceArticletagKeywords,
-    //       filtered_content: sourceArticleFiltered,
-    //       processed_content: sourceArticlesynonymized,
-    //       content: sourceArticle.content,
-    //     },
-    //     {
-    //       index: {
-    //         _index: 'test_articles',
-    //       },
-    //     },
-    //     {
-    //       title: targetArticle.title,
-    //       author: targetArticle.author,
-    //       tag: targetArticletagKeywords,
-    //       filtered_content: targetArticleFiltered,
-    //       processed_content: targetArticlesynonymized,
-    //       content: targetArticle.content,
-    //     },
-    //   ],
-    // });
     console.log('response from elasticSearch!!');
     console.log(responseFromES);
     responseFromES.items.forEach((ele) => console.log(ele));

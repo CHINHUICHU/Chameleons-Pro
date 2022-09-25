@@ -4,10 +4,12 @@ const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
 const { client } = require('./database');
 
+const { DB_USER_INDEX } = process.env;
+
 const signUp = async (user) => {
   try {
     const checkEmail = await client.search({
-      index: 'test_user',
+      index: DB_USER_INDEX,
       body: {
         query: {
           term: {
@@ -26,7 +28,7 @@ const signUp = async (user) => {
 
     const hash = await argon2.hash(user.password);
     const result = await client.index({
-      index: 'test_user',
+      index: DB_USER_INDEX,
       body: {
         name: user.name,
         email: user.email,
@@ -65,7 +67,7 @@ const signUp = async (user) => {
 const signIn = async (user) => {
   try {
     const result = await client.search({
-      index: 'test_user',
+      index: DB_USER_INDEX,
       body: {
         query: {
           term: {
@@ -119,7 +121,7 @@ const signIn = async (user) => {
 const getUserProfile = async (user) => {
   try {
     const result = await client.search({
-      index: 'test_user',
+      index: DB_USER_INDEX,
       body: {
         query: {
           term: {
