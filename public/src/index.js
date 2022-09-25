@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 $(document).ready(async () => {
   if (
     localStorage.getItem('current-page') &&

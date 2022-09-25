@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 require('dotenv').config();
@@ -15,7 +16,6 @@ const app = express();
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
-// app.use(express.json());
 app.set('view engine', 'ejs');
 app.use(cors());
 

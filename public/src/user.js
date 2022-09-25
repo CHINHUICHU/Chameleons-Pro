@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 $(document).ready(async () => {
   const token = localStorage.getItem('jwt');
   const header = {

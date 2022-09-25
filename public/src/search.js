@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-restricted-syntax */
 async function getArticles(page) {
   const response = await axios.get(

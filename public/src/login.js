@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 $(document).ready(async () => {
   $('#signup-submit').click(async () => {
     try {
@@ -18,6 +19,13 @@ $(document).ready(async () => {
       $('#member-link').show().css({ display: 'block' });
       $('#main').show();
       $('#finish').show();
+      Swal.fire({
+        icon: 'success',
+        text: '歡迎使用CHAMELEONS PRO',
+      });
+      $('.swal2-styled.swal2-confirm').click(() => {
+        window.location.href = localStorage.getItem('previous-page');
+      });
     } catch (error) {
       Swal.fire({
         icon: 'error',

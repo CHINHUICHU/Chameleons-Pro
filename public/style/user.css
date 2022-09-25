@@ -23,12 +23,13 @@
 
 #history-title {
     margin-top: 10%;
-    color: #212529
+    color: #495057
 }
 
 table {
     width: 850px !important;
     margin-bottom: 5% !important;
+    color: #495057 !important;
 }
 
 .table {
@@ -37,4 +38,8 @@ table {
 
 .row {
     margin-bottom: 0%;
+}
+
+.menu {
+    color: #212529;
 }

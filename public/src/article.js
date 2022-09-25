@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 $(document).ready(async () => {
   $('#article-area').empty();
   const articleId = localStorage.getItem('articleId');
