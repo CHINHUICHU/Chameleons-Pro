@@ -43,3 +43,11 @@ table {
 .menu {
     color: #212529;
 }
+
+#history {
+    margin-top: 10%;
+}
+
+#record-area {
+    padding-left: 7%;
+}

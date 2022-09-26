@@ -73,3 +73,7 @@ h1 {
     display: -webkit-box;
     -webkit-box-orient: vertical;
 }
+
+.search-area {
+  background-color: #e5e5e5 !important;
+}

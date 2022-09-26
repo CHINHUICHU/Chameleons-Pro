@@ -3,7 +3,10 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+}
 
+.intro-div {
+    margin-top: 8% !important;
 }
 
 h1 h3 {

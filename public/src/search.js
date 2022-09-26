@@ -15,13 +15,17 @@ async function getArticles(page) {
   $('#search-result-number').html(`<h5>共有${total}個搜尋結果</h5>`);
 
   article.forEach((element) => {
+    $('<div class="shadow-sm p-3 mb-5 rounded search-area"></div>').appendTo(
+      '#search-result'
+    );
     $(
       `<h4 class="article-title"><a href="/article" id="${element.id}">${element.title}</a></h4>`
-    ).appendTo('#search-result');
+    ).appendTo('.search-area:last');
+
     $(`<div>${element.content}</div>`)
       .addClass('crop-text-3')
       .css({ 'margin-bottom': '3%' })
-      .appendTo('#search-result');
+      .appendTo('.search-area:last');
   });
 }
 
@@ -131,4 +135,5 @@ $(document).on('click', '.pagination-newer', async () => {
 $(document).on('click', '.article-title a', async function () {
   localStorage.setItem('articleId', $(this).attr('id'));
   localStorage.setItem('current-page', $('.pagination-active').attr('id'));
+  console.log($('.pagination-active').attr('id'));
 });

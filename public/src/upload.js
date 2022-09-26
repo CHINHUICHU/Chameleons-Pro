@@ -28,41 +28,42 @@ $(document).ready(async () => {
       const { article, similarity, sentenceIndex } = response.data.data;
 
       const articleNumber = article.length;
-      $(`<h4>該文章共與${articleNumber}篇文章相似度超過10%</h4>`)
-        .css({ 'padding-left': '5%' })
+      $(`<h2>該文章共與${articleNumber}篇文章相似度超過10%</h2>`)
+        .css({ 'padding-left': '5%', 'margin-bottom': '5%' })
         .appendTo('#upload-result');
 
       for (let i = 0; i < articleNumber; i += 1) {
+        $('<div class="upload-result-area"></div>').appendTo('#upload-result');
         $(`<div class="input-group mb-3">
         <div class="input-group-prepend shadow-sm">
-          <span class="input-group-text" >標題</span>
+          <span class="input-group-text">標題</span>
         </div>
         <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-title-${i}" readonly>
       </div>`)
           .css({ 'padding-left': '5%', 'padding-right': '5%' })
-          .appendTo('#upload-result');
+          .appendTo('.upload-result-area:last');
 
         $(`#upload-result-title-${i}`).val(article[i].title);
 
         $(`<div class="input-group mb-3">
       <div class="input-group-prepend shadow-sm">
-        <span class="input-group-text" >作者</span>
+        <span class="input-group-text">作者</span>
       </div>
       <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-author-${i}" readonly>
     </div>`)
           .css({ 'padding-left': '5%', 'padding-right': '5%' })
-          .appendTo('#upload-result');
+          .appendTo('.upload-result-area:last');
 
         $(`#upload-result-author-${i}`).val(article[i].author);
 
         $(`<div class="input-group mb-3">
     <div class="input-group-prepend shadow-sm">
-      <span class="input-group-text" >相似度</span>
+      <span class="input-group-text">相似度</span>
     </div>
     <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-similartiy-${i}" readonly>
   </div>`)
           .css({ 'padding-left': '5%', 'padding-right': '5%' })
-          .appendTo('#upload-result');
+          .appendTo('.upload-result-area:last');
 
         $(`#upload-result-similartiy-${i}`).val(
           `${(similarity[i] * 100).toFixed(2)}%`
@@ -72,14 +73,14 @@ $(document).ready(async () => {
           .attr('id', `check-similar-paragraph-${i}`)
           .css({ 'margin-left': '5%', 'margin-bottom': '3%' })
           .addClass('check-upload-similar-paragraph btn btn-secondary')
-          .appendTo('#upload-result');
+          .appendTo('.upload-result-area:last');
       }
       $('.check-upload-similar-paragraph').click(function (e) {
         e.stopPropagation();
         $('#article-result').remove();
         const articleId = $(this).attr('id').split('-')[3];
 
-        $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
+        $('<div></div>')
           .attr('id', 'article-result')
           .css({
             display: 'flex',
@@ -95,7 +96,7 @@ $(document).ready(async () => {
           .addClass('article-result border')
           .css({
             'margin-bottom': '20px',
-            width: '35%',
+            width: '45%',
             height: '500px',
             'overflow-y': 'scroll',
           })
@@ -117,12 +118,12 @@ $(document).ready(async () => {
 
         $('#article-source-content').html(articleSourceWithParagraph);
 
-        $('<div></div>')
+        $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
           .attr('id', 'article-target-content')
           .addClass('article-result border')
           .css({
             'margin-bottom': '20px',
-            width: '35%',
+            width: '45%',
             height: '500px',
             'overflow-y': 'scroll',
           })
