@@ -49,7 +49,7 @@ $(document).ready(async () => {
     if (!validator.isLength($('#signup-password').val(), { min: 1, max: 40 })) {
       Swal.fire({
         icon: 'error',
-        text: 'Email長度不可超過40個字元',
+        text: '密碼長度不可超過40個字元',
         showConfirmButton: false,
       });
       return;
