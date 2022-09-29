@@ -55,5 +55,22 @@ a:hover {
     padding-bottom: 8%;
 }
 
+/* footer {
+    position: relative;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+} */
+
+body{ height:100vh; margin:0; }
+/* Trick */
+body{ 
+  display:flex; 
+  flex-direction:column; 
+}
+
+footer{
+  margin-top:auto; 
+}
 
 

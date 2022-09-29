@@ -48,6 +48,7 @@ $(document).ready(async () => {
   }
 
   if (!$('#search-result').find('div').length) {
+    console.log('hey~');
     await getArticles(1);
 
     const pageNumber = +localStorage.getItem('pageNumber');
@@ -58,13 +59,17 @@ $(document).ready(async () => {
     $('#page-1').addClass('pagination-active');
   }
 
-  if (
-    +$('.pagination-active').attr('id').split('-')[1] ===
-    +localStorage.getItem('pageNumber')
-  ) {
-    console.log('yo');
-    $('.pagination-newer').attr('disabled', true);
-  }
+  // if (
+  //   +$('.pagination-active').attr('id').split('-')[1] ===
+  //   +localStorage.getItem('pageNumber')
+  // ) {
+  //   console.log('yo');
+  //   $('.pagination-newer').attr('disabled', true);
+  // }
+  // console.log($('#search-result').height());
+  // if ($('#search-result').height() < 500) {
+  //   $('footer').css({ position: 'sticky', bottom: '0', width: '100% auto' });
+  // }
 });
 
 $(document).on('click', '.pagination-inner a', async function () {
@@ -72,12 +77,12 @@ $(document).on('click', '.pagination-inner a', async function () {
   $(this).addClass('pagination-active');
   const page = $(this).attr('id').split('-')[1];
   await getArticles(page);
-  $('.article-title a').click(function () {
-    console.log('hey');
-    console.log($(this).attr('id'));
-    localStorage.setItem('articleId', $(this).attr('id'));
-    localStorage.setItem('current-page', $('.pagination-active').attr('id'));
-  });
+  // $('.article-title a').click(function () {
+  //   console.log('hey');
+  //   console.log($(this).attr('id'));
+  //   localStorage.setItem('articleId', $(this).attr('id'));
+  //   localStorage.setItem('current-page', $('.pagination-active').attr('id'));
+  // });
 });
 
 $(document).on('click', '.pagination-older', async () => {
@@ -132,7 +137,7 @@ $(document).on('click', '.pagination-newer', async () => {
   }
 });
 
-$(document).on('click', '.article-title a', async function () {
+$(document).on('click', '.article-title a', function () {
   localStorage.setItem('articleId', $(this).attr('id'));
   localStorage.setItem('current-page', $('.pagination-active').attr('id'));
   console.log($('.pagination-active').attr('id'));

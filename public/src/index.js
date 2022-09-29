@@ -1,11 +1,8 @@
 /* eslint-disable no-undef */
 $(document).ready(async () => {
-  if (
-    localStorage.getItem('current-page') &&
-    window.location.href.split('/').pop() !== 'search'
-  ) {
+  if (localStorage.getItem('current-page') && localStorage.getItem('search')) {
     console.log('test');
-    // console.log(window.location.href);
+    console.log(window.location.href);
     localStorage.removeItem('current-page');
   }
 
@@ -45,4 +42,7 @@ $(document).ready(async () => {
     localStorage.setItem('search', $('#article-search').val());
     window.location.href = '/search';
   });
+
+  // if ($('body').height() <) {
+  // }
 });

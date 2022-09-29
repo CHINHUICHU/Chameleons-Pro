@@ -15,6 +15,11 @@ mark {
     margin-bottom: 4%;
 }
 
+#upload-result-area {
+    display: flex;
+    justify-content: center;
+}
+
 /* .upload-result-area {
     background-color: #e5e5e5 !important;
 } */

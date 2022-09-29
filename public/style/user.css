@@ -51,3 +51,7 @@ table {
 #record-area {
     padding-left: 7%;
 }
+
+.btn {
+    width: 60% !important;
+}

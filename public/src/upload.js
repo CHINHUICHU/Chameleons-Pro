@@ -3,6 +3,57 @@
 /* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
   $('#upload-submit').click(async () => {
+    if (
+      validator.isEmpty($('#upload-article-title').val()) ||
+      validator.isEmpty($('#upload-article-author').val()) ||
+      validator.isEmpty($('#upload-article-content').val())
+    ) {
+      Swal.fire({
+        icon: 'error',
+        text: '文章標題、作者與內文為必填資訊',
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    if (
+      !validator.isLength($('#upload-article-title').val(), { min: 1, max: 50 })
+    ) {
+      Swal.fire({
+        icon: 'error',
+        text: '文章標題字數上限為50字',
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    if (
+      !validator.isLength($('#upload-article-author').val(), {
+        min: 1,
+        max: 20,
+      })
+    ) {
+      Swal.fire({
+        icon: 'error',
+        text: '作者欄位字數上限為20字',
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    if (
+      !validator.isLength($('#upload-article-content').val(), {
+        min: 1,
+        max: 100000,
+      })
+    ) {
+      Swal.fire({
+        icon: 'error',
+        text: '文章字數上限為十萬字',
+        showConfirmButton: false,
+      });
+      return;
+    }
     $('#upload-article-area').hide();
     const token = localStorage.getItem('jwt');
     const header = {
@@ -10,9 +61,18 @@ $(document).ready(async () => {
       Authorization: token,
     };
     const uploadArticle = {
-      title: $('#upload-article-title').val(),
-      author: $('#upload-article-author').val(),
-      content: $('#upload-article-content').val(),
+      title: $('#upload-article-title')
+        .val()
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;'),
+      author: $('#upload-article-author')
+        .val()
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;'),
+      content: $('#upload-article-content')
+        .val()
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;'),
     };
     try {
       const response = await axios.post(

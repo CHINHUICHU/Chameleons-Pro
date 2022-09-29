@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/validator@latest/validator.min.js"></script>
     <link rel="icon" type="image/x-icon" href="./images/32220011_800x864.jpeg"/>
     <!-- Bootstrap core CSS -->
     <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -80,17 +81,17 @@
                         <div class="input-group-prepend">
                         <span class="input-group-text">標題</span>
                         </div>
-                        <input type="text" class="form-control" id="upload-article-title" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+                        <input type="text" class="form-control" id="upload-article-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend shadow-sm">
                         <span class="input-group-text">作者</span>
                         </div>
-                        <input type="text" class="form-control" id="upload-article-author" aria-label="Default" aria-describedby="inputGroup-sizing-default">
+                        <input type="text" class="form-control" id="upload-article-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                     </div>
         
                     <div class="form-group">
-                        <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="upload-article-content" rows="30" placeholder="內文"></textarea>
+                        <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="upload-article-content" rows="30" placeholder="內文" required></textarea>
                     </div>
                 </div>
         
@@ -106,13 +107,13 @@
       </div>
 
       <div class="container">
-        <div class="row">
-          <div class="col-">
+        <div class="row" id="upload-result-area">
+          <div class="col">
           </div>
           <div class="col-10">
             <div id="upload-result"></div>
           </div>
-          <div class="col-">
+          <div class="col">
           </div>
         </div>
       </div>

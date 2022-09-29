@@ -39,10 +39,70 @@ $(document).ready(async () => {
 
     const articles = [];
     for (let i = 1; i <= comparedArticles; i += 1) {
+      if (
+        validator.isEmpty($(`#article-${i}-title`).val()) ||
+        validator.isEmpty($(`#article-${i}-author`).val()) ||
+        validator.isEmpty($(`#article-${i}-content`).val())
+      ) {
+        Swal.fire({
+          icon: 'error',
+          text: '文章標題、作者與內文為必填資訊',
+          showConfirmButton: false,
+        });
+        return;
+      }
+      if (
+        !validator.isLength($(`#article-${i}-title`).val(), { min: 1, max: 50 })
+      ) {
+        Swal.fire({
+          icon: 'error',
+          text: '文章標題字數上限為50字',
+          showConfirmButton: false,
+        });
+        return;
+      }
+
+      if (
+        !validator.isLength($(`#article-${i}-author`).val(), {
+          min: 1,
+          max: 20,
+        })
+      ) {
+        Swal.fire({
+          icon: 'error',
+          text: '作者欄位字數上限為20字',
+          showConfirmButton: false,
+        });
+        return;
+      }
+
+      if (
+        !validator.isLength($(`#article-${i}-content`).val(), {
+          min: 1,
+          max: 100000,
+        })
+      ) {
+        Swal.fire({
+          icon: 'error',
+          text: '文章字數上限為十萬字',
+          showConfirmButton: false,
+        });
+        return;
+      }
+
       articles.push({
-        title: $(`#article-${i}-title`).val(),
-        author: $(`#article-${i}-author`).val(),
-        content: $(`#article-${i}-content`).val(),
+        title: $(`#article-${i}-title`)
+          .val()
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;'),
+        author: $(`#article-${i}-author`)
+          .val()
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;'),
+        content: $(`#article-${i}-content`)
+          .val()
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;'),
       });
     }
 
@@ -70,7 +130,7 @@ $(document).ready(async () => {
           <span class="input-group-text" >來源</span>
         </div>
         <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="source-title-${i}" readonly>
-      </div>`)
+        </div>`)
         .css({ 'padding-left': '5%', 'padding-right': '5%' })
         .appendTo('#multiple-result');
 
@@ -80,8 +140,10 @@ $(document).ready(async () => {
       <div class="input-group-prepend shadow-sm">
         <span class="input-group-text" >比對</span>
       </div>
-      <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="target-title-${i}" readonly>
-    </div>`)
+      <input type="text" class="form-control" aria-label="Default" 
+      aria-describedby="inputGroup-sizing-default" 
+      id="target-title-${i}" readonly>
+      </div>`)
         .css({ 'padding-left': '5%', 'padding-right': '5%' })
         .appendTo('#multiple-result');
 
@@ -91,9 +153,9 @@ $(document).ready(async () => {
     <div class="input-group-prepend shadow-sm">
       <span class="input-group-text" >相似度</span>
     </div>
-    <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="similartiy-${+edges[
-      i
-    ].source}-and-${+edges[i].target}" readonly>
+    <input type="text" class="form-control" aria-label="Default" 
+    aria-describedby="inputGroup-sizing-default" 
+    id="similartiy-${+edges[i].source}-and-${+edges[i].target}" readonly>
   </div>`)
         .css({ 'padding-left': '5%', 'padding-right': '5%' })
         .appendTo('#multiple-result');

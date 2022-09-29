@@ -22,14 +22,7 @@ $(document).ready(async () => {
       });
       return;
     }
-    if (!validator.isAlphanumeric($('#signup-email').val())) {
-      Swal.fire({
-        icon: 'error',
-        text: 'Email只能包含大小寫英文字母與數字',
-        showConfirmButton: false,
-      });
-      return;
-    }
+
     if (!validator.isLength($('#signup-name').val(), { min: 1, max: 20 })) {
       Swal.fire({
         icon: 'error',
@@ -85,6 +78,7 @@ $(document).ready(async () => {
         text: '歡迎使用CHAMELEONS PRO',
         showConfirmButton: false,
       });
+      window.location.href = localStorage.getItem('previous-page');
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -107,6 +101,7 @@ $(document).ready(async () => {
       });
       return;
     }
+
     if (!validator.isEmail($('#signin-email').val())) {
       Swal.fire({
         icon: 'error',
@@ -115,14 +110,7 @@ $(document).ready(async () => {
       });
       return;
     }
-    if (!validator.isAlphanumeric($('#signin-email').val())) {
-      Swal.fire({
-        icon: 'error',
-        text: 'Email只能包含大小寫英文字母與數字',
-        showConfirmButton: false,
-      });
-      return;
-    }
+
     if (!validator.isLength($('#signin-email').val(), { min: 1, max: 40 })) {
       Swal.fire({
         icon: 'error',
@@ -131,6 +119,7 @@ $(document).ready(async () => {
       });
       return;
     }
+
     if (!validator.isLength($('#signin-password').val(), { min: 1, max: 40 })) {
       Swal.fire({
         icon: 'error',
@@ -139,6 +128,7 @@ $(document).ready(async () => {
       });
       return;
     }
+
     if (!validator.isAlphanumeric($('#signin-password').val())) {
       Swal.fire({
         icon: 'error',
@@ -147,6 +137,7 @@ $(document).ready(async () => {
       });
       return;
     }
+
     try {
       const response = await axios.post('/api/1.0/user/signin', {
         data: {
@@ -166,6 +157,7 @@ $(document).ready(async () => {
         text: '歡迎登入',
         showConfirmButton: false,
       });
+      window.location.href = localStorage.getItem('previous-page');
     } catch (error) {
       Swal.fire({
         icon: 'error',
