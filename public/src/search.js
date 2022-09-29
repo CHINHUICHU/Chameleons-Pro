@@ -14,6 +14,14 @@ async function getArticles(page) {
 
   $('#search-result-number').html(`<h5>共有${total}個搜尋結果</h5>`);
 
+  if (total === 0) {
+    $('.pagination-container').hide();
+    $('<div id="retype">請重新輸入搜尋關鍵字</div>')
+      .css({})
+      .appendTo('#search-result');
+    $('<img src="./images/chameleons.gif">').appendTo('#search-result');
+  }
+
   article.forEach((element) => {
     $('<div class="shadow-sm p-3 mb-5 rounded search-area"></div>').appendTo(
       '#search-result'
@@ -58,18 +66,6 @@ $(document).ready(async () => {
 
     $('#page-1').addClass('pagination-active');
   }
-
-  // if (
-  //   +$('.pagination-active').attr('id').split('-')[1] ===
-  //   +localStorage.getItem('pageNumber')
-  // ) {
-  //   console.log('yo');
-  //   $('.pagination-newer').attr('disabled', true);
-  // }
-  // console.log($('#search-result').height());
-  // if ($('#search-result').height() < 500) {
-  //   $('footer').css({ position: 'sticky', bottom: '0', width: '100% auto' });
-  // }
 });
 
 $(document).on('click', '.pagination-inner a', async function () {
@@ -77,12 +73,6 @@ $(document).on('click', '.pagination-inner a', async function () {
   $(this).addClass('pagination-active');
   const page = $(this).attr('id').split('-')[1];
   await getArticles(page);
-  // $('.article-title a').click(function () {
-  //   console.log('hey');
-  //   console.log($(this).attr('id'));
-  //   localStorage.setItem('articleId', $(this).attr('id'));
-  //   localStorage.setItem('current-page', $('.pagination-active').attr('id'));
-  // });
 });
 
 $(document).on('click', '.pagination-older', async () => {
@@ -101,17 +91,6 @@ $(document).on('click', '.pagination-older', async () => {
       }
     }
     $(`#page-${previousActive - 1}`).addClass('pagination-active');
-    // $('.pagination-inner a').click(async function () {
-    //   $(this).siblings().removeClass('pagination-active');
-    //   $(this).addClass('pagination-active');
-    //   const page = $(this).attr('id').split('-')[1];
-    //   await getArticles(page);
-    // });
-    // $('.article-title a').click(function () {
-    //   console.log($(this).attr('id'));
-    //   localStorage.setItem('articleId', $(this).attr('id'));
-    //   localStorage.setItem('current-page', $('.pagination-active').attr('id'));
-    // });
   }
 });
 
