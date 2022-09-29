@@ -25,13 +25,6 @@ const signUp = async (req, res) => {
     });
   }
 
-  if (!validator.isAlphanumeric(user.email)) {
-    return res.status(400).send({
-      status_code: 400,
-      message: 'Email只能包含大小寫英文字母與數字',
-    });
-  }
-
   if (!validator.isLength(user.name, { min: 1, max: 20 })) {
     return res.status(400).send({
       status_code: 400,
@@ -83,13 +76,6 @@ const signIn = async (req, res) => {
     return res.status(400).send({
       status_code: 400,
       message: 'Email格式錯誤',
-    });
-  }
-
-  if (!validator.isAlphanumeric(user.email)) {
-    return res.status(400).send({
-      status_code: 400,
-      message: 'Email只能包含大小寫英文字母與數字',
     });
   }
 

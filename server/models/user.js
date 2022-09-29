@@ -22,7 +22,7 @@ const signUp = async (user) => {
     if (checkEmail.hits.total.value) {
       return {
         status_code: 400,
-        message: 'Error: The email has been signed up',
+        message: 'Email已經被註冊過',
       };
     }
 
@@ -80,7 +80,7 @@ const signIn = async (user) => {
     if (!result.hits.total.value) {
       return {
         status_code: 400,
-        message: 'Error: The email has not been signed up',
+        message: 'Email還沒有被註冊過',
       };
     }
     if (
@@ -107,7 +107,7 @@ const signIn = async (user) => {
     }
     return {
       status_code: 400,
-      message: 'Error: Wrong password',
+      message: '密碼錯誤',
     };
   } catch (err) {
     console.log(err);

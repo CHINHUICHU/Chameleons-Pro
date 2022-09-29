@@ -221,7 +221,6 @@ const multipleComparison = async (req, res) => {
 
 const getArticles = async (req, res) => {
   const esSearchQuery = {
-    must: [],
     must_not: [],
     should: [],
   };
@@ -232,11 +231,7 @@ const getArticles = async (req, res) => {
 
   if (searchConditions.length > 0) {
     searchConditions.forEach((element) => {
-      if (element[0] === '+') {
-        esSearchQuery.must.push({
-          multi_match: { query: element.substring(1) },
-        });
-      } else if (element[0] === '-') {
+      if (element[0] === '-') {
         esSearchQuery.must_not.push({
           multi_match: { query: element.substring(1) },
         });
