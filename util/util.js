@@ -83,24 +83,24 @@ main();
 function filterStopWords(splitedParagraphArray) {
   const result = [];
   const newArray = _.cloneDeep(splitedParagraphArray);
-  for (const sentense of newArray) {
-    for (let i = 0; i < sentense.length; i += 1) {
-      if (stopWordMap.get(sentense[i])) {
-        sentense[i] = -1;
+  for (const sentence of newArray) {
+    for (let i = 0; i < sentence.length; i += 1) {
+      if (stopWordMap.get(sentence[i])) {
+        sentence[i] = -1;
       }
     }
-    const sentenseResult = sentense.filter((ele) => ele !== -1);
-    result.push(sentenseResult);
+    const sentenceResult = sentence.filter((ele) => ele !== -1);
+    result.push(sentenceResult);
   }
   return result;
 }
 
 function findSynonym(paragraphArray) {
   const newParagraphArray = _.cloneDeep(paragraphArray);
-  for (const sentense of newParagraphArray) {
-    for (let i = 0; i < sentense.length; i += 1) {
-      if (synonymMap.get(sentense[i])) {
-        sentense[i] = synonymMap.get(sentense[i]);
+  for (const sentence of newParagraphArray) {
+    for (let i = 0; i < sentence.length; i += 1) {
+      if (synonymMap.get(sentence[i])) {
+        sentence[i] = synonymMap.get(sentence[i]);
       }
     }
   }
