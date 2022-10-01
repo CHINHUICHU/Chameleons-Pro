@@ -119,16 +119,26 @@ function findMatchedKeyword(
     for (const target of articleBtaggedArray) {
       const compareSet = [];
       let matched = 0;
-      source.forEach((element) => compareSet.push(element));
-      target.forEach((element) => {
-        if (compareSet.includes(element)) {
-          matched += 1;
-        }
-      });
-      if (matched / source.length >= 0.5) {
+      // choose longer sentence to add to the set first
+      if (source.length > target.length) {
+        source.forEach((element) => compareSet.push(element));
+        target.forEach((element) => {
+          if (compareSet.includes(element)) {
+            matched += 1;
+          }
+        });
+      } else {
+        target.forEach((element) => compareSet.push(element));
+        source.forEach((element) => {
+          if (compareSet.includes(element)) {
+            matched += 1;
+          }
+        });
+      }
+      if (matched / Math.max(source.length, target.length) >= 0.5) {
         result.push({
           sourceSentence: articleA[articleAtaggedArray.indexOf(source)],
-          targetSentense: articleB[articleBtaggedArray.indexOf(target)],
+          targetSentence: articleB[articleBtaggedArray.indexOf(target)],
         });
       }
     }
