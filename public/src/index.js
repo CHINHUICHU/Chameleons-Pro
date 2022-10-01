@@ -1,5 +1,8 @@
 /* eslint-disable no-undef */
 $(document).ready(async () => {
+  // $('#script').load('../layout/script.html');
+  $('#page-header').load('../layout/header.html');
+  $('#page-footer').load('../layout/footer.html');
   if (localStorage.getItem('current-page') && localStorage.getItem('search')) {
     console.log('test');
     console.log(window.location.href);
