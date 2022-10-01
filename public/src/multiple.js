@@ -33,6 +33,8 @@ $(document).ready(async () => {
     }
   });
 
+  let response;
+
   $('#multiple-submit').click(async () => {
     $('#multiple').hide();
     $('#multiple-finish').hide();
@@ -106,16 +108,9 @@ $(document).ready(async () => {
       });
     }
 
-    const response = await axios.post('/api/1.0/articles/multiple', {
+    response = await axios.post('/api/1.0/articles/multiple', {
       data: articles,
     });
-
-    console.log(response);
-
-    localStorage.setItem(
-      'sentence-index',
-      JSON.stringify(response.data.data.sentenseIndex)
-    );
 
     const edges = response.data.data.similarity.links;
 
@@ -216,7 +211,7 @@ $(document).ready(async () => {
       }
       $(`#article-${article1}-result`).html(article1withParagraph);
 
-      $('<div></div>')
+      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
         .attr('id', `article-${article2}-result`)
         .addClass('article-result border')
         .css({
@@ -228,35 +223,41 @@ $(document).ready(async () => {
         .appendTo('#article-result');
       $(`#article-${article2}-result`).html(article2withParagraph);
 
-      const article1split = $(`#article-${article1}-content`)
-        .val()
-        .split(/(?:，|。|\n|！|？|：|；)+/);
-      const article1splitLength = article1split.length;
+      // const article1split = $(`#article-${article1}-content`)
+      //   .val()
+      //   .split(/(?:，|。|\n|！|？|：|；)+/);
+      // const article1splitLength = article1split.length;
 
-      console.log(article1split);
+      // console.log(article1split);
 
-      const article2split = $(`#article-${article2}-content`)
-        .val()
-        .split(/(?:，|。|\n|！|？|：|；)+/);
-      const article2splitLength = article2split.length;
+      // const article2split = $(`#article-${article2}-content`)
+      //   .val()
+      //   .split(/(?:，|。|\n|！|？|：|；)+/);
+      // const article2splitLength = article2split.length;
 
-      console.log(article2split);
+      // console.log(article2split);
 
-      const similarSentenceIndex = JSON.parse(
-        localStorage.getItem('sentence-index')
-      )[`${$(this).attr('id')}`];
-
-      for (let i = 0; i < article1splitLength; i += 1) {
-        if (similarSentenceIndex[0][i]) {
-          $(`#article-${article1}-result`).mark(article1split[i]);
-        }
+      const { matchResult } = response.data.data;
+      for (const matchSentence of matchResult[$(this).attr('id')]) {
+        $(`#article-${article1}-result`).mark(matchSentence.sourceSentence);
+        $(`#article-${article2}-result`).mark(matchSentence.targetSentence);
       }
 
-      for (let i = 0; i < article2splitLength; i += 1) {
-        if (similarSentenceIndex[1][i]) {
-          $(`#article-${article2}-result`).mark(article2split[i]);
-        }
-      }
+      // const similarSentenceIndex = JSON.parse(
+      //   localStorage.getItem('sentence-index')
+      // )[`${$(this).attr('id')}`];
+
+      // for (let i = 0; i < article1splitLength; i += 1) {
+      //   if (similarSentenceIndex[0][i]) {
+      //     $(`#article-${article1}-result`).mark(article1split[i]);
+      //   }
+      // }
+
+      // for (let i = 0; i < article2splitLength; i += 1) {
+      //   if (similarSentenceIndex[1][i]) {
+      //     $(`#article-${article2}-result`).mark(article2split[i]);
+      //   }
+      // }
     });
   });
 
