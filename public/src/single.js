@@ -105,9 +105,9 @@ $(document).ready(async () => {
       },
     });
 
-    console.log('response', response);
+    const { matchResult, similarity } = response.data.data;
 
-    const { sourceArticle, targetArticle, similarity } = response.data.data;
+    console.log(matchResult);
 
     $('#top').showFlex();
     $('#nav').hide();
@@ -122,9 +122,6 @@ $(document).ready(async () => {
       style: `width: ${similarity}`,
     });
 
-    console.log($('#article-A-content').val());
-    console.log($('#article-B-content').val());
-
     const sourceArticleParagraphs = $('#article-A-content').val().split('\n');
     const targetArticleParagraphs = $('#article-B-content').val().split('\n');
 
@@ -137,19 +134,6 @@ $(document).ready(async () => {
       targetArticleWithParagraph += `<p>${paragraph}</p>`;
     }
 
-    const sourceArticlesSplit = $('#article-A-content')
-      .val()
-      .split(/(?:，|。|\n|！|？|：|；)+/);
-    const sourceArticlesSplitLength = sourceArticlesSplit.length;
-
-    const targetArticleSplit = $('#article-B-content')
-      .val()
-      .split(/(?:，|。|\n|！|？|：|；)+/);
-    const targetArticleSplitLength = targetArticleSplit.length;
-
-    console.log(sourceArticlesSplit);
-    console.log(targetArticleSplit);
-
     $('#result-A-title').val($('#article-A-title').val());
     $('#result-A-author').val($('#article-A-author').val());
     $('#result-A-content').html(sourceArticleWithParagraph);
@@ -158,16 +142,9 @@ $(document).ready(async () => {
     $('#result-B-author').val($('#article-B-author').val());
     $('#result-B-content').html(targetArticleWithParagraph);
 
-    for (let i = 0; i < sourceArticlesSplitLength; i += 1) {
-      if (sourceArticle[i]) {
-        $('#result-A-content').mark(sourceArticlesSplit[i]);
-      }
-    }
-
-    for (let i = 0; i < targetArticleSplitLength; i += 1) {
-      if (targetArticle[i]) {
-        $('#result-B-content').mark(targetArticleSplit[i]);
-      }
+    for (const matchSentence of matchResult) {
+      $('#result-A-content').mark(matchSentence.sourceSentence);
+      $('#result-B-content').mark(matchSentence.targetSentence);
     }
   });
 });
