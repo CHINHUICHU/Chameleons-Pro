@@ -80,133 +80,61 @@ async function main() {
 
 main();
 
-async function filterStopWords(splitedParagraphArray) {
+function filterStopWords(splitedParagraphArray) {
+  const result = [];
   const newArray = _.cloneDeep(splitedParagraphArray);
-  const paragraphLength = splitedParagraphArray.length;
-  for (let i = 0; i < paragraphLength; i += 1) {
-    if (newArray[i].length <= 1 || stopWordMap.get(newArray[i])) {
-      newArray[i] = -1;
+  for (const sentense of newArray) {
+    for (let i = 0; i < sentense.length; i += 1) {
+      if (stopWordMap.get(sentense[i])) {
+        sentense[i] = -1;
+      }
     }
+    const sentenseResult = sentense.filter((ele) => ele !== -1);
+    result.push(sentenseResult);
   }
-
-  const result = newArray.filter((ele) => ele !== -1);
-
   return result;
 }
 
-async function findSynonym(paragraphArray) {
+function findSynonym(paragraphArray) {
   const newParagraphArray = _.cloneDeep(paragraphArray);
-  const paragraphLength = newParagraphArray.length;
-  for (let i = 0; i < paragraphLength; i += 1) {
-    if (synonymMap.get(newParagraphArray[i])) {
-      newParagraphArray[i] = synonymMap.get(newParagraphArray[i]);
+  for (const sentense of newParagraphArray) {
+    for (let i = 0; i < sentense.length; i += 1) {
+      if (synonymMap.get(sentense[i])) {
+        sentense[i] = synonymMap.get(sentense[i]);
+      }
     }
   }
   return newParagraphArray;
 }
 
 function findMatchedKeyword(
+  articleA,
+  articleB,
   articleAtaggedArray,
-  articleBtaggedArray,
-  articleAarray,
-  articleBarray
+  articleBtaggedArray
 ) {
-  const matchedArticleA = [];
-  const matchedArticleB = [];
-  const articleAlength = articleAtaggedArray.length;
-  const articleBlength = articleBtaggedArray.length;
-  const articleAarrayForSearch = [...articleAarray];
-  const articleBarrayForSearch = [...articleBarray];
+  const result = [];
 
-  for (let i = 0; i < articleAlength; i += 7) {
-    for (let j = 0; j < articleBlength; j += 7) {
-      const articleAsubarray = articleAtaggedArray.slice(
-        i,
-        Math.min(i + 7, articleAlength)
-      );
-      const articleBsubarray = articleBtaggedArray.slice(
-        j,
-        Math.min(j + 7, articleBlength)
-      );
-
-      const compareSubarray = new Map();
-      const articleAmchtedKeyword = [];
-      const articleBmchtedKeyword = [];
-
-      articleAsubarray.forEach((element) => {
-        compareSubarray.set(element, articleAsubarray.indexOf(element) + i);
-      });
-
-      articleBsubarray.forEach((element) => {
-        if (compareSubarray.get(element)) {
-          articleAmchtedKeyword.push({
-            keyword: articleAarray[compareSubarray.get(element)],
-            index: compareSubarray.get(element),
-          });
-          articleBmchtedKeyword.push({
-            keyword: articleBarray[articleBsubarray.indexOf(element) + j],
-            index: articleBsubarray.indexOf(element) + j,
-          });
-          compareSubarray.delete(element);
+  for (const source of articleAtaggedArray) {
+    for (const target of articleBtaggedArray) {
+      const compareSet = [];
+      let matched = 0;
+      source.forEach((element) => compareSet.push(element));
+      target.forEach((element) => {
+        if (compareSet.includes(element)) {
+          matched += 1;
         }
       });
-
-      if (articleAmchtedKeyword.length >= 3) {
-        matchedArticleA.push(articleAmchtedKeyword);
-        matchedArticleB.push(articleBmchtedKeyword);
+      if (matched / source.length >= 0.5) {
+        result.push({
+          sourceSentence: articleA[articleAtaggedArray.indexOf(source)],
+          targetSentense: articleB[articleBtaggedArray.indexOf(target)],
+        });
       }
     }
   }
 
-  console.log(articleAarrayForSearch);
-  console.log('----------------------');
-  console.log(articleBarrayForSearch);
-
-  return [matchedArticleA, matchedArticleB];
-}
-
-function findSimilarSentenseIndex(article, matchedKeywords) {
-  let articleForSearching = article;
-
-  matchedKeywords.forEach((element) => {
-    element.forEach((matched) => {
-      const matchedLength = matched.keyword.length;
-
-      if (matchedLength === 2) {
-        articleForSearching = articleForSearching.replace(
-          matched.keyword,
-          'ＯＯ'
-        );
-      }
-
-      if (matchedLength === 3) {
-        articleForSearching = articleForSearching.replace(
-          matched.keyword,
-          'ＯＯＯ'
-        );
-      }
-      if (matchedLength === 4) {
-        articleForSearching = articleForSearching.replace(
-          matched.keyword,
-          'ＯＯＯＯ'
-        );
-      }
-    });
-  });
-
-  const splitArticle = articleForSearching.split(/(?:，|。|\n|！|？|：|；)+/);
-
-  console.log(splitArticle.length, splitArticle);
-
-  const markingArray = [];
-
-  splitArticle.forEach((sentense) => {
-    if (sentense.includes('ＯＯ')) {
-      markingArray.push(1);
-    } else markingArray.push(0);
-  });
-
-  return markingArray;
+  return result;
 }
 
 function calculateSimilarity(articleA, articleB) {
@@ -233,11 +161,8 @@ function calculateSimilarity(articleA, articleB) {
 module.exports = {
   authentication,
   wrapAsync,
-  stopWordMap,
-  synonymMap,
   filterStopWords,
   findSynonym,
   findMatchedKeyword,
-  findSimilarSentenseIndex,
   calculateSimilarity,
 };
