@@ -1,7 +1,5 @@
 /* eslint-disable no-underscore-dangle */
 require('dotenv').config();
-// const jieba = require('@node-rs/jieba');
-// const { Minhash, LshIndex } = require('minhash');
 
 const createJieba = require('js-jieba');
 const {
@@ -14,7 +12,6 @@ const {
 
 const jieba = createJieba(JiebaDict, HMMModel, UserDict, IDF, StopWords);
 
-// jieba.load({ userDict: './dict.utf8' });
 const Graph = require('graph-data-structure');
 
 const {
@@ -31,92 +28,79 @@ const {
   filterStopWords,
   findSynonym,
   findMatchedKeyword,
-  findSimilarSentenseIndex,
   calculateSimilarity,
 } = require('../../util/util');
 
 const comparison = async (req, res, next) => {
   const { sourceArticle, targetArticle } = req.body.data;
 
-  const sourceArticleSplit = jieba.cut(sourceArticle.content);
-  const targetArticleSplit = jieba.cut(targetArticle.content);
+  const sourceSplit = sourceArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
+  const targetSplit = targetArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
 
-  console.dir(sourceArticleSplit);
-  // console.log('----------------------');
+  const sourceToken = [];
+  const targetToken = [];
 
-  const tagNumber = 20;
+  for (const sentense of sourceSplit) {
+    sourceToken.push(jieba.cut(sentense));
+  }
 
-  const sourceArticleTag = jieba.extract(sourceArticle.content, tagNumber);
-  const targetArticleTag = jieba.extract(targetArticle.content, tagNumber);
+  for (const sentense of targetSplit) {
+    targetToken.push(jieba.cut(sentense));
+  }
 
-  const sourceArticleTagKeywords = sourceArticleTag.map(
-    (element) => element.keyword
-  );
-  const targetArticleTagKeywords = targetArticleTag.map(
-    (element) => element.keyword
-  );
+  // const tagNumber = 20;
 
-  // console.log(sourceArticletagKeywords);
-  // console.log('-----------');
-  // console.log(targetArticletagKeywords);
+  // const sourceArticleTag = jieba.extract(sourceArticle.content, tagNumber);
+  // const targetArticleTag = jieba.extract(targetArticle.content, tagNumber);
+
+  // const sourceArticleTagKeywords = sourceArticleTag.map(
+  //   (element) => element.keyword
+  // );
+  // const targetArticleTagKeywords = targetArticleTag.map(
+  //   (element) => element.keyword
+  // );
 
   try {
-    const sourceArticleFiltered = await filterStopWords(sourceArticleSplit);
-    const targetArticleFiltered = await filterStopWords(targetArticleSplit);
-    // console.log(sourceArticleFiltered);
-    // console.log('--------------------');
-    // console.log(targetArticleFiltered);
-    // console.log('-------------------');
+    const sourceArticleFiltered = await filterStopWords(sourceToken);
+    const targetArticleFiltered = await filterStopWords(targetToken);
+    console.log(sourceArticleFiltered);
+    console.log('--------------------');
+    console.log(targetArticleFiltered);
+    console.log('-------------------');
     const sourceArticleSynonymized = await findSynonym(sourceArticleFiltered);
     const targetArticleSynonymized = await findSynonym(targetArticleFiltered);
-    const responseFromES = await insertTwoArticles(
-      sourceArticle,
-      targetArticle,
-      sourceArticleTagKeywords,
-      sourceArticleFiltered,
-      sourceArticleSynonymized,
-      targetArticleTagKeywords,
-      targetArticleFiltered,
-      targetArticleSynonymized
-    );
+    // const responseFromES = await insertTwoArticles(
+    //   sourceArticle,
+    //   targetArticle,
+    //   sourceArticleTagKeywords,
+    //   sourceArticleFiltered,
+    //   sourceArticleSynonymized,
+    //   targetArticleTagKeywords,
+    //   targetArticleFiltered,
+    //   targetArticleSynonymized
+    // );
 
-    console.log('response from elasticSearch!!');
-    console.log(responseFromES);
+    // console.log('response from elasticSearch!!');
+    // console.log(responseFromES);
     // responseFromES.items.forEach((ele) => console.log(ele));
     // console.log(sourceArticlesynonymized);
     // console.log('--------------------');
     // console.log(targetArticlesynonymized);
     // console.log('-------------------');
     const articleSimilarity = calculateSimilarity(
+      sourceArticleSynonymized.flat(),
+      targetArticleSynonymized.flat()
+    );
+    const result = findMatchedKeyword(
+      sourceSplit,
+      targetSplit,
       sourceArticleSynonymized,
       targetArticleSynonymized
     );
-    const [matchedSourceArticle, matchedTargetArticle] = findMatchedKeyword(
-      sourceArticleSynonymized,
-      targetArticleSynonymized,
-      sourceArticleFiltered,
-      targetArticleFiltered
-    );
-    console.log(matchedSourceArticle);
-    console.log('-------------------');
-    console.log(matchedTargetArticle);
-    console.log('-------------------');
-    const matchedSourceArticleIndices = findSimilarSentenseIndex(
-      sourceArticle.content,
-      matchedSourceArticle
-    );
-    const matchedTargetArticleIndices = findSimilarSentenseIndex(
-      targetArticle.content,
-      matchedTargetArticle
-    );
-    // console.log('matched index');
-    // console.log(matchedSourceArticleIndices);
-    // console.log('--------------------');
-    // console.log(matchedTargetArticleIndices);
+
     const response = {
       similarity: articleSimilarity,
-      sourceArticle: matchedSourceArticleIndices,
-      targetArticle: matchedTargetArticleIndices,
+      matchResult: result,
     };
     res.send({ data: response });
   } catch (err) {
