@@ -24,6 +24,9 @@ $(document).ready(async () => {
       $('#user-signin-signup').hide();
       $('#logout-link').show().css({ display: 'block' });
       $('#member-link').show().css({ display: 'block' });
+      $('#single-compare-link').show().css({ display: 'block' });
+      $('#multiple-compare-link').show().css({ display: 'block' });
+      $('#upload-compare-link').show().css({ display: 'block' });
     } catch (error) {
       console.log(error);
     }
@@ -38,6 +41,9 @@ $(document).ready(async () => {
     window.location.href = '/';
     $('#logout-link').hide();
     $('#member-link').hide();
+    $('#single-compare-link').hide();
+    $('#multiple-compare-link').hide();
+    $('#upload-compare-link').hide();
     $('#signup-signin-link').show();
   });
 

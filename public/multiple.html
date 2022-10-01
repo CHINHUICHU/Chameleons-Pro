@@ -33,61 +33,63 @@
 
 
     <div id="page-header"></div>
-    <div class="container">
-        <div class="row multiple-area">
-          <div class="col">
-          </div>
-          <div class="col-8">
-            <div id="multiple">
-                <h2 id="multiple-introduction">請依序上傳欲比對的文章</h2>
-                <!-- <h2 class="article-num">文章1</h2> -->
-                <div class="multiple-article-area" id="multiple-compare-article-1">
-                    <div class="input-group mb-3 shadow-sm">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">標題</span>
+    <div id="main-area">
+        <div class="container">
+            <div class="row multiple-area pt-5">
+            <div class="col">
+            </div>
+            <div class="col-8">
+                <div id="multiple">
+                    <h2 id="multiple-introduction">請依序上傳欲比對的文章</h2>
+                    <!-- <h2 class="article-num">文章1</h2> -->
+                    <div class="multiple-article-area" id="multiple-compare-article-1">
+                        <div class="input-group mb-3 shadow-sm">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">標題</span>
+                            </div>
+                            <input type="text" class="form-control" id="article-1-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                         </div>
-                        <input type="text" class="form-control" id="article-1-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
-                    </div>
-                    <div class="input-group mb-3 shadow-sm">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">作者</span>
+                        <div class="input-group mb-3 shadow-sm">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">作者</span>
+                            </div>
+                            <input type="text" class="form-control" id="article-1-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                         </div>
-                        <input type="text" class="form-control" id="article-1-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="article-1-content" rows="30" placeholder="內文" required></textarea>
-                    </div>
-                </div>
-                <div class="multiple-article-area" id="multiple-compare-article-2">
-                    <div class="input-group mb-3 shadow-sm">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">標題</span>
+                        <div class="form-group">
+                            <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="article-1-content" rows="30" placeholder="內文" required></textarea>
                         </div>
-                        <input type="text" class="form-control" id="article-2-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                     </div>
-                    <div class="input-group mb-3 shadow-sm">
-                        <div class="input-group-prepend">
-                        <span class="input-group-text">作者</span>
+                    <div class="multiple-article-area" id="multiple-compare-article-2">
+                        <div class="input-group mb-3 shadow-sm">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">標題</span>
+                            </div>
+                            <input type="text" class="form-control" id="article-2-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                         </div>
-                        <input type="text" class="form-control" id="article-2-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
+                        <div class="input-group mb-3 shadow-sm">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text">作者</span>
+                            </div>
+                            <input type="text" class="form-control" id="article-2-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="article-2-content" rows="30" placeholder="內文" required></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="article-2-content" rows="30" placeholder="內文" required></textarea>
+                    <div id="multiple-finish">
+                        <button type="button" class="btn btn-secondary" color="black" id="remove-article" disabled>移除文章</button>
+                        <button type="button" class="btn btn-secondary" color="black" id="new-article">新增文章</button>
+                        <button type="button" class="btn btn-secondary" color="black" id="multiple-submit">進行比對</button>
                     </div>
-                </div>
-                <div id="multiple-finish">
-                    <button type="button" class="btn btn-secondary" color="black" id="remove-article" disabled>移除文章</button>
-                    <button type="button" class="btn btn-secondary" color="black" id="new-article">新增文章</button>
-                    <button type="button" class="btn btn-secondary" color="black" id="multiple-submit">進行比對</button>
                 </div>
             </div>
-          </div>
-          <div class="col">
-          </div>
+            <div class="col">
+            </div>
+            </div>
         </div>
-      </div>
 
-    <div id="multiple-result">
+        <div id="multiple-result">
+        </div>
     </div>
 
     <div id="page-footer"></div>

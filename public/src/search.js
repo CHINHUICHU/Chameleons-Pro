@@ -12,7 +12,11 @@ async function getArticles(page) {
 
   localStorage.setItem('pageNumber', Math.ceil(total / 10));
 
-  $('#search-result-number').html(`<h5>共有${total}個搜尋結果</h5>`);
+  $('#search-result-number').html(
+    `<h5>搜尋關鍵字：${localStorage.getItem(
+      'search'
+    )}      共有${total}個搜尋結果</h5>`
+  );
 
   if (total === 0) {
     $('.pagination-container').hide();
@@ -23,12 +27,12 @@ async function getArticles(page) {
   }
 
   article.forEach((element) => {
-    $('<div class="shadow-sm p-3 mb-5 rounded search-area"></div>').appendTo(
-      '#search-result'
-    );
     $(
-      `<h4 class="article-title"><a href="/article" id="${element.id}">${element.title}</a></h4>`
-    ).appendTo('.search-area:last');
+      `<a href="/article" id="${element.id}"><div class="shadow-sm p-3 mb-5 rounded search-area"></div></a>`
+    ).appendTo('#search-result');
+    $(`<h4 class="article-title">${element.title}</h4>`).appendTo(
+      '.search-area:last'
+    );
 
     $(`<div>${element.content}</div>`)
       .addClass('crop-text-3')
@@ -56,7 +60,6 @@ $(document).ready(async () => {
   }
 
   if (!$('#search-result').find('div').length) {
-    console.log('hey~');
     await getArticles(1);
 
     const pageNumber = +localStorage.getItem('pageNumber');

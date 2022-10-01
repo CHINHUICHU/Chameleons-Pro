@@ -40,11 +40,20 @@ a:hover {
     color: #343a40 !important;
 }
 
+#header .nav li a {
+    color: #143601 !important;
+    text-decoration: none !important;
+}
+
+#header .nav li a:hover {
+    color: #538d22 !important;
+}
+
 .text-center {
     color: #495057;
 }
 
-#member-link, #logout-link {
+#member-link, #logout-link, #single-compare-link, #multiple-compare-link,#upload-compare-link {
     display: none;
 }
 
@@ -71,6 +80,10 @@ body{
 
 footer{
   margin-top:auto; 
+}
+
+#main-area {
+    background-color: #fcfffd !important;
 }
 
 

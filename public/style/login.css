@@ -19,7 +19,8 @@ body{
 	height:100%;
 	position:absolute;
 	padding:90px 70px 50px 70px;
-	background:rgba(0, 77, 77,.9);
+	/* background:rgba(0, 77, 77,.9); */
+	background: #edede9;
 }
 .login-snip .login,
 .login-snip .sign-up-form{
@@ -52,7 +53,7 @@ body{
 }
 .login-snip .sign-in:checked + .tab,
 .login-snip .sign-up:checked + .tab{
-	color:#fff;
+    color: #6c757d;
 	border-color:#6a994e;
 }
 .login-space{
@@ -160,6 +161,7 @@ a{color:inherit;text-decoration:none}
 .card {
 	border: none !important;
 	margin-bottom: 4%;
+	/* background-color: #f6fff8 !important; */
 }
 ::placeholder{
 color: #b3b3b3;
@@ -170,5 +172,43 @@ color: #b3b3b3;
 }
 
 /* .row {
-	height: 75vh;
+    background-color: #f6fff8 !important;
 } */
+
+.login-space .group .label {
+    color: #343a40;
+    font-size: 18px;
+}
+
+.login-space .group .input, .login-space .group .button {
+    /* border: none; */
+    padding: 15px 20px;
+    border-radius: 25px;
+    background: rgba(255,255,255,.1);
+    border: #90be6d solid;
+    margin-top: 3%;
+}
+
+.login-space .group .label, .login-space .group .input, .login-space .group .button {
+    width: 100%;
+    color: #343a40;
+    display: block;
+}
+
+.login-space {
+    min-height: 345px;
+    position: relative;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+    margin-top: 5%;
+}
+
+.login-space .group .button {
+    background: #a7c957;
+    border: none;
+    margin-top: 10%;
+}
+
+.login-space .group .button:hover {
+	background: #6a994e;
+}

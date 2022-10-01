@@ -24,8 +24,6 @@ h1 {
   padding: 8px 16px 10px;
 }
 
-
-
 .pagination a:before {
   z-index: -1;
   position: absolute;
@@ -83,4 +81,17 @@ h1 {
   margin-bottom: 3%;
 }
 
+.pagination-inner a:hover {
+  background-color: #dee2e6;
+  border-radius: 50%;
+}
+
+.pagination-active {
+  background-color: #adb5bd;
+  border-radius: 50%;
+}
+
+.pagination-newer, .pagination-newer{
+  border-radius: 15%;
+}
 
