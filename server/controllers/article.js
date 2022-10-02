@@ -14,6 +14,7 @@ const jieba = createJieba(JiebaDict, HMMModel, UserDict, IDF, StopWords);
 
 const Graph = require('graph-data-structure');
 
+const { result } = require('lodash');
 const {
   insertArticles,
   insertCompareResult,
@@ -114,20 +115,19 @@ const comparison = async (req, res, next) => {
       targetArticleSynonymized
     );
 
-    const compareResult = [
-      {
-        index: {
-          _index: process.env.DB_COMPARE_INDEX,
+    const compareResult = {
+      user_id: req.user.user_id,
+      compare_mode: 1,
+      match_result: [
+        {
+          similarity: articleSimilarity,
+          source_id: insertArticlesResult.items[0].index._id,
+          target_id: insertArticlesResult.items[1].index._id,
+          sentences: result,
         },
-      },
-      {
-        compare_mode: 1,
-        similarity: articleSimilarity,
-        source_id: insertArticlesResult.items[0].index._id,
-        target_id: insertArticlesResult.items[1].index._id,
-        match_result: result,
-      },
-    ];
+      ],
+      create_time: Date.now(),
+    };
 
     await insertCompareResult(compareResult);
 
@@ -217,23 +217,28 @@ const multipleComparison = async (req, res) => {
 
       matchedArticles[`${i + 1}-and-${j + 1}`] = matchResult;
 
-      compareResult.push({
-        index: {
-          _index: process.env.DB_COMPARE_INDEX,
-        },
-      });
+      // compareResult.push({
+      //   index: {
+      //     _index: process.env.DB_COMPARE_INDEX,
+      //   },
+      // });
 
       compareResult.push({
-        compare_mode: 2,
+        // compare_mode: 2,
         similarity,
         source_id: insertArticlesResult.items[i].index._id,
         target_id: insertArticlesResult.items[j].index._id,
-        match_result: matchResult,
+        sentences: matchResult,
       });
     }
   }
 
-  await insertCompareResult(compareResult);
+  await insertCompareResult({
+    user_id: req.user.user_id,
+    compare_mode: 2,
+    match_result: compareResult,
+    create_time: Date.now(),
+  });
 
   const response = {
     similarity: articlesGraph.serialize(),
@@ -342,11 +347,12 @@ const analyzeArticle = async (req, res) => {
       articleSynonymized.flat(),
       searchResponse.hits.hits[i]._source.processed_content.flat()
     );
+    let result;
 
     if (articleSimilarity >= 0.1) {
       articleSimilarities.push(articleSimilarity);
 
-      const result = findMatchedKeyword(
+      result = findMatchedKeyword(
         articleSplit,
         searchResponse.hits.hits[i]._source.content.split(
           /(?:，|。|\n|！|？|：|；)+/
@@ -365,23 +371,19 @@ const analyzeArticle = async (req, res) => {
     }
 
     compareResult.push({
-      index: {
-        _index: process.env.DB_COMPARE_INDEX,
-      },
-    });
-
-    compareResult.push({
-      compare_mode: 3,
       similarity: articleSimilarity,
       source_id: insertResult.items[0].index._id,
       target_id: searchResponse.hits.hits[i]._id,
-      match_result: matchResult,
+      sentences: result,
     });
   }
 
-  console.log('compare result', compareResult);
-
-  await insertCompareResult(compareResult);
+  await insertCompareResult({
+    user_id: req.user.user_id,
+    compare_mode: 3,
+    match_result: compareResult,
+    create_time: Date.now(),
+  });
 
   res.send({
     data: {
@@ -405,42 +407,45 @@ const getArticleDetails = async (req, res) => {
 };
 
 function compare(a, b) {
-  if (a.create_time < b.create_time) return -1;
-  if (a.create_time > b.create_time) return 1;
+  if (a.similarity < b.similarity) return 1;
+  if (a.similarity > b.similarity) return -1;
   return 0;
 }
-
+// FIXME: map to reduce
 const getArticleRecords = async (req, res) => {
-  const result = await getUserComparedArticles(req.user.user_id, 0);
-  const temp = [];
-  for (let i = 10; i < result.hits.total.value; i += 10) {
-    temp.push(getUserComparedArticles(req.user.user_id, i));
-  }
-  let tempArticleResult = await Promise.all(temp);
-  tempArticleResult = tempArticleResult.map((element) => element.hits.hits);
-  tempArticleResult.forEach((element) =>
-    element.forEach((article) => result.hits.hits.push(article))
-  );
-  const compareResult = await Promise.all(
-    result.hits.hits.map((article) => getCompareResult(article._id))
-  );
+  const compareResults = await getCompareResult(req.user.user_id);
+  const searchArticle = [];
+  const highestSimilaityResult = compareResults.hits.hits.map((element) => {
+    element._source.match_result.sort(compare);
+    return element._source.match_result[0];
+  });
 
-  // console.log('result', result.hits.hits.sort(compare));
-  // const searchCompareQuery = result.hits.hits.map((element) => element._id);
+  highestSimilaityResult.forEach((element) => {
+    searchArticle.push(searchArticleById(element.source_id));
+    searchArticle.push(searchArticleById(element.target_id));
+  });
 
-  // console.log(compareResult.hits.hits);
+  let articleResult = await Promise.all(searchArticle);
+  articleResult = articleResult.map((element) => {
+    const newElement = {
+      id: element.hits.hits[0]._id,
+      title: element.hits.hits[0]._source.title,
+      author: element.hits.hits[0]._source.author,
+      content: element.hits.hits[0]._source.content,
+    };
+    return newElement;
+  });
+  // articleResult.reduce((accu, curr) => {
+  //   if (!accu[curr.id]) {
+  //     accu[curr.id] = curr;
+  //   }
+  // }, {});
+  // highestSimilaityResult.forEach((element) => {
+  //   element.sourceArticle = articleResult[element.source_id];
+  //   element.targetArticle = articleResult[element.target_id];
+  // });
 
-  // const response = [];
-  // for (const article of result.hits.hits) {
-  //   response.push({
-  //     title: article._source.title,
-  //     author: article._source.author,
-  //     similar_articles: article._source.similar_articles,
-  //     highest_similarity: article._source.highest_similarity,
-  //   });
-  // }
-  // res.status(200).send({ data: response });
-  res.status(200).send({ data: result, compareResult });
+  res.status(200).send({ data: highestSimilaityResult });
 };
 
 module.exports = {

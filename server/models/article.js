@@ -14,8 +14,12 @@ const insertArticles = async (queryBody) => {
 };
 
 const insertCompareResult = async (queryBody) => {
+  console.log('query', queryBody);
   try {
-    const result = client.bulk({ body: queryBody });
+    const result = client.index({
+      index: DB_COMPARE_INDEX,
+      body: queryBody,
+    });
     return result;
   } catch (error) {
     console.log(error);
@@ -128,15 +132,14 @@ const getUserComparedArticles = async (userId, start) => {
   }
 };
 
-const getCompareResult = async (articleId) => {
+const getCompareResult = async (userId) => {
   try {
     const result = await client.search({
       index: DB_COMPARE_INDEX,
       body: {
         query: {
-          multi_match: {
-            query: articleId,
-            fields: ['source_id'],
+          term: {
+            user_id: userId,
           },
         },
       },
