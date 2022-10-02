@@ -8,6 +8,7 @@ $(document).ready(async () => {
   const response = await axios.get('/api/1.0/articles/records', {
     headers: header,
   });
+  console.log(response);
   const records = response.data.data;
   for (let i = 0; i < records.length; i += 1) {
     $('<tr></tr>')

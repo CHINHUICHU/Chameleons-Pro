@@ -107,10 +107,19 @@ $(document).ready(async () => {
           .replaceAll('>', '&gt;'),
       });
     }
+    const token = localStorage.getItem('jwt');
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    };
 
-    response = await axios.post('/api/1.0/articles/multiple', {
-      data: articles,
-    });
+    response = await axios.post(
+      '/api/1.0/articles/multiple',
+      {
+        data: articles,
+      },
+      { headers: header }
+    );
 
     const edges = response.data.data.similarity.links;
 

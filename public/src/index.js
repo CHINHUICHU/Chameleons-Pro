@@ -32,11 +32,13 @@ $(document).ready(async () => {
     }
   }
 
-  $('#signup-signin-link').click(() => {
-    localStorage.setItem('previous-page', window.location.href);
-  });
+  // $('#signup-signin-link').click(() => {
+  //   console.log('ready to sign in');
+  //   localStorage.setItem('previous-page', window.location.href);
+  // });
 
   $('#logout-link').click(() => {
+    console.log('log out');
     localStorage.removeItem('jwt');
     window.location.href = '/';
     $('#logout-link').hide();
@@ -54,4 +56,9 @@ $(document).ready(async () => {
 
   // if ($('body').height() <) {
   // }
+});
+
+$(document).on('click', '#signup-signin-link', () => {
+  console.log('ready to sign in');
+  localStorage.setItem('previous-page', window.location.href);
 });

@@ -2,6 +2,8 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
+  console.log('3', localStorage.getItem('jwt'));
+
   $.fn.showFlex = function () {
     this.show();
     this.css('display', 'flex');
@@ -72,38 +74,51 @@ $(document).ready(async () => {
       return;
     }
 
-    const response = await axios.post('/api/1.0/articles/single', {
-      data: {
-        sourceArticle: {
-          title: $('#article-A-title')
-            .val()
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;'),
-          author: $('#article-A-author')
-            .val()
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;'),
-          content: $('#article-A-content')
-            .val()
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;'),
-        },
-        targetArticle: {
-          title: $('#article-B-title')
-            .val()
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;'),
-          author: $('#article-B-author')
-            .val()
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;'),
-          content: $('#article-B-content')
-            .val()
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;'),
+    const token = localStorage.getItem('jwt');
+    console.log('token', token);
+    const header = {
+      'Content-Type': 'application/json',
+      Authorization: token,
+    };
+
+    console.log('hearder', header);
+
+    const response = await axios.post(
+      '/api/1.0/articles/single',
+      {
+        data: {
+          sourceArticle: {
+            title: $('#article-A-title')
+              .val()
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;'),
+            author: $('#article-A-author')
+              .val()
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;'),
+            content: $('#article-A-content')
+              .val()
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;'),
+          },
+          targetArticle: {
+            title: $('#article-B-title')
+              .val()
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;'),
+            author: $('#article-B-author')
+              .val()
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;'),
+            content: $('#article-B-content')
+              .val()
+              .replaceAll('<', '&lt;')
+              .replaceAll('>', '&gt;'),
+          },
         },
       },
-    });
+      { headers: header }
+    );
 
     const { matchResult, similarity } = response.data.data;
 

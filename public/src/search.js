@@ -119,8 +119,7 @@ $(document).on('click', '.pagination-newer', async () => {
   }
 });
 
-$(document).on('click', '.article-title a', function () {
+$(document).on('click', '#search-result a', function () {
   localStorage.setItem('articleId', $(this).attr('id'));
   localStorage.setItem('current-page', $('.pagination-active').attr('id'));
-  console.log($('.pagination-active').attr('id'));
 });
