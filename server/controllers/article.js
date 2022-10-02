@@ -20,7 +20,8 @@ const {
   searchArticles,
   searchArticlesByTag,
   searchArticleById,
-  getRecords,
+  getUserComparedArticles,
+  getCompareResult,
 } = require('../models/article');
 
 const {
@@ -232,8 +233,6 @@ const multipleComparison = async (req, res) => {
     }
   }
 
-  // console.log('compare result', compareResult);
-
   await insertCompareResult(compareResult);
 
   const response = {
@@ -405,20 +404,43 @@ const getArticleDetails = async (req, res) => {
   res.status(200).send({ data: response });
 };
 
+function compare(a, b) {
+  if (a.create_time < b.create_time) return -1;
+  if (a.create_time > b.create_time) return 1;
+  return 0;
+}
+
 const getArticleRecords = async (req, res) => {
-  console.log(req.user.user_id);
-  const result = await getRecords(req.user.user_id);
-  console.log('result', result);
-  const response = [];
-  for (const article of result.hits.hits) {
-    response.push({
-      title: article._source.title,
-      author: article._source.author,
-      similar_articles: article._source.similar_articles,
-      highest_similarity: article._source.highest_similarity,
-    });
+  const result = await getUserComparedArticles(req.user.user_id, 0);
+  const temp = [];
+  for (let i = 10; i < result.hits.total.value; i += 10) {
+    temp.push(getUserComparedArticles(req.user.user_id, i));
   }
-  res.status(200).send({ data: response });
+  let tempArticleResult = await Promise.all(temp);
+  tempArticleResult = tempArticleResult.map((element) => element.hits.hits);
+  tempArticleResult.forEach((element) =>
+    element.forEach((article) => result.hits.hits.push(article))
+  );
+  const compareResult = await Promise.all(
+    result.hits.hits.map((article) => getCompareResult(article._id))
+  );
+
+  // console.log('result', result.hits.hits.sort(compare));
+  // const searchCompareQuery = result.hits.hits.map((element) => element._id);
+
+  // console.log(compareResult.hits.hits);
+
+  // const response = [];
+  // for (const article of result.hits.hits) {
+  //   response.push({
+  //     title: article._source.title,
+  //     author: article._source.author,
+  //     similar_articles: article._source.similar_articles,
+  //     highest_similarity: article._source.highest_similarity,
+  //   });
+  // }
+  // res.status(200).send({ data: response });
+  res.status(200).send({ data: result, compareResult });
 };
 
 module.exports = {

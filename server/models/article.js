@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { client } = require('./database');
 
-const { DB_ARTICLE_INDEX } = process.env;
+const { DB_ARTICLE_INDEX, DB_COMPARE_INDEX } = process.env;
 
 const insertArticles = async (queryBody) => {
   try {
@@ -110,13 +110,34 @@ const searchArticleById = async (id) => {
   }
 };
 
-const getRecords = async (userId) => {
+const getUserComparedArticles = async (userId, start) => {
   try {
     const result = await client.search({
       index: DB_ARTICLE_INDEX,
       body: {
+        from: start,
         query: {
           term: { user_id: userId },
+        },
+      },
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
+const getCompareResult = async (articleId) => {
+  try {
+    const result = await client.search({
+      index: DB_COMPARE_INDEX,
+      body: {
+        query: {
+          multi_match: {
+            query: articleId,
+            fields: ['source_id'],
+          },
         },
       },
     });
@@ -134,5 +155,6 @@ module.exports = {
   searchArticlesByTag,
   insertUploadArticle,
   searchArticleById,
-  getRecords,
+  getUserComparedArticles,
+  getCompareResult,
 };

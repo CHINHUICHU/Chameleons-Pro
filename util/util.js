@@ -9,7 +9,8 @@ const { getUserProfile } = require('../server/models/user');
 const readFileAsync = promisify(fs.readFile);
 
 const authentication = async (req, res, next) => {
-  let accessToken = req.headers.authorization;
+  let accessToken = req.get('Authorization');
+  console.log(accessToken);
   if (accessToken === 'null' || !accessToken) {
     return res.status(401).send({
       status_code: 401,
