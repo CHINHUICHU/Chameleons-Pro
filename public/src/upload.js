@@ -85,7 +85,7 @@ $(document).ready(async () => {
 
       console.log(response.data.data);
 
-      const { article, similarity, sentenceIndex } = response.data.data;
+      const { article, similarity, matchResult } = response.data.data;
 
       const articleNumber = article.length;
       $(`<h2>該文章共與${articleNumber}篇文章相似度超過10%</h2>`)
@@ -191,30 +191,35 @@ $(document).ready(async () => {
 
         $('#article-target-content').html(articleTargetWithParagraph);
 
-        const article1split = $('#upload-article-content')
-          .val()
-          .split(/(?:，|。|\n|！|？|：|；)+/);
-        const article1splitLength = article1split.length;
-
-        console.log(article1split);
-
-        const article2split =
-          article[articleId].content.split(/(?:，|。|\n|！|？|：|；)+/);
-        const article2splitLength = article2split.length;
-
-        console.log(article2split);
-
-        for (let i = 0; i < article1splitLength; i += 1) {
-          if (sentenceIndex[articleId][0][i]) {
-            $('#article-source-content').mark(article1split[i]);
-          }
+        for (const matchSentence of matchResult[articleId]) {
+          $('#article-source-content').mark(matchSentence.sourceSentence);
+          $('#article-target-content').mark(matchSentence.targetSentence);
         }
 
-        for (let i = 0; i < article2splitLength; i += 1) {
-          if (sentenceIndex[articleId][1][i]) {
-            $('#article-target-content').mark(article2split[i]);
-          }
-        }
+        // const article1split = $('#upload-article-content')
+        //   .val()
+        //   .split(/(?:，|。|\n|！|？|：|；)+/);
+        // const article1splitLength = article1split.length;
+
+        // console.log(article1split);
+
+        // const article2split =
+        //   article[articleId].content.split(/(?:，|。|\n|！|？|：|；)+/);
+        // const article2splitLength = article2split.length;
+
+        // console.log(article2split);
+
+        // for (let i = 0; i < article1splitLength; i += 1) {
+        //   if (sentenceIndex[articleId][0][i]) {
+        //     $('#article-source-content').mark(article1split[i]);
+        //   }
+        // }
+
+        // for (let i = 0; i < article2splitLength; i += 1) {
+        //   if (sentenceIndex[articleId][1][i]) {
+        //     $('#article-target-content').mark(article2split[i]);
+        //   }
+        // }
       });
     } catch (error) {
       Swal.fire({

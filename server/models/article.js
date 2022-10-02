@@ -116,7 +116,7 @@ const getRecords = async (userId) => {
       index: DB_ARTICLE_INDEX,
       body: {
         query: {
-          term: { 'user_id.keyword': userId },
+          term: { user_id: userId },
         },
       },
     });
