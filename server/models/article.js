@@ -3,47 +3,9 @@ const { client } = require('./database');
 
 const { DB_ARTICLE_INDEX } = process.env;
 
-const insertTwoArticles = async (
-  sourceArticle,
-  targetArticle,
-  sourceArticletagKeywords,
-  sourceArticleFiltered,
-  sourceArticlesynonymized,
-  targetArticletagKeywords,
-  targetArticleFiltered,
-  targetArticlesynonymized
-) => {
+const insertArticles = async (queryBody) => {
   try {
-    const result = await client.bulk({
-      body: [
-        {
-          index: {
-            _index: DB_ARTICLE_INDEX,
-          },
-        },
-        {
-          title: sourceArticle.title,
-          author: sourceArticle.author,
-          tag: sourceArticletagKeywords,
-          filtered_content: sourceArticleFiltered,
-          processed_content: sourceArticlesynonymized,
-          content: sourceArticle.content,
-        },
-        {
-          index: {
-            _index: DB_ARTICLE_INDEX,
-          },
-        },
-        {
-          title: targetArticle.title,
-          author: targetArticle.author,
-          tag: targetArticletagKeywords,
-          filtered_content: targetArticleFiltered,
-          processed_content: targetArticlesynonymized,
-          content: targetArticle.content,
-        },
-      ],
-    });
+    const result = client.bulk({ body: queryBody });
     return result;
   } catch (error) {
     console.log(error);
@@ -51,7 +13,7 @@ const insertTwoArticles = async (
   }
 };
 
-const insertMultipleArticles = async (queryBody) => {
+const insertCompareResult = async (queryBody) => {
   try {
     const result = client.bulk({ body: queryBody });
     return result;
@@ -166,8 +128,8 @@ const getRecords = async (userId) => {
 };
 
 module.exports = {
-  insertTwoArticles,
-  insertMultipleArticles,
+  insertArticles,
+  insertCompareResult,
   searchArticles,
   searchArticlesByTag,
   insertUploadArticle,

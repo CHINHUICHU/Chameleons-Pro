@@ -10,13 +10,13 @@ const readFileAsync = promisify(fs.readFile);
 
 const authentication = async (req, res, next) => {
   let accessToken = req.headers.authorization;
-  accessToken = accessToken.replace('Bearer ', '');
-  if (accessToken === 'null') {
+  if (accessToken === 'null' || !accessToken) {
     return res.status(401).send({
       status_code: 401,
       message: 'Unauthorized',
     });
   }
+  accessToken = accessToken.replace('Bearer ', '');
   try {
     const user = await promisify(jwt.verify)(
       accessToken,

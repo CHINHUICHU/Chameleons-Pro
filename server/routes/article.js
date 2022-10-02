@@ -9,9 +9,13 @@ const {
   getArticleRecords,
 } = require('../controllers/article');
 
-router.route('/articles/single').post(wrapAsync(comparison));
+router
+  .route('/articles/single')
+  .post(wrapAsync(authentication), wrapAsync(comparison));
 
-router.route('/articles/multiple').post(wrapAsync(multipleComparison));
+router
+  .route('/articles/multiple')
+  .post(wrapAsync(authentication), wrapAsync(multipleComparison));
 
 router
   .route('/articles/analysis')
