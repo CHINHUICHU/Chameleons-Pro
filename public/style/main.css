@@ -4,7 +4,11 @@ body{
 }
 
 #main-logo {
-    width: 150px;
+    width: 12%;
+}
+
+#main-title {
+    width: 18%;
 }
 
 #main-image-area{
@@ -82,8 +86,15 @@ footer{
   margin-top:auto; 
 }
 
-#main-area {
-    background-color: #fcfffd !important;
+#page-header {
+    background-color: #cad2c5;
 }
+
+footer {
+    background-color: #a3b18a !important;
+}
+/* #main-area {
+    background-color: #f6fff8 !important;
+} */
 
 
