@@ -232,41 +232,11 @@ $(document).ready(async () => {
         .appendTo('#article-result');
       $(`#article-${article2}-result`).html(article2withParagraph);
 
-      // const article1split = $(`#article-${article1}-content`)
-      //   .val()
-      //   .split(/(?:，|。|\n|！|？|：|；)+/);
-      // const article1splitLength = article1split.length;
-
-      // console.log(article1split);
-
-      // const article2split = $(`#article-${article2}-content`)
-      //   .val()
-      //   .split(/(?:，|。|\n|！|？|：|；)+/);
-      // const article2splitLength = article2split.length;
-
-      // console.log(article2split);
-
       const { matchResult } = response.data.data;
       for (const matchSentence of matchResult[$(this).attr('id')]) {
         $(`#article-${article1}-result`).mark(matchSentence.sourceSentence);
         $(`#article-${article2}-result`).mark(matchSentence.targetSentence);
       }
-
-      // const similarSentenceIndex = JSON.parse(
-      //   localStorage.getItem('sentence-index')
-      // )[`${$(this).attr('id')}`];
-
-      // for (let i = 0; i < article1splitLength; i += 1) {
-      //   if (similarSentenceIndex[0][i]) {
-      //     $(`#article-${article1}-result`).mark(article1split[i]);
-      //   }
-      // }
-
-      // for (let i = 0; i < article2splitLength; i += 1) {
-      //   if (similarSentenceIndex[1][i]) {
-      //     $(`#article-${article2}-result`).mark(article2split[i]);
-      //   }
-      // }
     });
   });
 
