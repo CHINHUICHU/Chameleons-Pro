@@ -14,7 +14,6 @@ const insertArticles = async (queryBody) => {
 };
 
 const insertCompareResult = async (queryBody) => {
-  console.log('query', queryBody);
   try {
     const result = client.index({
       index: DB_COMPARE_INDEX,
@@ -27,7 +26,7 @@ const insertCompareResult = async (queryBody) => {
   }
 };
 
-const searchArticles = async (page, pageSize, searchQuery) => {
+const searchArticle = async (page, pageSize, searchQuery) => {
   try {
     const searchResult = await client.search({
       index: process.env.DB_ARTICLE_INDEXE,
@@ -66,37 +65,6 @@ const searchArticlesByTag = async (responseSize, searchQuery) => {
   }
 };
 
-const insertUploadArticle = async (
-  article,
-  articleTagKeywords,
-  articleFiltered,
-  articleSynonymized,
-  userId,
-  articleSimilarities,
-  maxSimilarity
-) => {
-  try {
-    const responseFromES = await client.index({
-      index: DB_ARTICLE_INDEX,
-      body: {
-        title: article.title,
-        author: article.author,
-        tag: articleTagKeywords,
-        filtered_content: articleFiltered,
-        processed_content: articleSynonymized,
-        content: article.content,
-        user_id: userId,
-        similar_articles: articleSimilarities.length,
-        highest_similarity: maxSimilarity,
-      },
-    });
-    return responseFromES;
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
-
 const searchArticleById = async (id) => {
   try {
     const result = await client.search({
@@ -104,24 +72,6 @@ const searchArticleById = async (id) => {
       body: {
         query: {
           term: { _id: id },
-        },
-      },
-    });
-    return result;
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
-
-const getUserComparedArticles = async (userId, start) => {
-  try {
-    const result = await client.search({
-      index: DB_ARTICLE_INDEX,
-      body: {
-        from: start,
-        query: {
-          term: { user_id: userId },
         },
       },
     });
@@ -154,10 +104,8 @@ const getCompareResult = async (userId) => {
 module.exports = {
   insertArticles,
   insertCompareResult,
-  searchArticles,
+  searchArticle,
   searchArticlesByTag,
-  insertUploadArticle,
   searchArticleById,
-  getUserComparedArticles,
   getCompareResult,
 };

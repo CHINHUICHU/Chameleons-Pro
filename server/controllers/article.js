@@ -14,14 +14,12 @@ const jieba = createJieba(JiebaDict, HMMModel, UserDict, IDF, StopWords);
 
 const Graph = require('graph-data-structure');
 
-const { result } = require('lodash');
 const {
   insertArticles,
   insertCompareResult,
-  searchArticles,
+  searchArticle,
   searchArticlesByTag,
   searchArticleById,
-  getUserComparedArticles,
   getCompareResult,
 } = require('../models/article');
 
@@ -272,7 +270,7 @@ const getArticles = async (req, res) => {
 
   console.log(esSearchQuery);
 
-  const searchResult = await searchArticles(page, pageSize, esSearchQuery);
+  const searchResult = await searchArticle(page, pageSize, esSearchQuery);
 
   console.log(searchResult.hits.hits);
 
@@ -414,36 +412,40 @@ function compare(a, b) {
 // FIXME: map to reduce
 const getArticleRecords = async (req, res) => {
   const compareResults = await getCompareResult(req.user.user_id);
-  const searchArticle = [];
-  const highestSimilaityResult = compareResults.hits.hits.map((element) => {
+  const searchArticles = [];
+
+  // only show compare result with highest similarity (with multiple and upload mode)
+  let highestSimilaityResult = compareResults.hits.hits.map((element) => {
     element._source.match_result.sort(compare);
-    return element._source.match_result[0];
+    element._source.match_result = element._source.match_result.shift();
+    return element._source;
   });
 
+  // prepare for search articles
   highestSimilaityResult.forEach((element) => {
-    searchArticle.push(searchArticleById(element.source_id));
-    searchArticle.push(searchArticleById(element.target_id));
+    searchArticles.push(searchArticleById(element.match_result.source_id));
+    searchArticles.push(searchArticleById(element.match_result.target_id));
   });
 
-  let articleResult = await Promise.all(searchArticle);
-  articleResult = articleResult.map((element) => {
-    const newElement = {
-      id: element.hits.hits[0]._id,
-      title: element.hits.hits[0]._source.title,
-      author: element.hits.hits[0]._source.author,
-      content: element.hits.hits[0]._source.content,
+  let articleResult = await Promise.all(searchArticles);
+
+  // organize article result to hash table
+  articleResult = articleResult.reduce((accu, curr) => {
+    accu[curr.hits.hits[0]._id] = {
+      id: curr.hits.hits[0]._id,
+      title: curr.hits.hits[0]._source.title,
+      author: curr.hits.hits[0]._source.author,
+      content: curr.hits.hits[0]._source.content,
     };
-    return newElement;
+    return accu;
+  }, {});
+
+  // map source article and target article to result
+  highestSimilaityResult = highestSimilaityResult.map((element) => {
+    element.source_article = articleResult[element.match_result.source_id];
+    element.target_article = articleResult[element.match_result.target_id];
+    return element;
   });
-  // articleResult.reduce((accu, curr) => {
-  //   if (!accu[curr.id]) {
-  //     accu[curr.id] = curr;
-  //   }
-  // }, {});
-  // highestSimilaityResult.forEach((element) => {
-  //   element.sourceArticle = articleResult[element.source_id];
-  //   element.targetArticle = articleResult[element.target_id];
-  // });
 
   res.status(200).send({ data: highestSimilaityResult });
 };
