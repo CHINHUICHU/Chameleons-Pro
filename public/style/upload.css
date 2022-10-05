@@ -1,12 +1,12 @@
-mark {
-    background-color: #ffcad4 !important;
-}
+
 #upload-introduction {
     margin-bottom: 5%;
 }
+
 #upload-article-content {
     height: 500px;
 }
+
 .swal2-styled.swal2-confirm {
     background-color: #8d99ae !important;
 }
@@ -19,11 +19,4 @@ mark {
     display: flex;
     justify-content: center;
 }
-
-/* .upload-result-area {
-    background-color: #e5e5e5 !important;
-} */
-/* .col-8 {
-    height: 75vh;
-} */
 
