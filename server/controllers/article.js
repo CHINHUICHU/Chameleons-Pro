@@ -30,8 +30,84 @@ const {
   calculateSimilarity,
 } = require('../../util/util');
 
+const { cache } = require('../../util/cache');
+
 const comparison = async (req, res, next) => {
   const { sourceArticle, targetArticle } = req.body.data;
+
+  // const isLongArticle =
+  //   sourceArticle.content.length >= 2000 ||
+  //   targetArticle.content.length >= 2000;
+
+  console.log(sourceArticle.content.length, targetArticle.content.length);
+
+  // console.log('long article', isLongArticle);
+
+  if (cache.ready) {
+    const insertArtile = [
+      {
+        index: {
+          _index: process.env.DB_ARTICLE_INDEX,
+        },
+      },
+      {
+        title: sourceArticle.title,
+        author: sourceArticle.author,
+        content: sourceArticle.content,
+        // processed_content: sourceArticleSynonymized,
+        // tag: sourceArticleTagKeywords,
+        user_id: req.user.user_id,
+        create_time: Date.now(),
+      },
+      {
+        index: {
+          _index: process.env.DB_ARTICLE_INDEX,
+        },
+      },
+      {
+        title: targetArticle.title,
+        author: targetArticle.author,
+        content: targetArticle.content,
+        // processed_content: targetArticleSynonymized,
+        // tag: targetArticleTagKeywords,
+        user_id: req.user.user_id,
+        create_time: Date.now(),
+      },
+    ];
+
+    const insertArticlesResult = await insertArticles(insertArtile);
+
+    const compareResult = {
+      user_id: req.user.user_id,
+      compare_mode: 1,
+      match_result: [
+        {
+          source_id: insertArticlesResult.items[0].index._id,
+          target_id: insertArticlesResult.items[1].index._id,
+        },
+      ],
+      create_time: Date.now(),
+    };
+
+    const compareResultResponse = await insertCompareResult(compareResult);
+
+    console.log('compare result id', compareResultResponse._id);
+
+    await cache.lpush(
+      'chinese-article-compare',
+      JSON.stringify({
+        user_id: req.user.user_id,
+        compare_mode: 1,
+        compare_result_id: compareResultResponse._id,
+        sourceArticle,
+        targetArticle,
+      })
+    );
+
+    console.log('push job to queue');
+
+    return res.send('pending');
+  }
 
   const sourceSplit = sourceArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
   const targetSplit = targetArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);

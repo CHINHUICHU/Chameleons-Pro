@@ -37,6 +37,7 @@
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
     "graph-data-structure": "^2.0.0",
+    "ioredis": "^5.2.3",
     "jieba-zh-tw": "^1.0.12",
     "js-jieba": "^1.0.12",
     "jsonwebtoken": "^8.5.1",
