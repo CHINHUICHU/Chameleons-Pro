@@ -1,6 +1,4 @@
 /* eslint-disable no-undef */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
   let comparedArticles = 2;
   $('#new-article').click(() => {

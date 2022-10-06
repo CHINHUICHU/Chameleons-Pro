@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 require('dotenv').config();
 
 const createJieba = require('js-jieba');

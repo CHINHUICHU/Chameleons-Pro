@@ -1,6 +1,3 @@
-/* eslint-disable global-require */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-console */
 require('dotenv').config();
 const express = require('express');
 
@@ -117,7 +114,6 @@ app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
 });
 
 // 404 error handling
-// eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {
   const fileName = '404.html';
   res.sendFile(fileName, options, (err) => {
@@ -129,7 +125,6 @@ app.use((req, res, next) => {
   });
 });
 
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.log('something wrong', err);
   res

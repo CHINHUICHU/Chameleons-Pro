@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-undef */
 $(document).ready(async () => {
   const token = localStorage.getItem('jwt');

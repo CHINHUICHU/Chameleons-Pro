@@ -1,6 +1,4 @@
 /* eslint-disable no-undef */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-restricted-syntax */
 $(document).ready(async () => {
   $('#upload-submit').click(async () => {
     if (

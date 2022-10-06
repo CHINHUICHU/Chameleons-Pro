@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 require('dotenv').config();
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');

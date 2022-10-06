@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-/* eslint-disable no-restricted-syntax */
 async function getArticles(page) {
   const response = await axios.get(
     `/api/1.0/articles/search?page=${page}&key=${localStorage.getItem(

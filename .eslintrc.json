@@ -6,21 +6,12 @@
         "jquery": true,
         "node": true
     },
-    "extends": "airbnb-base",
+    "extends": ["eslint:recommended"],
     "overrides": [
     ],
     "parserOptions": {
         "ecmaVersion": "latest"
     },
     "rules": {
-        "no-restricted-syntax": ["error", "FunctionExpression", "WithStatement", "BinaryExpression[operator='in']"],
-        "operator-linebreak": ["error", "after"],
-        "comma-dangle": ["error", {
-            "arrays": "never",
-            "objects": "only-multiline",
-            "imports": "never",
-            "exports": "never",
-            "functions": "never"
-        }]
     }
 }
