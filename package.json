@@ -26,9 +26,7 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.4.0",
-    "@node-rs/jieba": "^1.6.1",
     "argon2": "^0.29.1",
-    "body-parser": "^1.20.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
@@ -37,9 +35,6 @@
     "js-jieba": "^1.0.12",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
-    "mdb-ui-kit": "^5.0.0",
-    "minhash": "^0.0.9",
-    "multer": "^1.4.5-lts.1",
     "validator": "^13.7.0"
   }
 }
