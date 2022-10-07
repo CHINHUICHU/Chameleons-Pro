@@ -1,15 +1,12 @@
 require('dotenv').config();
 
-const createJieba = require('js-jieba');
+const stopWord = require('../../util/stopWord');
+const synonym = require('../../util/synonym');
+const { Article, Articles } = require('../../util/article');
 const {
-  JiebaDict,
-  HMMModel,
-  UserDict,
-  IDF,
-  StopWords,
-} = require('jieba-zh-tw');
-
-const jieba = createJieba(JiebaDict, HMMModel, UserDict, IDF, StopWords);
+  findMatchedSentence,
+  calculateSimilarity,
+} = require('../../util/compare');
 
 const Graph = require('graph-data-structure');
 
@@ -22,49 +19,32 @@ const {
   getCompareResult,
 } = require('../models/article');
 
-const {
-  filterStopWords,
-  findSynonym,
-  findMatchedKeyword,
-  calculateSimilarity,
-} = require('../../util/util');
-
 const comparison = async (req, res, next) => {
+  const articles = new Articles();
   const { sourceArticle, targetArticle } = req.body.data;
 
-  const sourceSplit = sourceArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
-  const targetSplit = targetArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
-
-  const sourceToken = [];
-  const targetToken = [];
-
-  for (const sentence of sourceSplit) {
-    sourceToken.push(jieba.cut(sentence));
-  }
-
-  for (const sentence of targetSplit) {
-    targetToken.push(jieba.cut(sentence));
-  }
-
-  const tagNumber = 20;
-
-  const sourceArticleTag = jieba.extract(sourceArticle.content, tagNumber);
-  const targetArticleTag = jieba.extract(targetArticle.content, tagNumber);
-
-  const sourceArticleTagKeywords = sourceArticleTag.map(
-    (element) => element.word
+  articles.newArticle(
+    sourceArticle.title,
+    sourceArticle.author,
+    sourceArticle.content
   );
-  const targetArticleTagKeywords = targetArticleTag.map(
-    (element) => element.word
+
+  articles.newArticle(
+    targetArticle.title,
+    targetArticle.author,
+    targetArticle.content
   );
+
+  // article preprocessing
+  articles.all.forEach((element) => {
+    element.extractTag().splitSentence().tokenizer();
+    element.filtered = stopWord.filterStopWords(element.tokens);
+    element.synonym = synonym.findSynonym(element.filtered);
+  });
+
+  const [source, target] = articles.all;
 
   try {
-    const sourceArticleFiltered = filterStopWords(sourceToken);
-    const targetArticleFiltered = filterStopWords(targetToken);
-
-    const sourceArticleSynonymized = findSynonym(sourceArticleFiltered);
-    const targetArticleSynonymized = findSynonym(targetArticleFiltered);
-
     const insertArtile = [
       {
         index: {
@@ -72,11 +52,11 @@ const comparison = async (req, res, next) => {
         },
       },
       {
-        title: sourceArticle.title,
-        author: sourceArticle.author,
-        content: sourceArticle.content,
-        processed_content: sourceArticleSynonymized,
-        tag: sourceArticleTagKeywords,
+        title: source.title,
+        author: source.author,
+        content: source.content,
+        processed_content: source.synonym,
+        tag: source.tags,
         user_id: req.user.user_id,
         create_time: Date.now(),
       },
@@ -86,11 +66,11 @@ const comparison = async (req, res, next) => {
         },
       },
       {
-        title: targetArticle.title,
-        author: targetArticle.author,
-        content: targetArticle.content,
-        processed_content: targetArticleSynonymized,
-        tag: targetArticleTagKeywords,
+        title: target.title,
+        author: target.author,
+        content: target.content,
+        processed_content: target.synonym,
+        tag: target.tags,
         user_id: req.user.user_id,
         create_time: Date.now(),
       },
@@ -101,15 +81,15 @@ const comparison = async (req, res, next) => {
     console.log(insertArticlesResult.items);
 
     const articleSimilarity = calculateSimilarity(
-      sourceArticleSynonymized.flat(),
-      targetArticleSynonymized.flat()
+      source.synonym.flat(),
+      target.synonym.flat()
     );
 
-    const result = findMatchedKeyword(
-      sourceSplit,
-      targetSplit,
-      sourceArticleSynonymized,
-      targetArticleSynonymized
+    const result = findMatchedSentence(
+      source.sentences,
+      target.sentences,
+      source.synonym,
+      target.synonym
     );
 
     const compareResult = {
@@ -141,38 +121,23 @@ const comparison = async (req, res, next) => {
 };
 
 const multipleComparison = async (req, res) => {
-  let articles = req.body.data;
+  let articles = new Articles();
 
-  const tagNumber = 20;
-
-  articles = articles.map((element) => {
-    const newElement = element;
-    const tags = jieba.extract(element.content, tagNumber);
-    const keywords = tags.map((tag) => tag.word);
-    newElement.tag = keywords;
-    return newElement;
-  });
-
-  const splitArticles = [];
-  const filteredArticles = [];
-  const synonymizedArticles = [];
   const insertedArticles = [];
 
-  for (const article of articles) {
-    const splitArticle = article.content.split(/(?:，|。|\n|！|？|：|；)+/);
-
-    splitArticles.push(splitArticle);
-
-    const tokenizedArticle = splitArticle.map((sentence) =>
-      jieba.cut(sentence)
+  req.body.data.forEach((element) => {
+    // article preprocessing
+    const article = articles.newArticle(
+      element.title,
+      element.author,
+      element.content
     );
 
-    const filteredArticle = filterStopWords(tokenizedArticle);
-    filteredArticles.push(filteredArticle);
+    article.extractTag().splitSentence().tokenizer();
+    article.filtered = stopWord.filterStopWords(article.tokens);
+    article.synonym = synonym.findSynonym(article.filtered);
 
-    const synonymizedArticle = findSynonym(filteredArticle);
-    synonymizedArticles.push(synonymizedArticle);
-
+    // prepare data to insert into database
     insertedArticles.push({
       index: {
         _index: process.env.DB_ARTICLE_INDEX,
@@ -183,45 +148,49 @@ const multipleComparison = async (req, res) => {
       title: article.title,
       author: article.author,
       content: article.content,
-      processed_content: synonymizedArticle,
-      tag: article.tag,
+      processed_content: article.synonym,
+      tag: article.tags,
       user_id: req.user.user_id,
       create_time: Date.now(),
     });
-  }
+  });
 
   const insertArticlesResult = await insertArticles(insertedArticles);
 
   const articlesGraph = Graph();
   const matchedArticles = {};
 
-  const articleNumber = articles.length;
   const compareResult = [];
 
-  for (let i = 0; i < articleNumber; i += 1) {
-    for (let j = i + 1; j < articleNumber; j += 1) {
+  // article comparison
+  for (let i = 0; i < articles.numberOfArticles; i += 1) {
+    for (let j = i + 1; j < articles.numberOfArticles; j += 1) {
       const similarity = calculateSimilarity(
-        synonymizedArticles[i].flat(),
-        synonymizedArticles[j].flat()
+        articles.all[i].synonym.flat(),
+        articles.all[j].synonym.flat()
       );
+
       articlesGraph.addEdge(i + 1, j + 1, similarity);
-      const matchResult = findMatchedKeyword(
-        splitArticles[i],
-        splitArticles[j],
-        synonymizedArticles[i],
-        synonymizedArticles[j]
+
+      // find matched sentences between two articles
+      const matchResult = findMatchedSentence(
+        articles.all[i].sentences,
+        articles.all[j].sentences,
+        articles.all[i].synonym,
+        articles.all[j].synonym
       );
 
       matchedArticles[`${i + 1}-and-${j + 1}`] = matchResult;
 
-      // compareResult.push({
-      //   index: {
-      //     _index: process.env.DB_COMPARE_INDEX,
-      //   },
-      // });
+      // prepare compare result to insert into database
+      compareResult.push({
+        index: {
+          _index: process.env.DB_COMPARE_INDEX,
+        },
+      });
 
       compareResult.push({
-        // compare_mode: 2,
+        compare_mode: 2,
         similarity,
         source_id: insertArticlesResult.items[i].index._id,
         target_id: insertArticlesResult.items[j].index._id,
@@ -237,12 +206,12 @@ const multipleComparison = async (req, res) => {
     create_time: Date.now(),
   });
 
-  const response = {
-    similarity: articlesGraph.serialize(),
-    matchResult: matchedArticles,
-  };
-
-  res.send({ data: response });
+  res.send({
+    data: {
+      similarity: articlesGraph.serialize(),
+      matchResult: matchedArticles,
+    },
+  });
 };
 
 const getArticles = async (req, res) => {
