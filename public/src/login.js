@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 $(document).ready(async () => {
-  console.log(localStorage.getItem('previous-page'));
   $('#signup-submit').click(async (e) => {
     e.preventDefault();
     if (
@@ -65,8 +64,6 @@ $(document).ready(async () => {
         },
       });
 
-      console.log(response);
-
       localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
       $('#signup-signin-link').hide();
       $('#user-signin-signup').hide();
@@ -91,7 +88,6 @@ $(document).ready(async () => {
 
   $('#signin-submit').click(async (e) => {
     e.preventDefault();
-    console.log('2', localStorage.getItem('previous-page'));
 
     if (
       validator.isEmpty($('#signin-email').val()) ||
@@ -149,10 +145,7 @@ $(document).ready(async () => {
         },
       });
 
-      console.log('response', response);
-
       localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
-      // console.log(localStorage.getItem('jwt'));
       $('#signup-signin-link').hide();
       $('#logout-link').show().css({ display: 'block' });
       $('#member-link').show().css({ display: 'block' });
@@ -161,10 +154,10 @@ $(document).ready(async () => {
         text: '歡迎登入',
         showConfirmButton: false,
       });
-      console.log('3', localStorage.getItem('jwt'));
       // window.location.href = '/';
       window.location.href = localStorage.getItem('previous-page');
     } catch (error) {
+      console.log(error);
       Swal.fire({
         icon: 'error',
         text: error.response.data.message,
