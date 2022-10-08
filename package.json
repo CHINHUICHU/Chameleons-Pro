@@ -41,6 +41,7 @@
     "mdb-ui-kit": "^5.0.0",
     "minhash": "^0.0.9",
     "multer": "^1.4.5-lts.1",
+    "node-ipc": "^11.1.0",
     "validator": "^13.7.0"
   }
 }

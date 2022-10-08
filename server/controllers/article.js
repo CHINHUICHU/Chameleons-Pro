@@ -32,6 +32,17 @@ const {
 
 const { cache } = require('../../util/cache');
 
+const ipc = require('../../util/ipc');
+
+const {
+  MODE_SINGLE,
+  MODE_MULTIPLE,
+  MODE_UPLOAD,
+  MATCH_PENDING,
+  MATCH_FINISHED,
+  DB_ARTICLE_INDEX,
+} = process.env;
+
 const comparison = async (req, res, next) => {
   const { sourceArticle, targetArticle } = req.body.data;
 
@@ -47,29 +58,25 @@ const comparison = async (req, res, next) => {
     const insertArtile = [
       {
         index: {
-          _index: process.env.DB_ARTICLE_INDEX,
+          _index: DB_ARTICLE_INDEX,
         },
       },
       {
         title: sourceArticle.title,
         author: sourceArticle.author,
         content: sourceArticle.content,
-        // processed_content: sourceArticleSynonymized,
-        // tag: sourceArticleTagKeywords,
         user_id: req.user.user_id,
         create_time: Date.now(),
       },
       {
         index: {
-          _index: process.env.DB_ARTICLE_INDEX,
+          _index: DB_ARTICLE_INDEX,
         },
       },
       {
         title: targetArticle.title,
         author: targetArticle.author,
         content: targetArticle.content,
-        // processed_content: targetArticleSynonymized,
-        // tag: targetArticleTagKeywords,
         user_id: req.user.user_id,
         create_time: Date.now(),
       },
@@ -78,8 +85,9 @@ const comparison = async (req, res, next) => {
     const insertArticlesResult = await insertArticles(insertArtile);
 
     const compareResult = {
+      status: +MATCH_PENDING,
       user_id: req.user.user_id,
-      compare_mode: 1,
+      compare_mode: +MODE_SINGLE,
       match_result: [
         {
           source_id: insertArticlesResult.items[0].index._id,
@@ -91,14 +99,14 @@ const comparison = async (req, res, next) => {
 
     const compareResultResponse = await insertCompareResult(compareResult);
 
-    console.log('compare result id', compareResultResponse._id);
-
     await cache.lpush(
       'chinese-article-compare',
       JSON.stringify({
         user_id: req.user.user_id,
-        compare_mode: 1,
+        compare_mode: +MODE_SINGLE,
         compare_result_id: compareResultResponse._id,
+        source_id: insertArticlesResult.items[0].index._id,
+        target_id: insertArticlesResult.items[1].index._id,
         sourceArticle,
         targetArticle,
       })
@@ -106,7 +114,7 @@ const comparison = async (req, res, next) => {
 
     console.log('push job to queue');
 
-    return res.send('pending');
+    return res.send({ status: 'pending' });
   }
 
   const sourceSplit = sourceArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
@@ -145,7 +153,7 @@ const comparison = async (req, res, next) => {
     const insertArtile = [
       {
         index: {
-          _index: process.env.DB_ARTICLE_INDEX,
+          _index: DB_ARTICLE_INDEX,
         },
       },
       {
@@ -159,7 +167,7 @@ const comparison = async (req, res, next) => {
       },
       {
         index: {
-          _index: process.env.DB_ARTICLE_INDEX,
+          _index: DB_ARTICLE_INDEX,
         },
       },
       {
