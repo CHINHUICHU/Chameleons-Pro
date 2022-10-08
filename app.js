@@ -10,6 +10,9 @@ const options = {
 };
 
 const app = express();
+
+const ipc = require('./util/ipc');
+
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));

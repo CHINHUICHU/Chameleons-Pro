@@ -19,6 +19,26 @@ const {
   getCompareResult,
 } = require('../models/article');
 
+const {
+  filterStopWords,
+  findSynonym,
+  findMatchedKeyword,
+  calculateSimilarity,
+} = require('../../util/util');
+
+const { cache } = require('../../util/cache');
+
+const ipc = require('../../util/ipc');
+
+const {
+  MODE_SINGLE,
+  MODE_MULTIPLE,
+  MODE_UPLOAD,
+  MATCH_PENDING,
+  MATCH_FINISHED,
+  DB_ARTICLE_INDEX,
+} = process.env;
+
 const comparison = async (req, res, next) => {
   const articles = new Articles();
   const { sourceArticle, targetArticle } = req.body.data;
@@ -27,6 +47,98 @@ const comparison = async (req, res, next) => {
     sourceArticle.title,
     sourceArticle.author,
     sourceArticle.content
+  )
+  // const isLongArticle =
+  //   sourceArticle.content.length >= 2000 ||
+  //   targetArticle.content.length >= 2000;
+
+
+  // console.log('long article', isLongArticle);
+
+  if (cache.ready) {
+    const insertArtile = [
+      {
+        index: {
+          _index: DB_ARTICLE_INDEX,
+        },
+      },
+      {
+        title: sourceArticle.title,
+        author: sourceArticle.author,
+        content: sourceArticle.content,
+        user_id: req.user.user_id,
+        create_time: Date.now(),
+      },
+      {
+        index: {
+          _index: DB_ARTICLE_INDEX,
+        },
+      },
+      {
+        title: targetArticle.title,
+        author: targetArticle.author,
+        content: targetArticle.content,
+        user_id: req.user.user_id,
+        create_time: Date.now(),
+      },
+    ];
+
+    const insertArticlesResult = await insertArticles(insertArtile);
+
+    const compareResult = {
+      status: +MATCH_PENDING,
+      user_id: req.user.user_id,
+      compare_mode: +MODE_SINGLE,
+      match_result: [
+        {
+          source_id: insertArticlesResult.items[0].index._id,
+          target_id: insertArticlesResult.items[1].index._id,
+        },
+      ],
+      create_time: Date.now(),
+    };
+
+    const compareResultResponse = await insertCompareResult(compareResult);
+
+    await cache.lpush(
+      'chinese-article-compare',
+      JSON.stringify({
+        user_id: req.user.user_id,
+        compare_mode: +MODE_SINGLE,
+        compare_result_id: compareResultResponse._id,
+        source_id: insertArticlesResult.items[0].index._id,
+        target_id: insertArticlesResult.items[1].index._id,
+        sourceArticle,
+        targetArticle,
+      })
+    );
+
+    console.log('push job to queue');
+
+    return res.send({ status: 'pending' });
+  }
+
+  const sourceSplit = sourceArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
+  const targetSplit = targetArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
+
+  const sourceToken = [];
+  const targetToken = [];
+
+  for (const sentence of sourceSplit) {
+    sourceToken.push(jieba.cut(sentence));
+  }
+
+  for (const sentence of targetSplit) {
+    targetToken.push(jieba.cut(sentence));
+  }
+
+  const tagNumber = 20;
+
+  const sourceArticleTag = jieba.extract(sourceArticle.content, tagNumber);
+  const targetArticleTag = jieba.extract(targetArticle.content, tagNumber);
+
+  const sourceArticleTagKeywords = sourceArticleTag.map(
+    (element) => element.word
   );
 
   articles.newArticle(
@@ -48,7 +160,7 @@ const comparison = async (req, res, next) => {
     const insertArtile = [
       {
         index: {
-          _index: process.env.DB_ARTICLE_INDEX,
+          _index: DB_ARTICLE_INDEX,
         },
       },
       {
@@ -62,7 +174,7 @@ const comparison = async (req, res, next) => {
       },
       {
         index: {
-          _index: process.env.DB_ARTICLE_INDEX,
+          _index: DB_ARTICLE_INDEX,
         },
       },
       {
