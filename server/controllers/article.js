@@ -1,4 +1,6 @@
 require('dotenv').config();
+const { Worker } = require('worker_threads');
+const path = require('path');
 
 const stopWord = require('../../util/stopWord');
 const synonym = require('../../util/synonym');
@@ -19,16 +21,9 @@ const {
   getCompareResult,
 } = require('../models/article');
 
-const {
-  filterStopWords,
-  findSynonym,
-  findMatchedKeyword,
-  calculateSimilarity,
-} = require('../../util/util');
-
 const { cache } = require('../../util/cache');
 
-const ipc = require('../../util/ipc');
+const worker = new Worker(path.resolve('./worker/worker.js'));
 
 const {
   MODE_SINGLE,
@@ -47,11 +42,19 @@ const comparison = async (req, res, next) => {
     sourceArticle.title,
     sourceArticle.author,
     sourceArticle.content
-  )
+  );
+
+  articles.newArticle(
+    targetArticle.title,
+    targetArticle.author,
+    targetArticle.content
+  );
+
+  const [source, target] = articles.all;
+
   // const isLongArticle =
   //   sourceArticle.content.length >= 2000 ||
   //   targetArticle.content.length >= 2000;
-
 
   // console.log('long article', isLongArticle);
 
@@ -63,9 +66,9 @@ const comparison = async (req, res, next) => {
         },
       },
       {
-        title: sourceArticle.title,
-        author: sourceArticle.author,
-        content: sourceArticle.content,
+        title: source.title,
+        author: source.author,
+        content: source.content,
         user_id: req.user.user_id,
         create_time: Date.now(),
       },
@@ -75,9 +78,9 @@ const comparison = async (req, res, next) => {
         },
       },
       {
-        title: targetArticle.title,
-        author: targetArticle.author,
-        content: targetArticle.content,
+        title: target.title,
+        author: target.author,
+        content: target.content,
         user_id: req.user.user_id,
         create_time: Date.now(),
       },
@@ -100,52 +103,26 @@ const comparison = async (req, res, next) => {
 
     const compareResultResponse = await insertCompareResult(compareResult);
 
-    await cache.lpush(
-      'chinese-article-compare',
-      JSON.stringify({
-        user_id: req.user.user_id,
-        compare_mode: +MODE_SINGLE,
-        compare_result_id: compareResultResponse._id,
-        source_id: insertArticlesResult.items[0].index._id,
-        target_id: insertArticlesResult.items[1].index._id,
-        sourceArticle,
-        targetArticle,
-      })
-    );
+    try {
+      await cache.lpush(
+        'chinese-article-compare',
+        JSON.stringify({
+          user_id: req.user.user_id,
+          compare_mode: +MODE_SINGLE,
+          compare_result_id: compareResultResponse._id,
+          source_id: insertArticlesResult.items[0].index._id,
+          target_id: insertArticlesResult.items[1].index._id,
+          source,
+          target,
+        })
+      );
 
-    console.log('push job to queue');
-
-    return res.send({ status: 'pending' });
+      return res.send({ status: 'pending' });
+    } catch (error) {
+      console.log(error);
+      return res.send('redis error');
+    }
   }
-
-  const sourceSplit = sourceArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
-  const targetSplit = targetArticle.content.split(/(?:，|。|\n|！|？|：|；)+/);
-
-  const sourceToken = [];
-  const targetToken = [];
-
-  for (const sentence of sourceSplit) {
-    sourceToken.push(jieba.cut(sentence));
-  }
-
-  for (const sentence of targetSplit) {
-    targetToken.push(jieba.cut(sentence));
-  }
-
-  const tagNumber = 20;
-
-  const sourceArticleTag = jieba.extract(sourceArticle.content, tagNumber);
-  const targetArticleTag = jieba.extract(targetArticle.content, tagNumber);
-
-  const sourceArticleTagKeywords = sourceArticleTag.map(
-    (element) => element.word
-  );
-
-  articles.newArticle(
-    targetArticle.title,
-    targetArticle.author,
-    targetArticle.content
-  );
 
   // article preprocessing
   articles.all.forEach((element) => {
@@ -153,8 +130,6 @@ const comparison = async (req, res, next) => {
     element.filtered = stopWord.filterStopWords(element.tokens);
     element.synonym = synonym.findSynonym(element.filtered);
   });
-
-  const [source, target] = articles.all;
 
   try {
     const insertArtile = [
@@ -237,6 +212,8 @@ const multipleComparison = async (req, res) => {
 
   const insertedArticles = [];
 
+  // const isTimeConsumingJob = req.body.data.length > 10;
+
   req.body.data.forEach((element) => {
     // article preprocessing
     const article = articles.newArticle(
@@ -250,21 +227,22 @@ const multipleComparison = async (req, res) => {
     article.synonym = synonym.findSynonym(article.filtered);
 
     // prepare data to insert into database
-    insertedArticles.push({
-      index: {
-        _index: process.env.DB_ARTICLE_INDEX,
+    insertedArticles.push(
+      {
+        index: {
+          _index: process.env.DB_ARTICLE_INDEX,
+        },
       },
-    });
-
-    insertedArticles.push({
-      title: article.title,
-      author: article.author,
-      content: article.content,
-      processed_content: article.synonym,
-      tag: article.tags,
-      user_id: req.user.user_id,
-      create_time: Date.now(),
-    });
+      {
+        title: article.title,
+        author: article.author,
+        content: article.content,
+        processed_content: article.synonym,
+        tag: article.tags,
+        user_id: req.user.user_id,
+        create_time: Date.now(),
+      }
+    );
   });
 
   const insertArticlesResult = await insertArticles(insertedArticles);
@@ -529,6 +507,10 @@ const getArticleRecords = async (req, res) => {
 
   res.status(200).send({ data: highestSimilaityResult });
 };
+
+worker.on('message', (message) => {
+  console.log('main thread got message', message);
+});
 
 module.exports = {
   comparison,
