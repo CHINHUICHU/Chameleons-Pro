@@ -57,11 +57,9 @@ $(document).ready(async () => {
     }
     try {
       const response = await axios.post('/api/1.0/user/signup', {
-        data: {
-          name: $('#signup-name').val(),
-          email: $('#signup-email').val(),
-          password: $('#signup-password').val(),
-        },
+        name: $('#signup-name').val(),
+        email: $('#signup-email').val(),
+        password: $('#signup-password').val(),
       });
 
       localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
@@ -139,10 +137,8 @@ $(document).ready(async () => {
 
     try {
       const response = await axios.post('/api/1.0/user/signin', {
-        data: {
-          email: $('#signin-email').val(),
-          password: $('#signin-password').val(),
-        },
+        email: $('#signin-email').val(),
+        password: $('#signin-password').val(),
       });
 
       localStorage.setItem('jwt', `Bearer ${response.data.data.access_token}`);
