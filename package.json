@@ -27,9 +27,11 @@
   "dependencies": {
     "@elastic/elasticsearch": "^8.4.0",
     "argon2": "^0.29.1",
+    "chai": "^4.3.6",
     "cors": "^2.8.5",
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
+    "express-validator": "^6.14.2",
     "graph-data-structure": "^2.0.0",
     "ioredis": "^5.2.3",
     "jieba-zh-tw": "^1.0.12",
@@ -40,6 +42,7 @@
     "minhash": "^0.0.9",
     "multer": "^1.4.5-lts.1",
     "node-ipc": "^11.1.0",
+    "should": "^13.2.3",
     "validator": "^13.7.0"
   }
 }
