@@ -11,6 +11,7 @@ const cache = new Redis({
 });
 
 cache.ready = false;
+
 cache.on('ready', () => {
   cache.ready = true;
   console.log('Cache is ready');
@@ -24,6 +25,25 @@ cache.on('error', () => {
 cache.on('end', () => {
   cache.ready = false;
   console.log('Cache is disconnected');
+});
+
+const subscriber = cache.duplicate();
+
+subscriber.subscribe('my-channel', (err, count) => {
+  if (err) {
+    // Just like other commands, subscribe() can fail for some reasons,
+    // ex network issues.
+    console.error('Failed to subscribe: %s', err.message);
+  } else {
+    // `count` represents the number of channels this client are currently subscribed to.
+    console.log(
+      `Subscribed successfully! This client is currently subscribed to ${count} channels.`
+    );
+  }
+});
+
+subscriber.on('message', (channel, message) => {
+  console.log(`Received ${message} from ${channel}`);
 });
 
 module.exports = { cache };
