@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../../.env' });
+require('dotenv').config();
 const { client } = require('../../server/models/database');
 
 const { DB_ARTICLE_INDEX, DB_COMPARE_INDEX, COMPARE_FINISHED } = process.env;
@@ -44,7 +44,21 @@ const updateCompareResult = async (
   }
 };
 
+const insertCompareResult = async (queryBody) => {
+  try {
+    const result = client.index({
+      index: DB_COMPARE_INDEX,
+      body: queryBody,
+    });
+    return result;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 module.exports = {
   updateArticle,
   updateCompareResult,
+  insertCompareResult,
 };
