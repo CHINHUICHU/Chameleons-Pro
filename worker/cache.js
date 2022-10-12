@@ -11,6 +11,10 @@ const cache = new Redis({
 });
 
 cache.ready = false;
+
+cache.on('connect', () => {
+  console.log('Worker cache connected...');
+});
 cache.on('ready', () => {
   cache.ready = true;
   console.log('Worker cache is ready');
