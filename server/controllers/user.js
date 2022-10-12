@@ -1,56 +1,14 @@
 require('dotenv').config();
-const validator = require('validator');
 const User = require('../models/user');
+const { validationResult } = require('express-validator');
 
 const signUp = async (req, res) => {
-  const user = req.body.data;
-  if (
-    !user.name ||
-    !user.email ||
-    !user.password ||
-    validator.isEmpty(user.name) ||
-    validator.isEmpty(user.email) ||
-    validator.isEmpty(user.password)
-  ) {
-    return res.status(400).send({
-      status_code: 400,
-      message: '使用者名稱、Email與密碼為必填資訊',
-    });
-  }
+  const user = req.body;
 
-  if (!validator.isEmail(user.email)) {
-    return res.status(400).send({
-      status_code: 400,
-      message: 'Email格式錯誤',
-    });
-  }
+  const errors = validationResult(req);
 
-  if (!validator.isLength(user.name, { min: 1, max: 20 })) {
-    return res.status(400).send({
-      status_code: 400,
-      message: '姓名長度不可超過20個字',
-    });
-  }
-
-  if (!validator.isLength(user.email, { min: 1, max: 40 })) {
-    return res.status(400).send({
-      status_code: 400,
-      message: 'Email長度不可超過40個字元',
-    });
-  }
-
-  if (!validator.isLength(user.password, { min: 1, max: 40 })) {
-    return res.status(400).send({
-      status_code: 400,
-      message: '密碼長度不可超過40個字元',
-    });
-  }
-
-  if (!validator.isAlphanumeric(user.password)) {
-    return res.status(400).send({
-      status_code: 400,
-      message: '密碼只能包含大小寫英文字母與數字',
-    });
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array() });
   }
 
   const result = await User.signUp(user);
@@ -58,48 +16,13 @@ const signUp = async (req, res) => {
 };
 
 const signIn = async (req, res) => {
-  const user = req.body.data;
+  const user = req.body;
 
-  if (
-    !user.email ||
-    !user.password ||
-    validator.isEmpty(user.email) ||
-    validator.isEmpty(user.password)
-  ) {
-    return res.status(400).send({
-      status_code: 400,
-      message: 'Email與密碼為必填資訊',
-    });
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ error: errors.array() });
   }
-
-  if (!validator.isEmail(user.email)) {
-    return res.status(400).send({
-      status_code: 400,
-      message: 'Email格式錯誤',
-    });
-  }
-
-  if (!validator.isLength(user.email, { min: 1, max: 40 })) {
-    return res.status(400).send({
-      status_code: 400,
-      message: 'Email長度不可超過40個字元',
-    });
-  }
-
-  if (!validator.isLength(user.password, { min: 1, max: 40 })) {
-    return res.status(400).send({
-      status_code: 400,
-      message: '密碼長度不可超過40個字元',
-    });
-  }
-
-  if (!validator.isAlphanumeric(user.password)) {
-    return res.status(400).send({
-      status_code: 400,
-      message: '密碼只能包含大小寫英文字母與數字',
-    });
-  }
-
   const result = await User.signIn(user);
   return res.status(result.status_code).send(result);
 };
