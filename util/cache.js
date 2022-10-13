@@ -43,7 +43,7 @@ subscriber.subscribe('my-channel', (err, count) => {
 });
 
 subscriber.on('message', (channel, message) => {
-  console.log(`Received ${message} from ${channel}`);
+  console.log(JSON.parse(message));
 });
 
-module.exports = { cache };
+module.exports = { cache, subscriber };
