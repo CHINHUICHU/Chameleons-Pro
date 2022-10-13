@@ -1,5 +1,4 @@
 require('dotenv').config();
-const { Worker } = require('worker_threads');
 const path = require('path');
 
 const stopWord = require('../../util/stopWord');
@@ -22,8 +21,6 @@ const {
 } = require('../models/article');
 
 const { cache } = require('../../util/cache');
-
-const worker = new Worker(path.resolve('./worker/worker.js'));
 
 const {
   MODE_SINGLE,
@@ -52,11 +49,9 @@ const comparison = async (req, res, next) => {
 
   const [source, target] = articles.all;
 
-  // const isLongArticle =
-  //   sourceArticle.content.length >= 2000 ||
-  //   targetArticle.content.length >= 2000;
-
-  // console.log('long article', isLongArticle);
+  const isLongArticle =
+    sourceArticle.content.length >= 20000 ||
+    targetArticle.content.length >= 20000;
 
   if (cache.ready) {
     const insertArtile = [
@@ -132,7 +127,7 @@ const comparison = async (req, res, next) => {
   });
 
   try {
-    const insertArtile = [
+    const insertArticle = [
       {
         index: {
           _index: DB_ARTICLE_INDEX,
@@ -163,7 +158,7 @@ const comparison = async (req, res, next) => {
       },
     ];
 
-    const insertArticlesResult = await insertArticles(insertArtile);
+    const insertArticlesResult = await insertArticles(insertArticle);
 
     console.log(insertArticlesResult.items);
 
@@ -213,6 +208,52 @@ const multipleComparison = async (req, res) => {
   const insertedArticles = [];
 
   // const isTimeConsumingJob = req.body.data.length > 10;
+
+  if (cache.ready) {
+    req.body.data.forEach((element) => {
+      // article preprocessing
+      const article = articles.newArticle(
+        element.title,
+        element.author,
+        element.content
+      );
+
+      // prepare data to insert into database
+      insertedArticles.push(
+        {
+          index: {
+            _index: process.env.DB_ARTICLE_INDEX,
+          },
+        },
+        {
+          title: article.title,
+          author: article.author,
+          content: article.content,
+          processed_content: article.synonym,
+          tag: article.tags,
+          user_id: req.user.user_id,
+          create_time: Date.now(),
+        }
+      );
+    });
+
+    // const insertArticlesResult = await insertArticles(insertedArticles);
+
+    // for (let i = 0; i < articles.numberOfArticles; i++) {
+    //   articles.all[i].id = insertArticlesResult.items[i].index._id;
+    // }
+
+    await cache.lpush(
+      'chinese-article-compare',
+      JSON.stringify({
+        user_id: req.user.user_id,
+        compare_mode: +MODE_MULTIPLE,
+        articles: articles.all,
+      })
+    );
+
+    return res.send('ok');
+  }
 
   req.body.data.forEach((element) => {
     // article preprocessing
@@ -280,7 +321,6 @@ const multipleComparison = async (req, res) => {
       });
 
       compareResult.push({
-        compare_mode: 2,
         similarity,
         source_id: insertArticlesResult.items[i].index._id,
         target_id: insertArticlesResult.items[j].index._id,
@@ -291,7 +331,7 @@ const multipleComparison = async (req, res) => {
 
   await insertCompareResult({
     user_id: req.user.user_id,
-    compare_mode: 2,
+    compare_mode: +MODE_MULTIPLE,
     match_result: compareResult,
     create_time: Date.now(),
   });
@@ -347,31 +387,15 @@ const getArticles = async (req, res) => {
 };
 
 const analyzeArticle = async (req, res) => {
-  const article = req.body.data;
-
-  const tokenizedArticle = [];
-  const articleSplit = article.content.split(/(?:，|。|\n|！|？|：|；)+/);
-
-  for (const sentence of articleSplit) {
-    tokenizedArticle.push(jieba.cut(sentence));
-  }
-
-  const tagNumber = 20;
-  const articleTag = jieba.extract(article.content, tagNumber);
-  const articleTagKeywords = articleTag.map((element) => element.word);
-  article.tag = articleTagKeywords;
-
-  const articleFiltered = filterStopWords(tokenizedArticle);
-
-  const articleSynonymized = findSynonym(articleFiltered);
+  const { title, author, content } = req.body.data;
+  const article = new Article(title, author, content);
+  article.extractTag().splitSentence().tokenizer();
+  article.filtered = stopWord.filterStopWords(article.tokens);
+  article.synonym = synonym.findSynonym(article.filtered);
 
   const responseSize = 10;
-  const searchTags = [];
-  articleTagKeywords.forEach((element) => {
-    searchTags.push({ match: { tag: element } });
-  });
 
-  const searchResponse = await searchArticlesByTag(responseSize, searchTags);
+  const searchResponse = await searchArticlesByTag(responseSize, article.tags);
   const insertResult = await insertArticles([
     {
       index: {
@@ -382,7 +406,7 @@ const analyzeArticle = async (req, res) => {
       title: article.title,
       author: article.author,
       content: article.content,
-      processed_content: articleSynonymized,
+      processed_content: article.synonym,
       tag: article.tag,
       user_id: req.user.user_id,
       create_time: Date.now(),
@@ -400,22 +424,13 @@ const analyzeArticle = async (req, res) => {
     i += 1
   ) {
     const articleSimilarity = calculateSimilarity(
-      articleSynonymized.flat(),
+      article.synonym.flat(),
       searchResponse.hits.hits[i]._source.processed_content.flat()
     );
     let result;
 
     if (articleSimilarity >= 0.1) {
       articleSimilarities.push(articleSimilarity);
-
-      result = findMatchedKeyword(
-        articleSplit,
-        searchResponse.hits.hits[i]._source.content.split(
-          /(?:，|。|\n|！|？|：|；)+/
-        ),
-        articleSynonymized,
-        searchResponse.hits.hits[i]._source.processed_content
-      );
 
       similarArticles.push({
         title: searchResponse.hits.hits[i]._source.title,
@@ -436,7 +451,7 @@ const analyzeArticle = async (req, res) => {
 
   await insertCompareResult({
     user_id: req.user.user_id,
-    compare_mode: 3,
+    compare_mode: +MODE_UPLOAD,
     match_result: compareResult,
     create_time: Date.now(),
   });
@@ -467,7 +482,7 @@ function compare(a, b) {
   if (a.similarity > b.similarity) return -1;
   return 0;
 }
-// FIXME: map to reduce
+
 const getArticleRecords = async (req, res) => {
   const compareResults = await getCompareResult(req.user.user_id);
   const searchArticles = [];
@@ -507,10 +522,6 @@ const getArticleRecords = async (req, res) => {
 
   res.status(200).send({ data: highestSimilaityResult });
 };
-
-worker.on('message', (message) => {
-  console.log('main thread got message', message);
-});
 
 module.exports = {
   comparison,
