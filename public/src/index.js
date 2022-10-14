@@ -1,4 +1,11 @@
 /* eslint-disable no-undef */
+
+const compareModeMap = {
+  1: 'single',
+  2: 'multiple',
+  3: 'upload',
+};
+
 $(document).ready(async () => {
   // $('#script').load('../layout/script.html');
   $('#page-header').load('../layout/header.html');
@@ -15,7 +22,7 @@ $(document).ready(async () => {
 
   if (token) {
     try {
-      await axios.get('/api/1.0/user/profile', {
+      response = await axios.get('/api/1.0/user/profile', {
         headers: header,
       });
       $('#signup-signin-link').hide();
@@ -25,6 +32,8 @@ $(document).ready(async () => {
       $('#single-compare-link').show().css({ display: 'block' });
       $('#multiple-compare-link').show().css({ display: 'block' });
       $('#upload-compare-link').show().css({ display: 'block' });
+
+      console.log(response.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -46,11 +55,46 @@ $(document).ready(async () => {
     window.location.href = '/search';
   });
 
-  // if ($('body').height() <) {
-  // }
+  const socket = io({ reconnectionDelayMax: 10000, auth: { token } });
+
+  // client-side
+  socket.on('connect', () => {
+    console.log('connect', socket.id);
+  });
+
+  socket.on('hello', (result) => {
+    setTimeout(() => {
+      Swal.fire({
+        icon: 'success',
+        text: '比對結果出爐！',
+        showConfirmButton: false,
+      });
+      localStorage.setItem('result', result);
+      // console.log(result);
+      window.location.href = `/${
+        compareModeMap[JSON.parse(result).compare_mode]
+      }`;
+    }, 5000);
+  });
+
+  // client-side
+  socket.on('connect_error', (err) => {
+    socket.disconnect();
+    console.log('disconnect due to auth error');
+  });
+
+  socket.on('disconnect', () => {
+    console.log('disconnected...');
+  });
 });
 
 $(document).on('click', '#signup-signin-link', () => {
-  console.log('ready to sign in');
   localStorage.setItem('previous-page', window.location.href);
 });
+
+// $(document).on('click', '.delay-check-result', () => {
+//   console.log('hey');
+//   window.location.href = `/${compareModeMap(
+//     JSON.parse(localStorage.getItem('result')).compare_mode
+//   )}`;
+// });
