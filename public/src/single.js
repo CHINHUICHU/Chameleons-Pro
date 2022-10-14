@@ -1,10 +1,85 @@
 /* eslint-disable no-undef */
+
 $(document).ready(async () => {
   $.fn.showFlex = function () {
     this.show();
     this.css('display', 'flex');
     this.css('justify-content', 'space-around');
   };
+
+  function prepareDisplayResult() {
+    $('#top').showFlex();
+    $('#nav').hide();
+    $('#main').hide();
+    $('#finish').hide();
+    $('#result').showFlex();
+    $('#main-result').showFlex();
+  }
+
+  function displaySimilarity(similarity) {
+    $('#similarity').html(`相似度：${(similarity * 100).toFixed(2)}%`);
+  }
+
+  function preprocessArticleContent(
+    sourceArticleContent,
+    targetArticleContent
+  ) {
+    let sourceArticleWithParagraph = '';
+    let targetArticleWithParagraph = '';
+    for (const paragraph of sourceArticleContent) {
+      sourceArticleWithParagraph += `<p>${paragraph}</p>`;
+    }
+    for (const paragraph of targetArticleContent) {
+      targetArticleWithParagraph += `<p>${paragraph}</p>`;
+    }
+    return [sourceArticleWithParagraph, targetArticleWithParagraph];
+  }
+
+  function displayArticleInfo(title, author, content, kind) {
+    $(`#result-${kind}-title`).val(title);
+    $(`#result-${kind}-author`).val(author);
+    $(`#result-${kind}-content`).html(content);
+  }
+
+  function markArticle(matchResult) {
+    for (const matchSentence of matchResult) {
+      $('#result-source-content').mark(matchSentence.sourceSentence);
+      $('#result-target-content').mark(matchSentence.targetSentence);
+    }
+  }
+
+  if (localStorage.getItem('result')) {
+    const { source, target, compareResult, similarity } = JSON.parse(
+      localStorage.getItem('result')
+    );
+
+    prepareDisplayResult();
+
+    displaySimilarity(similarity);
+
+    const [sourceArticleWithParagraph, targetArticleWithParagraph] =
+      preprocessArticleContent(
+        source.content.split('\n'),
+        target.content.split('\n')
+      );
+
+    displayArticleInfo(
+      source.title,
+      source.author,
+      sourceArticleWithParagraph,
+      'source'
+    );
+    displayArticleInfo(
+      target.title,
+      target.author,
+      targetArticleWithParagraph,
+      'target'
+    );
+
+    markArticle(compareResult);
+
+    localStorage.removeItem('result');
+  }
 
   $('#article-search').change(() => {
     localStorage.setItem('search', $('#article-search').val());
@@ -13,12 +88,12 @@ $(document).ready(async () => {
 
   $('#finish>button').click(async () => {
     if (
-      validator.isEmpty($('#article-A-title').val()) ||
-      validator.isEmpty($('#article-A-author').val()) ||
-      validator.isEmpty($('#article-A-content').val()) ||
-      validator.isEmpty($('#article-B-title').val()) ||
-      validator.isEmpty($('#article-B-author').val()) ||
-      validator.isEmpty($('#article-B-content').val())
+      validator.isEmpty($('#article-source-title').val()) ||
+      validator.isEmpty($('#article-source-author').val()) ||
+      validator.isEmpty($('#article-source-content').val()) ||
+      validator.isEmpty($('#article-target-title').val()) ||
+      validator.isEmpty($('#article-target-author').val()) ||
+      validator.isEmpty($('#article-target-content').val())
     ) {
       Swal.fire({
         icon: 'error',
@@ -29,8 +104,10 @@ $(document).ready(async () => {
     }
 
     if (
-      !validator.isLength($('#article-A-title').val(), { min: 1, max: 50 }) ||
-      !validator.isLength($('#article-B-title').val(), { min: 1, max: 50 })
+      !validator.isLength($('#article-source-title').val(), {
+        max: 50,
+      }) ||
+      !validator.isLength($('#article-target-title').val(), { min: 1, max: 50 })
     ) {
       Swal.fire({
         icon: 'error',
@@ -41,8 +118,12 @@ $(document).ready(async () => {
     }
 
     if (
-      !validator.isLength($('#article-A-author').val(), { min: 1, max: 20 }) ||
-      !validator.isLength($('#article-B-author').val(), { min: 1, max: 20 })
+      !validator.isLength($('#article-source-author').val(), {
+        max: 20,
+      }) ||
+      !validator.isLength($('#article-target-author').val(), {
+        max: 20,
+      })
     ) {
       Swal.fire({
         icon: 'error',
@@ -53,12 +134,11 @@ $(document).ready(async () => {
     }
 
     if (
-      !validator.isLength($('#article-A-content').val(), {
+      !validator.isLength($('#article-source-content').val(), {
         min: 1,
         max: 100000,
       }) ||
-      !validator.isLength($('#article-B-content').val(), {
-        min: 1,
+      !validator.isLength($('#article-target-content').val(), {
         max: 100000,
       })
     ) {
@@ -76,81 +156,85 @@ $(document).ready(async () => {
       Authorization: token,
     };
 
-    const response = await axios.post(
-      '/api/1.0/articles/single',
-      {
-        data: {
-          sourceArticle: {
-            title: $('#article-A-title')
-              .val()
-              .replaceAll('<', '&lt;')
-              .replaceAll('>', '&gt;'),
-            author: $('#article-A-author')
-              .val()
-              .replaceAll('<', '&lt;')
-              .replaceAll('>', '&gt;'),
-            content: $('#article-A-content')
-              .val()
-              .replaceAll('<', '&lt;')
-              .replaceAll('>', '&gt;'),
-          },
-          targetArticle: {
-            title: $('#article-B-title')
-              .val()
-              .replaceAll('<', '&lt;')
-              .replaceAll('>', '&gt;'),
-            author: $('#article-B-author')
-              .val()
-              .replaceAll('<', '&lt;')
-              .replaceAll('>', '&gt;'),
-            content: $('#article-B-content')
-              .val()
-              .replaceAll('<', '&lt;')
-              .replaceAll('>', '&gt;'),
+    try {
+      const response = await axios.post(
+        '/api/1.0/articles/single',
+        {
+          data: {
+            sourceArticle: {
+              title: $('#article-source-title')
+                .val()
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;'),
+              author: $('#article-source-author')
+                .val()
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;'),
+              content: $('#article-source-content')
+                .val()
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;'),
+            },
+            targetArticle: {
+              title: $('#article-target-title')
+                .val()
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;'),
+              author: $('#article-target-author')
+                .val()
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;'),
+              content: $('#article-target-content')
+                .val()
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;'),
+            },
           },
         },
-      },
-      { headers: header }
-    );
+        { headers: header }
+      );
 
-    const { matchResult, similarity } = response.data.data;
+      if (response.data.data) {
+        prepareDisplayResult();
 
-    $('#top').showFlex();
-    $('#nav').hide();
-    $('#main').hide();
-    $('#finish').hide();
-    $('#result').showFlex();
-    $('#main-result').showFlex();
+        const { matchResult, similarity } = response.data.data;
 
-    $('#similarity').html(`相似度：${(similarity * 100).toFixed(2)}%`);
+        displaySimilarity(similarity);
 
-    $('#progress>div').css({
-      style: `width: ${similarity}`,
-    });
+        const [sourceArticleWithParagraph, targetArticleWithParagraph] =
+          preprocessArticleContent(
+            $('#article-source-content').val().split('\n'),
+            $('#article-target-content').val().split('\n')
+          );
 
-    const sourceArticleParagraphs = $('#article-A-content').val().split('\n');
-    const targetArticleParagraphs = $('#article-B-content').val().split('\n');
+        displayArticleInfo(
+          $('#article-source-title').val(),
+          $('#article-source-author').val(),
+          sourceArticleWithParagraph,
+          'source'
+        );
+        displayArticleInfo(
+          $('#article-target-title').val(),
+          $('#article-target-author').val(),
+          targetArticleWithParagraph,
+          'target'
+        );
 
-    let sourceArticleWithParagraph = '';
-    let targetArticleWithParagraph = '';
-    for (const paragraph of sourceArticleParagraphs) {
-      sourceArticleWithParagraph += `<p>${paragraph}</p>`;
-    }
-    for (const paragraph of targetArticleParagraphs) {
-      targetArticleWithParagraph += `<p>${paragraph}</p>`;
-    }
-
-    $('#result-A-title').val($('#article-A-title').val());
-    $('#result-A-author').val($('#article-A-author').val());
-    $('#result-A-content').html(sourceArticleWithParagraph);
-
-    $('#result-B-title').val($('#article-B-title').val());
-    $('#result-B-author').val($('#article-B-author').val());
-    $('#result-B-content').html(targetArticleWithParagraph);
-
-    for (const matchSentence of matchResult) {
-      $('#result-A-content').mark(matchSentence.sourceSentence);
-      $('#result-B-content').mark(matchSentence.targetSentence);
+        markArticle(matchResult);
+      } else {
+        Swal.fire({
+          icon: 'success',
+          text: response.data.message,
+          showConfirmButton: false,
+        });
+        console.log(response.data.message);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        text: error.response.data.message,
+        showConfirmButton: false,
+      });
     }
   });
 });
