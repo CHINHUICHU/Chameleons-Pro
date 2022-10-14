@@ -42,7 +42,6 @@ async function getArticles(page) {
 
 $(document).ready(async () => {
   if (localStorage.getItem('current-page')) {
-    console.log(localStorage.getItem('current-page'));
     const currentPage = +localStorage.getItem('current-page').split('-')[1];
     const pageNumber = +localStorage.getItem('pageNumber');
     await getArticles(currentPage);

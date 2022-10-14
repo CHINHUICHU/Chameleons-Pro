@@ -1,7 +1,5 @@
 /* eslint-disable no-undef */
 $(document).ready(async () => {
-  console.log('3', localStorage.getItem('jwt'));
-
   $.fn.showFlex = function () {
     this.show();
     this.css('display', 'flex');
@@ -73,13 +71,10 @@ $(document).ready(async () => {
     }
 
     const token = localStorage.getItem('jwt');
-    console.log('token', token);
     const header = {
       'Content-Type': 'application/json',
       Authorization: token,
     };
-
-    console.log('hearder', header);
 
     const response = await axios.post(
       '/api/1.0/articles/single',
@@ -119,8 +114,6 @@ $(document).ready(async () => {
     );
 
     const { matchResult, similarity } = response.data.data;
-
-    console.log(matchResult);
 
     $('#top').showFlex();
     $('#nav').hide();

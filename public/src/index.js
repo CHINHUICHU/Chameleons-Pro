@@ -4,8 +4,6 @@ $(document).ready(async () => {
   $('#page-header').load('../layout/header.html');
   $('#page-footer').load('../layout/footer.html');
   if (localStorage.getItem('current-page') && localStorage.getItem('search')) {
-    console.log('test');
-    console.log(window.location.href);
     localStorage.removeItem('current-page');
   }
 
@@ -32,13 +30,7 @@ $(document).ready(async () => {
     }
   }
 
-  // $('#signup-signin-link').click(() => {
-  //   console.log('ready to sign in');
-  //   localStorage.setItem('previous-page', window.location.href);
-  // });
-
   $('#logout-link').click(() => {
-    console.log('log out');
     localStorage.removeItem('jwt');
     window.location.href = '/';
     $('#logout-link').hide();

@@ -13,7 +13,6 @@ $(document).ready(async () => {
     2: '多篇比對',
     3: '上傳比對',
   };
-  console.log(response);
   const records = response.data.data;
   for (let i = 0; i < records.length; i += 1) {
     const compareDate = Date(records[i].create_time)

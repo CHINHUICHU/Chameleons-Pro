@@ -1,4 +1,5 @@
 /* eslint-disable no-undef */
+
 $(document).ready(async () => {
   $('#signup-submit').click(async (e) => {
     e.preventDefault();
@@ -23,7 +24,7 @@ $(document).ready(async () => {
       return;
     }
 
-    if (!validator.isLength($('#signup-name').val(), { min: 1, max: 20 })) {
+    if (!validator.isLength($('#signup-name').val(), { max: 20 })) {
       Swal.fire({
         icon: 'error',
         text: '姓名長度不可超過20個字',
@@ -31,7 +32,7 @@ $(document).ready(async () => {
       });
       return;
     }
-    if (!validator.isLength($('#signup-email').val(), { min: 1, max: 40 })) {
+    if (!validator.isLength($('#signup-email').val(), { max: 40 })) {
       Swal.fire({
         icon: 'error',
         text: 'Email長度不可超過40個字元',
@@ -39,7 +40,7 @@ $(document).ready(async () => {
       });
       return;
     }
-    if (!validator.isLength($('#signup-password').val(), { min: 1, max: 40 })) {
+    if (!validator.isLength($('#signup-password').val(), { max: 40 })) {
       Swal.fire({
         icon: 'error',
         text: '密碼長度不可超過40個字元',
@@ -78,7 +79,7 @@ $(document).ready(async () => {
     } catch (error) {
       Swal.fire({
         icon: 'error',
-        text: error.response.data.message,
+        text: error.response.data.error[0].msg,
         showConfirmButton: false,
       });
     }
@@ -108,7 +109,7 @@ $(document).ready(async () => {
       return;
     }
 
-    if (!validator.isLength($('#signin-email').val(), { min: 1, max: 40 })) {
+    if (!validator.isLength($('#signin-email').val(), { max: 40 })) {
       Swal.fire({
         icon: 'error',
         text: 'Email長度不可超過40個字元',
@@ -117,7 +118,7 @@ $(document).ready(async () => {
       return;
     }
 
-    if (!validator.isLength($('#signin-password').val(), { min: 1, max: 40 })) {
+    if (!validator.isLength($('#signin-password').val(), { max: 40 })) {
       Swal.fire({
         icon: 'error',
         text: 'Email長度不可超過40個字元',
@@ -150,13 +151,11 @@ $(document).ready(async () => {
         text: '歡迎登入',
         showConfirmButton: false,
       });
-      // window.location.href = '/';
       window.location.href = localStorage.getItem('previous-page');
     } catch (error) {
-      console.log(error);
       Swal.fire({
         icon: 'error',
-        text: error.response.data.message,
+        text: error.response.data.error[0].msg,
         showConfirmButton: false,
       });
     }
