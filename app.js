@@ -133,6 +133,8 @@ app.use((err, req, res, next) => {
     .send({ error_code: 500, error_message: 'internal server error' });
 });
 
-app.listen(process.env.SERVER_PORT, () => {
-  console.log(`server is listening on port ${process.env.SERVER_PORT}...`);
-});
+module.exports = app;
+
+// app.listen(process.env.SERVER_PORT, () => {
+//   console.log(`server is listening on port ${process.env.SERVER_PORT}...`);
+// });
