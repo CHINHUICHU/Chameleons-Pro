@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { wrapAsync, authentication } = require('../../util/util');
+const { wrapAsync, appAuth } = require('../../util/util');
 const {
   comparison,
   multipleComparison,
@@ -11,15 +11,15 @@ const {
 
 router
   .route('/articles/single')
-  .post(wrapAsync(authentication), wrapAsync(comparison));
+  .post(wrapAsync(appAuth), wrapAsync(comparison));
 
 router
   .route('/articles/multiple')
-  .post(wrapAsync(authentication), wrapAsync(multipleComparison));
+  .post(wrapAsync(appAuth), wrapAsync(multipleComparison));
 
 router
   .route('/articles/analysis')
-  .post(wrapAsync(authentication), wrapAsync(analyzeArticle));
+  .post(wrapAsync(appAuth), wrapAsync(analyzeArticle));
 
 router.route('/articles/search').get(wrapAsync(getArticles));
 
@@ -27,6 +27,6 @@ router.route('/articles/details').get(wrapAsync(getArticleDetails));
 
 router
   .route('/articles/records')
-  .get(wrapAsync(authentication), wrapAsync(getArticleRecords));
+  .get(wrapAsync(appAuth), wrapAsync(getArticleRecords));
 
 module.exports = router;
