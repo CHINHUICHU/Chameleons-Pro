@@ -9,10 +9,9 @@ const {
   updateCompareResult,
   insertCompareResult,
 } = require('./model/article');
-// const _ = require('lodash');
 const Graph = require('graph-data-structure');
 
-const { MODE_SINGLE, MODE_MULTIPLE, MODE_UPLOAD } = process.env;
+const { MODE_SINGLE, MODE_MULTIPLE, MODE_UPLOAD, CHANNEL_NAME } = process.env;
 
 (async () => {
   while (true) {
@@ -54,8 +53,6 @@ const { MODE_SINGLE, MODE_MULTIPLE, MODE_UPLOAD } = process.env;
           target.synonym
         );
 
-        console.log('compare result', compareResult);
-
         const similarity = calculateSimilarity(
           source.synonym.flat(),
           target.synonym.flat()
@@ -73,7 +70,7 @@ const { MODE_SINGLE, MODE_MULTIPLE, MODE_UPLOAD } = process.env;
           compare_mode,
         };
 
-        await cache.publish('my-channel', JSON.stringify(finishedJob));
+        await cache.publish(CHANNEL_NAME, JSON.stringify(finishedJob));
       }
       if (job.compare_mode === +MODE_MULTIPLE) {
         const articles = new Articles();
