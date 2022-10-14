@@ -27,6 +27,7 @@
     <script src="https://unpkg.com/validator@latest/validator.min.js"></script>
     <!-- Bootstrap core CSS -->
     <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
     <script src="./src/index.js"></script>
     <script src="./src/single.js"></script>
 </head>
@@ -43,18 +44,18 @@
                     <div class="input-group-prepend">
                     <span class="input-group-text">標題</span>
                     </div>
-                    <input type="text" class="form-control" id="article-A-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
+                    <input type="text" class="form-control" id="article-source-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                 </div>
                 <div class="input-group mb-3 shadow-sm">
                     <div class="input-group-prepend">
                     <span class="input-group-text">作者</span>
                     </div>
-                    <input type="text" class="form-control" id="article-A-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
+                    <input type="text" class="form-control" id="article-source-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                 </div>
 
                 <div class="form-group textarea-container">
                     <!-- <a><img src="./images/outline_clear_black_24dp.png"></a> -->
-                    <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="article-A-content" rows="30" placeholder="請在此輸入來源文章內容⋯⋯" required></textarea>
+                    <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded"  id="article-source-content" rows="30" placeholder="請在此輸入來源文章內容⋯⋯" required></textarea>
                 </div>
 
             </div>
@@ -62,20 +63,20 @@
                 <h1 id="single-target" class="title">比對文章</h1>
                 <div class="input-group mb-3 shadow-sm">
                     <div class="input-group-prepend">
-                    <span class="input-group-text article-B-title">標題</span>
+                    <span class="input-group-text article-target-title">標題</span>
                     </div>
-                    <input type="text" class="form-control" id="article-B-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
+                    <input type="text" class="form-control" id="article-target-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                 </div>
                 <div class="input-group mb-3 shadow-sm">
                     <div class="input-group-prepend">
-                    <span class="input-group-text article-B-author">作者</span>
+                    <span class="input-group-text article-target-author">作者</span>
                     </div>
-                    <input type="text" class="form-control" id="article-B-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
+                    <input type="text" class="form-control" id="article-target-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" required>
                 </div>
 
                 <div class="form-group textarea-container">
                     <!-- <a><img src="./images/outline_clear_black_24dp.png"></a> -->
-                    <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded" id= "article-B-content" rows="30" placeholder="請在此輸入比對文章內容⋯⋯" required></textarea>
+                    <textarea class="form-control rounded-0 single-article-content shadow-sm p-3 mb-5 bg-white rounded" id= "article-target-content" rows="30" placeholder="請在此輸入比對文章內容⋯⋯" required></textarea>
                 </div>
             </div>
         </div>
@@ -96,16 +97,16 @@
                     <div class="input-group-prepend shadow-sm">
                     <span class="input-group-text">標題</span>
                     </div>
-                    <input type="text" class="form-control" id="result-A-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
+                    <input type="text" class="form-control" id="result-source-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend shadow-sm">
                     <span class="input-group-text">作者</span>
                     </div>
-                    <input type="text" class="form-control" id="result-A-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
+                    <input type="text" class="form-control" id="result-source-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
                 </div>
                 <div>可能相似段落</div>
-                <div class="border shadow-sm p-3 mb-5 bg-white rounded" id="result-A-content"></div>
+                <div class="border shadow-sm p-3 mb-5 bg-white rounded" id="result-source-content"></div>
 
             </div>
             <div>
@@ -114,16 +115,16 @@
                     <div class="input-group-prepend shadow-sm">
                     <span class="input-group-text">標題</span>
                     </div>
-                    <input type="text" class="form-control" id="result-B-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
+                    <input type="text" class="form-control" id="result-target-title" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
                 </div>
                 <div class="input-group mb-3">
                     <div class="input-group-prepend shadow-sm">
                     <span class="input-group-text">作者</span>
                     </div>
-                    <input type="text" class="form-control" id="result-B-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
+                    <input type="text" class="form-control" id="result-target-author" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
                 </div>
                 <div>可能相似段落</div>
-                <div class="border shadow-sm p-3 mb-5 bg-white rounded" id="result-B-content"></div>
+                <div class="border shadow-sm p-3 mb-5 bg-white rounded" id="result-target-content"></div>
 
             </div>
         </div>
