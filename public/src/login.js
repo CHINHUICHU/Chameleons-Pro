@@ -79,7 +79,7 @@ $(document).ready(async () => {
     } catch (error) {
       Swal.fire({
         icon: 'error',
-        text: error.response.data.error[0].msg,
+        text: error.response.data.message,
         showConfirmButton: false,
       });
     }
@@ -155,7 +155,7 @@ $(document).ready(async () => {
     } catch (error) {
       Swal.fire({
         icon: 'error',
-        text: error.response.data.error[0].msg,
+        text: error.response.data.message,
         showConfirmButton: false,
       });
     }
