@@ -29,11 +29,6 @@ function findMatchedSentence(
           ? findMatchedKeyword(source, target)
           : findMatchedKeyword(target, source);
 
-      console.log(
-        matchedKeywordCount / Math.max(source.length, target.length) >=
-          MATCH_THREASHOLD
-      );
-
       if (
         matchedKeywordCount / Math.max(source.length, target.length) >=
         MATCH_THREASHOLD
