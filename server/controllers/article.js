@@ -112,7 +112,9 @@ const comparison = async (req, res, next) => {
         })
       );
 
-      return res.send({ status: 'pending' });
+      return res
+        .status(200)
+        .send({ status_code: 200, data: null, message: '文章比對進行中' });
     } catch (error) {
       console.log(error);
       return res.send('redis error');
