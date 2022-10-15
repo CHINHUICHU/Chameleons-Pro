@@ -1,5 +1,185 @@
 /* eslint-disable no-undef */
+function showSimilarArticleNumber(articleNumber) {
+  $(`<h2>該文章共與${articleNumber}篇文章相似度超過10%</h2>`)
+    .css({ 'padding-left': '5%', 'margin-bottom': '5%' })
+    .appendTo('#upload-result');
+}
+
+function displayTitle(title, index) {
+  $(`<div class="input-group mb-3">
+  <div class="input-group-prepend shadow-sm">
+    <span class="input-group-text">標題</span>
+  </div>
+  <input type="text" class="form-control" aria-label="Default" 
+  aria-describedby="inputGroup-sizing-default" id="upload-result-title-${index}" readonly>
+</div>`)
+    .css({ 'padding-left': '5%', 'padding-right': '5%' })
+    .appendTo('.upload-result-area:last');
+
+  $(`#upload-result-title-${index}`).val(title);
+}
+
+function displayAuthor(author, index) {
+  $(`<div class="input-group mb-3">
+  <div class="input-group-prepend shadow-sm">
+    <span class="input-group-text">作者</span>
+  </div>
+  <input type="text" class="form-control" aria-label="Default" 
+  aria-describedby="inputGroup-sizing-default" id="upload-result-author-${index}" readonly>
+</div>`)
+    .css({ 'padding-left': '5%', 'padding-right': '5%' })
+    .appendTo('.upload-result-area:last');
+
+  $(`#upload-result-author-${index}`).val(author);
+}
+
+function displaySimilarity(similarity, index) {
+  $(`<div class="input-group mb-3">
+  <div class="input-group-prepend shadow-sm">
+    <span class="input-group-text">相似度</span>
+  </div>
+  <input type="text" class="form-control" aria-label="Default" 
+  aria-describedby="inputGroup-sizing-default" id="upload-result-similartiy-${index}" readonly>
+  </div>`)
+    .css({ 'padding-left': '5%', 'padding-right': '5%' })
+    .appendTo('.upload-result-area:last');
+
+  $(`#upload-result-similartiy-${index}`).val(
+    `${(similarity * 100).toFixed(2)}%`
+  );
+}
+
+function preprocessArticle(sourceParagraphs, targetParagraphs) {
+  let processedSource = '';
+  let processedTarget = '';
+  for (const paragraph of sourceParagraphs) {
+    processedSource += `<p>${paragraph}</p>`;
+  }
+  for (const paragraph of targetParagraphs) {
+    processedTarget += `<p>${paragraph}</p>`;
+  }
+
+  return [processedSource, processedTarget];
+}
+
+function displayCheckResultBtn(index) {
+  $('<button type="button">查看相似段落</button>')
+    .attr('id', `check-similar-paragraph-${index}`)
+    .css({ 'margin-left': '5%', 'margin-bottom': '3%' })
+    .addClass('check-upload-similar-paragraph btn btn-secondary')
+    .appendTo('.upload-result-area:last');
+}
+
+function prepareDisplayResult(kind) {
+  $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
+    .attr('id', `article-${kind}-content`)
+    .addClass('article-result border')
+    .css({
+      'margin-bottom': '20px',
+      width: '45%',
+      height: '500px',
+      'overflow-y': 'scroll',
+    })
+    .appendTo('#article-result');
+}
+
+function markArticle(matchResult) {
+  for (const matchSentence of matchResult) {
+    $('#article-source-content').mark(matchSentence.sourceSentence);
+    $('#article-target-content').mark(matchSentence.targetSentence);
+  }
+}
+
+let response;
+
 $(document).ready(async () => {
+  if (localStorage.getItem('upload-result')) {
+    $('#upload-article-area').hide();
+    const { article, matchResult, similarArticles, similarity } = JSON.parse(
+      localStorage.getItem('upload-result')
+    );
+
+    showSimilarArticleNumber(similarArticles.length);
+
+    for (let i = 0; i < similarArticles.length; i += 1) {
+      $('<div class="upload-result-area"></div>').appendTo('#upload-result');
+
+      displayTitle(similarArticles[i].title, i);
+      displayAuthor(similarArticles[i].author, i);
+      displaySimilarity(similarity[i], i);
+      displayCheckResultBtn(i);
+    }
+
+    $('.check-upload-similar-paragraph').click(function (e) {
+      e.stopPropagation();
+      $('#article-result').remove();
+      const articleId = $(this).attr('id').split('-')[3];
+
+      $('<div></div>')
+        .attr('id', 'article-result')
+        .css({
+          display: 'flex',
+          'justify-content': 'space-around',
+          'padding-left': '5%',
+          'padding-right': '5%',
+          'margin-top': '3%',
+        })
+        .insertAfter($(this));
+
+      const [processedSource, processedTarget] = preprocessArticle(
+        article.content.split('\n'),
+        similarArticles[articleId].content.split('\n')
+      );
+
+      prepareDisplayResult('source');
+
+      $('#article-source-content').html(processedSource);
+
+      prepareDisplayResult('target');
+
+      $('#article-target-content').html(processedTarget);
+
+      // const { matchResult } = response.data.data;
+
+      markArticle(matchResult[articleId]);
+    });
+
+    localStorage.removeItem('upload-result');
+
+    // $('.check-similar-paragraph').click(function (e) {
+    //   e.stopPropagation();
+    //   $('#article-result').remove();
+    //   const articleIds = $(this).attr('id').split('-');
+    //   const [source, target] = [articleIds[0], articleIds[2]];
+
+    //   $('<div class=" p-3 mb-5 bg-white rounded"></div>')
+    //     .attr('id', 'article-result')
+    //     .css({
+    //       display: 'flex',
+    //       'justify-content': 'space-around',
+    //       'padding-left': '5%',
+    //       'padding-right': '5%',
+    //       'margin-top': '3%',
+    //     })
+    //     .insertAfter($(this));
+
+    //   showArticle(source);
+    //   showArticle(target);
+
+    //   const [processedSource, processedTarget] = preprocessArticle(
+    //     articles[+source - 1].content.split('\n'),
+    //     articles[+target - 1].content.split('\n')
+    //   );
+
+    //   $(`#article-${source}-result`).html(processedSource);
+    //   $(`#article-${target}-result`).html(processedTarget);
+
+    //   markArticle(matchResult[$(this).attr('id')], source, target);
+    // });
+
+    // localStorage.removeItem('result');
+  }
+
   $('#upload-submit').click(async () => {
     if (
       validator.isEmpty($('#upload-article-title').val()) ||
@@ -14,9 +194,7 @@ $(document).ready(async () => {
       return;
     }
 
-    if (
-      !validator.isLength($('#upload-article-title').val(), { min: 1, max: 50 })
-    ) {
+    if (!validator.isLength($('#upload-article-title').val(), { max: 50 })) {
       Swal.fire({
         icon: 'error',
         text: '文章標題字數上限為50字',
@@ -27,7 +205,6 @@ $(document).ready(async () => {
 
     if (
       !validator.isLength($('#upload-article-author').val(), {
-        min: 1,
         max: 20,
       })
     ) {
@@ -41,7 +218,6 @@ $(document).ready(async () => {
 
     if (
       !validator.isLength($('#upload-article-content').val(), {
-        min: 1,
         max: 100000,
       })
     ) {
@@ -73,7 +249,7 @@ $(document).ready(async () => {
         .replaceAll('>', '&gt;'),
     };
     try {
-      const response = await axios.post(
+      response = await axios.post(
         '/api/1.0/articles/analysis',
         {
           data: uploadArticle,
@@ -81,126 +257,71 @@ $(document).ready(async () => {
         { headers: header }
       );
 
-      const { article, similarity, matchResult } = response.data.data;
+      if (response.data.data) {
+        const { article, similarity } = response.data.data;
 
-      const articleNumber = article.length;
-      $(`<h2>該文章共與${articleNumber}篇文章相似度超過10%</h2>`)
-        .css({ 'padding-left': '5%', 'margin-bottom': '5%' })
-        .appendTo('#upload-result');
+        showSimilarArticleNumber(article.length);
 
-      for (let i = 0; i < articleNumber; i += 1) {
-        $('<div class="upload-result-area"></div>').appendTo('#upload-result');
-        $(`<div class="input-group mb-3">
-        <div class="input-group-prepend shadow-sm">
-          <span class="input-group-text">標題</span>
-        </div>
-        <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-title-${i}" readonly>
-      </div>`)
-          .css({ 'padding-left': '5%', 'padding-right': '5%' })
-          .appendTo('.upload-result-area:last');
+        for (let i = 0; i < article.length; i += 1) {
+          $('<div class="upload-result-area"></div>').appendTo(
+            '#upload-result'
+          );
 
-        $(`#upload-result-title-${i}`).val(article[i].title);
-
-        $(`<div class="input-group mb-3">
-      <div class="input-group-prepend shadow-sm">
-        <span class="input-group-text">作者</span>
-      </div>
-      <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-author-${i}" readonly>
-    </div>`)
-          .css({ 'padding-left': '5%', 'padding-right': '5%' })
-          .appendTo('.upload-result-area:last');
-
-        $(`#upload-result-author-${i}`).val(article[i].author);
-
-        $(`<div class="input-group mb-3">
-    <div class="input-group-prepend shadow-sm">
-      <span class="input-group-text">相似度</span>
-    </div>
-    <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="upload-result-similartiy-${i}" readonly>
-  </div>`)
-          .css({ 'padding-left': '5%', 'padding-right': '5%' })
-          .appendTo('.upload-result-area:last');
-
-        $(`#upload-result-similartiy-${i}`).val(
-          `${(similarity[i] * 100).toFixed(2)}%`
-        );
-
-        $('<button type="button">查看相似段落</button>')
-          .attr('id', `check-similar-paragraph-${i}`)
-          .css({ 'margin-left': '5%', 'margin-bottom': '3%' })
-          .addClass('check-upload-similar-paragraph btn btn-secondary')
-          .appendTo('.upload-result-area:last');
+          displayTitle(article[i].title, i);
+          displayAuthor(article[i].author, i);
+          displaySimilarity(similarity[i], i);
+          displayCheckResultBtn(i);
+        }
+      } else {
+        Swal.fire({
+          icon: 'success',
+          text: response.data.message,
+          showConfirmButton: false,
+        });
       }
-      $('.check-upload-similar-paragraph').click(function (e) {
-        e.stopPropagation();
-        $('#article-result').remove();
-        const articleId = $(this).attr('id').split('-')[3];
-
-        $('<div></div>')
-          .attr('id', 'article-result')
-          .css({
-            display: 'flex',
-            'justify-content': 'space-around',
-            'padding-left': '5%',
-            'padding-right': '5%',
-            'margin-top': '3%',
-          })
-          .insertAfter($(this));
-
-        $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
-          .attr('id', 'article-source-content')
-          .addClass('article-result border')
-          .css({
-            'margin-bottom': '20px',
-            width: '45%',
-            height: '500px',
-            'overflow-y': 'scroll',
-          })
-          .appendTo('#article-result');
-
-        const articleSourceParagraphs = $('#upload-article-content')
-          .val()
-          .split('\n');
-        const articleTargetParagraphs = article[articleId].content.split('\n');
-
-        let articleSourceWithParagraph = '';
-        let articleTargetWithParagraph = '';
-        for (const paragraph of articleSourceParagraphs) {
-          articleSourceWithParagraph += `<p>${paragraph}</p>`;
-        }
-        for (const paragraph of articleTargetParagraphs) {
-          articleTargetWithParagraph += `<p>${paragraph}</p>`;
-        }
-
-        $('#article-source-content').html(articleSourceWithParagraph);
-
-        $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
-          .attr('id', 'article-target-content')
-          .addClass('article-result border')
-          .css({
-            'margin-bottom': '20px',
-            width: '45%',
-            height: '500px',
-            'overflow-y': 'scroll',
-          })
-          .appendTo('#article-result');
-
-        $('#article-target-content').html(articleTargetWithParagraph);
-
-        for (const matchSentence of matchResult[articleId]) {
-          $('#article-source-content').mark(matchSentence.sourceSentence);
-          $('#article-target-content').mark(matchSentence.targetSentence);
-        }
-      });
     } catch (error) {
+      console.log(error);
       Swal.fire({
         icon: 'error',
-        title: 'Oops...',
         text: error.response.data.message,
-      });
-      $('.swal2-confirm').click(() => {
-        window.location.href = '/';
+        showConfirmButton: false,
       });
     }
   });
+});
+
+$(document).on('click', '.check-upload-similar-paragraph', function (e) {
+  e.stopPropagation();
+  $('#article-result').remove();
+  const articleId = $(this).attr('id').split('-')[3];
+
+  const { article } = response.data.data;
+
+  $('<div></div>')
+    .attr('id', 'article-result')
+    .css({
+      display: 'flex',
+      'justify-content': 'space-around',
+      'padding-left': '5%',
+      'padding-right': '5%',
+      'margin-top': '3%',
+    })
+    .insertAfter($(this));
+
+  const [processedSource, processedTarget] = preprocessArticle(
+    $('#upload-article-content').val().split('\n'),
+    article[articleId].content.split('\n')
+  );
+
+  prepareDisplayResult('source');
+
+  $('#article-source-content').html(processedSource);
+
+  prepareDisplayResult('target');
+
+  $('#article-target-content').html(processedTarget);
+
+  const { matchResult } = response.data.data;
+
+  markArticle(matchResult[articleId]);
 });
