@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHAMELEONS PRO</title>
+    <link rel="icon" href="/images/main-logo-2.png"/>
+    <link rel="stylesheet" type="text/css" href="./style/login.css" media="all" />
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <!-- <div id="script"></div> -->
+    <link rel="stylesheet" type="text/css" href="./style/main.css" media="all" />
+    <!-- <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.es6.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js" integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="//apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js" integrity="sha512-tqaIiFJopq4lTBmFlWF0MNzzTpDsHyug8tJaaY0VkcH5AR2ANMJlcD+3fIL+RQ4JU3K6edt9OoySKfCCyKgkng==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.22.1/cytoscape.min.js" integrity="sha512-KTe+SDYh8ExHDmrSZuoKkFoFQDSU3ywInRi9SkE0ENpJu72GS+UAxd/l0CAXF8DaGGGOLKd7wKRoa7mEirvIpg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous"></script>
+    <!-- <link rel="icon" type="image/x-icon" href="./images/main-logo-2.png"/> -->
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.1/examples/sign-in/">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta2/css/all.min.css" integrity="sha512-YWzhKL2whUzgiheMoBFwW8CKV4qpHQAEuvilg9FAn5VJUDwKZZxkJNuGM4XkWuk94WCrrwslk8yWNGmY1EduTA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- <script src="./js/axios.min.js"></script> -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.1.0/axios.min.js" integrity="sha512-XBNfhLlCtb8qnULwqSg1EK2BgkP6KLmBsYWOdvCnOmtrQvV7paArUOYgAbBHEKeziyhqmY2o8iavAVtL4tvYDw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://unpkg.com/validator@latest/validator.min.js"></script>
+    <!-- Bootstrap core CSS -->
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js" integrity="sha384-7EyYLQZgWBi67fBtVxw60/OWl1kjsfrPFcaU0pp0nAh+i8FD068QogUvg85Ewy1k" crossorigin="anonymous"></script>
+    <script src="./src/index.js"></script>
+    <script src="./src/login.js"></script>
+</head>
+<body>
+
+
+    <div id="page-header"></div>
+    <div id="main-area">
+        <div class ="row pt-5">
+            <div class="col-md-6 mx-auto p-0">
+                <div class="card">
+                    <div class="login-box">
+                        <div class="login-snip">
+                            <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">登入</label>
+                            <input id="tab-2" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab">註冊</label>
+                            <div class="login-space">
+                                <div class="login needs-validation">
+                                    <div class="group">
+                                        <label for="user" class="label">信箱</label>
+                                        <input id="signin-email" type="email" class="input form-control"  name="email" placeholder="example@test.com" value="test123@test.com"required>
+                                        <div class="invalid-feedback">
+                                            請輸入信箱
+                                        </div>
+                                    </div>
+                                    <div class="group">
+                                        <label for="pass" class="label">密碼</label>
+                                        <input id="signin-password" type="password" class="input form-control" name="password"  value="123" data-type="password" placeholder="請輸入密碼" required>
+                                        <div class="invalid-feedback">
+                                            請輸入密碼
+                                        </div>
+                                    </div>
+                                    <div class="group">
+                                        <button id="signin-submit" type="submit" class="button">登入</button>
+                                    </div>
+                                    <div class="hr"></div>
+                                </div>
+                                <div class="sign-up-form needs-validation">
+                                    <div class="group">
+                                        <label for="user" class="label">姓名</label>
+                                        <input id="signup-name" type="text" class="input form-control" placeholder="請輸入姓名" required>
+                                        <div class="invalid-feedback">
+                                            請輸入姓名
+                                        </div>
+                                    </div>
+                                    <div class="group">
+                                        <label for="pass" class="label">信箱</label>
+                                        <input id="signup-email" type="email" class="input form-control" data-type="email" placeholder="example@test.com" required>
+                                        <div class="invalid-feedback">
+                                            請輸入信箱
+                                        </div>
+                                    </div>
+                                    <div class="group">
+                                        <label for="pass" class="label">密碼</label>
+                                        <input id="signup-password" type="password" class="input form-control" placeholder="請輸入密碼" required>
+                                        <div class="invalid-feedback">
+                                            請輸入密碼
+                                        </div>
+                                    </div>
+                                    <div class="group">
+                                        <button id="signup-submit" type="submit" class="button">註冊</button>
+                                    </div>
+                                    <div class="hr"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>   
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="page-footer"></div>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-u1OknCvxWvY5kfmNBILK2hRnQC3Pr17a+RTT6rIHI7NnikvbZlHgTPOOmMi466C8" crossorigin="anonymous"></script>
+</body>
+</html>

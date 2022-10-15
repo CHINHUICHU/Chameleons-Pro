@@ -1,0 +1,97 @@
+h1 {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 300;
+}
+
+.pagination-container {
+  margin: 5% auto;
+  text-align: center;
+  display: flex;
+  justify-content: space-around;
+}
+
+.pagination {
+  position: relative;
+}
+
+.pagination a {
+  position: relative;
+  display: inline-block;
+  color: #2c3e50;
+  text-decoration: none;
+  font-size: 1.2rem;
+  padding: 8px 16px 10px;
+}
+
+.pagination a:before {
+  z-index: -1;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  content: "";
+  top: 0;
+  left: 0;
+  background-color: #adb5bd;
+  border-radius: 24px;
+  transform: scale(0);
+  transition: all 0.2s;
+}
+
+.pagination a:hover,
+.pagination a .pagination-active {
+  color: #fff;
+}
+
+.pagination a:hover:before,
+.pagination a .pagination-active:before {
+  transform: scale(1);
+}
+
+.pagination .pagination-active {
+  color: #fff;
+}
+
+.pagination .pagination-active:before {
+  transform: scale(1);
+}
+
+.pagination-newer {
+  margin-right: 50px;
+}
+
+.pagination-older {
+  margin-left: 50px;
+}
+
+.crop-text-3 {
+    -webkit-line-clamp: 3;
+    overflow : hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+
+.search-area {
+  background-color: #e5e5e5 !important;
+}
+
+#retype {
+  color: #495057;
+  margin-bottom: 3%;
+}
+
+.pagination-inner a:hover {
+  background-color: #dee2e6;
+  border-radius: 50%;
+}
+
+.pagination-active {
+  background-color: #adb5bd;
+  border-radius: 50%;
+}
+
+.pagination-newer, .pagination-newer{
+  border-radius: 15%;
+}
+

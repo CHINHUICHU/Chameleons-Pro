@@ -1,0 +1,31 @@
+#intro {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.intro-div {
+    margin-top: 8% !important;
+}
+
+h1 h3 {
+    display: flex;
+    justify-content: center;
+}
+
+h1 {
+    font-size: 100px !important;
+}
+
+h3 {
+    font-size: 50px !important;
+}
+
+.container {
+    height: 80vh;
+}
+
+.btn-secondary {
+    margin-top: 10%;
+}

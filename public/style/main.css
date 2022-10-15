@@ -1,0 +1,104 @@
+@import url(//fonts.googleapis.com/earlyaccess/notosanstc.css);
+body{
+  font-family: 'Noto Sans TC',sans-serif !important;
+}
+
+#main-logo {
+    width: 12%;
+}
+
+#main-title {
+    width: 18%;
+}
+
+#main-image-area{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#main-image {
+    width: 80%;
+}
+
+.discription {
+    margin-bottom: 5%;
+}
+
+#introduction {
+    color: #495057;
+}
+
+#header, #header-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+a {
+    color: #495057 !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: #343a40 !important;
+}
+
+#header .nav li a {
+    color: #143601 !important;
+    text-decoration: none !important;
+}
+
+#header .nav li a:hover {
+    color: #538d22 !important;
+}
+
+.text-center {
+    color: #495057;
+}
+
+#member-link, #logout-link, #single-compare-link, #multiple-compare-link,#upload-compare-link {
+    display: none;
+}
+
+.main-intro {
+    margin-bottom: 4%;
+    height: 80%;
+    padding-top: 8%;
+    padding-bottom: 8%;
+}
+
+/* footer {
+    position: relative;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+} */
+
+body{ height:100vh; margin:0; }
+/* Trick */
+body{ 
+  display:flex; 
+  flex-direction:column; 
+}
+
+footer{
+  margin-top:auto; 
+}
+
+#page-header {
+    background-color: #cad2c5;
+}
+
+footer {
+    background-color: #a3b18a !important;
+}
+/* #main-area {
+    background-color: #f6fff8 !important;
+} */
+
+mark {
+    background-color: #ffcad4 !important;
+}
+
+

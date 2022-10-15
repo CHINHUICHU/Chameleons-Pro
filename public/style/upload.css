@@ -1,0 +1,22 @@
+
+#upload-introduction {
+    margin-bottom: 5%;
+}
+
+#upload-article-content {
+    height: 500px;
+}
+
+.swal2-styled.swal2-confirm {
+    background-color: #8d99ae !important;
+}
+
+.container {
+    margin-bottom: 4%;
+}
+
+#upload-result-area {
+    display: flex;
+    justify-content: center;
+}
+

@@ -1,0 +1,49 @@
+{
+  "name": "chamelemons-pro",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CHINHUICHU/Chameleons-Pro.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CHINHUICHU/Chameleons-Pro/issues"
+  },
+  "homepage": "https://github.com/CHINHUICHU/Chameleons-Pro#readme",
+  "devDependencies": {
+    "eslint": "^8.23.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-html": "^7.1.0",
+    "eslint-plugin-import": "^2.26.0",
+    "prettier": "^2.7.1",
+    "prettier-eslint": "^15.0.1"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.4.0",
+    "argon2": "^0.29.1",
+    "chai": "^4.3.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "express-validator": "^6.14.2",
+    "graph-data-structure": "^2.0.0",
+    "ioredis": "^5.2.3",
+    "jieba-zh-tw": "^1.0.12",
+    "js-jieba": "^1.0.12",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "mdb-ui-kit": "^5.0.0",
+    "minhash": "^0.0.9",
+    "multer": "^1.4.5-lts.1",
+    "node-ipc": "^11.1.0",
+    "should": "^13.2.3",
+    "socket.io": "^4.5.2",
+    "validator": "^13.7.0"
+  }
+}
