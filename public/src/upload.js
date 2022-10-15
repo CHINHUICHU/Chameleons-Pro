@@ -139,45 +139,10 @@ $(document).ready(async () => {
 
       $('#article-target-content').html(processedTarget);
 
-      // const { matchResult } = response.data.data;
-
       markArticle(matchResult[articleId]);
     });
 
     localStorage.removeItem('upload-result');
-
-    // $('.check-similar-paragraph').click(function (e) {
-    //   e.stopPropagation();
-    //   $('#article-result').remove();
-    //   const articleIds = $(this).attr('id').split('-');
-    //   const [source, target] = [articleIds[0], articleIds[2]];
-
-    //   $('<div class=" p-3 mb-5 bg-white rounded"></div>')
-    //     .attr('id', 'article-result')
-    //     .css({
-    //       display: 'flex',
-    //       'justify-content': 'space-around',
-    //       'padding-left': '5%',
-    //       'padding-right': '5%',
-    //       'margin-top': '3%',
-    //     })
-    //     .insertAfter($(this));
-
-    //   showArticle(source);
-    //   showArticle(target);
-
-    //   const [processedSource, processedTarget] = preprocessArticle(
-    //     articles[+source - 1].content.split('\n'),
-    //     articles[+target - 1].content.split('\n')
-    //   );
-
-    //   $(`#article-${source}-result`).html(processedSource);
-    //   $(`#article-${target}-result`).html(processedTarget);
-
-    //   markArticle(matchResult[$(this).attr('id')], source, target);
-    // });
-
-    // localStorage.removeItem('result');
   }
 
   $('#upload-submit').click(async () => {
