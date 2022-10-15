@@ -78,8 +78,8 @@ $(document).on('click', '.pagination-inner a', async function () {
 
 $(document).on('click', '.pagination-older', async () => {
   const previousActive = +$('.pagination-active').attr('id').split('-')[1];
-  await getArticles(previousActive - 1);
   if (previousActive > 1) {
+    await getArticles(previousActive - 1);
     $(`#page-${previousActive}`).removeClass('pagination-active');
     if (previousActive % 5 === 1) {
       $('.pagination-inner').empty();
