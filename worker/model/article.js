@@ -57,8 +57,30 @@ const insertCompareResult = async (queryBody) => {
   }
 };
 
+const searchArticlesByTag = async (responseSize, searchQuery) => {
+  try {
+    const searchResponse = await client.search({
+      index: DB_ARTICLE_INDEX,
+      body: {
+        size: responseSize,
+        query: {
+          bool: {
+            should: searchQuery,
+            minimum_should_match: 1,
+          },
+        },
+      },
+    });
+    return searchResponse;
+  } catch (error) {
+    console.log(error);
+    return error;
+  }
+};
+
 module.exports = {
   updateArticle,
   updateCompareResult,
   insertCompareResult,
+  searchArticlesByTag,
 };
