@@ -1,3 +1,4 @@
+require('dotenv').config();
 const createJieba = require('js-jieba');
 const {
   JiebaDict,
@@ -9,7 +10,10 @@ const {
 
 const jieba = createJieba(JiebaDict, HMMModel, UserDict, IDF, StopWords);
 
+const { LENGTHY_ARTICLE_THRESHOLD } = process.env;
+
 class Article {
+  id;
   tokens = [];
   tags = [];
   #TAG_NUMBER = 20;
@@ -58,6 +62,12 @@ class Articles {
 
   get numberOfArticles() {
     return this.articles.length;
+  }
+
+  checkLengthyContent() {
+    return this.articles.some((article) => {
+      article.content >= +LENGTHY_ARTICLE_THRESHOLD;
+    });
   }
 }
 
