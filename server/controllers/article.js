@@ -1,5 +1,4 @@
 require('dotenv').config();
-const path = require('path');
 
 const stopWord = require('../../util/stopWord');
 const synonym = require('../../util/synonym');
@@ -29,6 +28,10 @@ const {
   MATCH_PENDING,
   MATCH_FINISHED,
   DB_ARTICLE_INDEX,
+  LENGTHY_ARTICLE_THRESHOLD,
+  MUTIPLE_THRESHOLD,
+  UPLOAD_RESPONSE_THRESHOLD,
+  UPLOAD_RESPONSE_MIN_SIMILARITY,
 } = process.env;
 
 const comparison = async (req, res, next) => {
@@ -49,11 +52,11 @@ const comparison = async (req, res, next) => {
 
   const [source, target] = articles.all;
 
-  const isLongArticle =
-    sourceArticle.content.length >= 20000 ||
-    targetArticle.content.length >= 20000;
+  const hasLongArticle =
+    sourceArticle.content.length >= +LENGTHY_ARTICLE_THRESHOLD ||
+    targetArticle.content.length >= +LENGTHY_ARTICLE_THRESHOLD;
 
-  if (cache.ready) {
+  if (cache.ready && hasLongArticle) {
     const insertArtile = [
       {
         index: {
@@ -209,41 +212,40 @@ const multipleComparison = async (req, res) => {
 
   const insertedArticles = [];
 
-  // const isTimeConsumingJob = req.body.data.length > 10;
+  req.body.data.forEach((element) => {
+    // article preprocessing
+    const article = articles.newArticle(
+      element.title,
+      element.author,
+      element.content
+    );
 
-  if (cache.ready) {
-    req.body.data.forEach((element) => {
-      // article preprocessing
-      const article = articles.newArticle(
-        element.title,
-        element.author,
-        element.content
-      );
-
-      // prepare data to insert into database
-      insertedArticles.push(
-        {
-          index: {
-            _index: process.env.DB_ARTICLE_INDEX,
-          },
+    // prepare data to insert into database
+    insertedArticles.push(
+      {
+        index: {
+          _index: DB_ARTICLE_INDEX,
         },
-        {
-          title: article.title,
-          author: article.author,
-          content: article.content,
-          processed_content: article.synonym,
-          tag: article.tags,
-          user_id: req.user.user_id,
-          create_time: Date.now(),
-        }
-      );
-    });
+      },
+      {
+        title: article.title,
+        author: article.author,
+        content: article.content,
+        user_id: req.user.user_id,
+        create_time: Date.now(),
+      }
+    );
+  });
 
-    // const insertArticlesResult = await insertArticles(insertedArticles);
+  const hasTimeConsumingJob = req.body.data.length >= +MUTIPLE_THRESHOLD;
+  const hasLenthyContent = articles.checkLengthyContent();
 
-    // for (let i = 0; i < articles.numberOfArticles; i++) {
-    //   articles.all[i].id = insertArticlesResult.items[i].index._id;
-    // }
+  if (cache.ready && (hasTimeConsumingJob || hasLenthyContent)) {
+    const insertArticlesResult = await insertArticles(insertedArticles);
+
+    for (let i = 0; i < articles.numberOfArticles; i++) {
+      articles.all[i].id = insertArticlesResult.items[i].index._id;
+    }
 
     await cache.lpush(
       'chinese-article-compare',
@@ -254,16 +256,18 @@ const multipleComparison = async (req, res) => {
       })
     );
 
-    return res.send('ok');
+    return res
+      .status(200)
+      .send({ status_code: 200, data: null, message: '文章比對進行中' });
   }
 
-  req.body.data.forEach((element) => {
+  articles.all.forEach((article) => {
     // article preprocessing
-    const article = articles.newArticle(
-      element.title,
-      element.author,
-      element.content
-    );
+    // const article = articles.newArticle(
+    //   element.title,
+    //   element.author,
+    //   element.content
+    // );
 
     article.extractTag().splitSentence().tokenizer();
     article.filtered = stopWord.filterStopWords(article.tokens);
@@ -273,7 +277,7 @@ const multipleComparison = async (req, res) => {
     insertedArticles.push(
       {
         index: {
-          _index: process.env.DB_ARTICLE_INDEX,
+          _index: DB_ARTICLE_INDEX,
         },
       },
       {
@@ -346,6 +350,141 @@ const multipleComparison = async (req, res) => {
   });
 };
 
+const analyzeArticle = async (req, res) => {
+  const { title, author, content } = req.body.data;
+  const article = new Article(title, author, content);
+
+  if (cache.ready) {
+    const insertResult = await insertArticles([
+      {
+        index: {
+          _index: DB_ARTICLE_INDEX,
+        },
+      },
+      {
+        title: article.title,
+        author: article.author,
+        content: article.content,
+        user_id: req.user.user_id,
+        create_time: Date.now(),
+      },
+    ]);
+
+    // console.log(insertResult.items[0].index);
+
+    article.id = insertResult.items[0].index._id;
+
+    console.log(article.id);
+
+    await cache.lpush(
+      'chinese-article-compare',
+      JSON.stringify({
+        user_id: req.user.user_id,
+        compare_mode: +MODE_UPLOAD,
+        article,
+      })
+    );
+
+    return res
+      .status(200)
+      .send({ status_code: 200, data: null, message: '文章比對進行中' });
+  }
+
+  article.extractTag().splitSentence().tokenizer();
+  article.filtered = stopWord.filterStopWords(article.tokens);
+  article.synonym = synonym.findSynonym(article.filtered);
+
+  const insertResult = await insertArticles([
+    {
+      index: {
+        _index: DB_ARTICLE_INDEX,
+      },
+    },
+    {
+      title: article.title,
+      author: article.author,
+      content: article.content,
+      processed_content: article.synonym,
+      tag: article.tags,
+      user_id: req.user.user_id,
+      create_time: Date.now(),
+    },
+  ]);
+
+  const searchTags = [];
+  article.tags.forEach((element) => {
+    searchTags.push({ match: { tag: element } });
+  });
+
+  const responseSize = +UPLOAD_RESPONSE_THRESHOLD;
+  const searchResponse = await searchArticlesByTag(responseSize, searchTags);
+
+  console.log(searchResponse.hits.hits);
+
+  const articleSimilarities = [];
+  const similarArticles = [];
+  const matchResult = [];
+  const compareResult = [];
+
+  for (
+    let i = 0;
+    i < Math.min(searchResponse.hits.total.value, responseSize);
+    i += 1
+  ) {
+    const articleSimilarity = calculateSimilarity(
+      article.synonym.flat(),
+      searchResponse.hits.hits[i]._source.processed_content.flat()
+    );
+
+    let { title, author, content, processed_content } =
+      searchResponse.hits.hits[i]._source;
+
+    let compareArticle = new Article(title, author, content);
+    compareArticle.splitSentence();
+
+    let result = findMatchedSentence(
+      article.sentences,
+      compareArticle.sentences,
+      article.synonym,
+      processed_content
+    );
+
+    if (articleSimilarity >= +UPLOAD_RESPONSE_MIN_SIMILARITY) {
+      articleSimilarities.push(articleSimilarity);
+
+      similarArticles.push({
+        title,
+        author,
+        content,
+      });
+
+      matchResult.push(result);
+    }
+
+    compareResult.push({
+      similarity: articleSimilarity,
+      source_id: insertResult.items[0].index._id,
+      target_id: searchResponse.hits.hits[i]._id,
+      sentences: result,
+    });
+  }
+
+  await insertCompareResult({
+    user_id: req.user.user_id,
+    compare_mode: +MODE_UPLOAD,
+    match_result: compareResult,
+    create_time: Date.now(),
+  });
+
+  res.send({
+    data: {
+      similarity: articleSimilarities,
+      matchResult,
+      article: similarArticles,
+    },
+  });
+};
+
 const getArticles = async (req, res) => {
   const esSearchQuery = {
     must_not: [],
@@ -386,85 +525,6 @@ const getArticles = async (req, res) => {
   };
   res.send({ data: response });
   // res.send('ok');
-};
-
-const analyzeArticle = async (req, res) => {
-  const { title, author, content } = req.body.data;
-  const article = new Article(title, author, content);
-  article.extractTag().splitSentence().tokenizer();
-  article.filtered = stopWord.filterStopWords(article.tokens);
-  article.synonym = synonym.findSynonym(article.filtered);
-
-  const responseSize = 10;
-
-  const searchResponse = await searchArticlesByTag(responseSize, article.tags);
-  const insertResult = await insertArticles([
-    {
-      index: {
-        _index: process.env.DB_ARTICLE_INDEX,
-      },
-    },
-    {
-      title: article.title,
-      author: article.author,
-      content: article.content,
-      processed_content: article.synonym,
-      tag: article.tag,
-      user_id: req.user.user_id,
-      create_time: Date.now(),
-    },
-  ]);
-
-  const articleSimilarities = [];
-  const similarArticles = [];
-  const matchResult = [];
-  const compareResult = [];
-
-  for (
-    let i = 0;
-    i < Math.min(searchResponse.hits.total.value, responseSize);
-    i += 1
-  ) {
-    const articleSimilarity = calculateSimilarity(
-      article.synonym.flat(),
-      searchResponse.hits.hits[i]._source.processed_content.flat()
-    );
-    let result;
-
-    if (articleSimilarity >= 0.1) {
-      articleSimilarities.push(articleSimilarity);
-
-      similarArticles.push({
-        title: searchResponse.hits.hits[i]._source.title,
-        author: searchResponse.hits.hits[i]._source.author,
-        content: searchResponse.hits.hits[i]._source.content,
-      });
-
-      matchResult.push(result);
-    }
-
-    compareResult.push({
-      similarity: articleSimilarity,
-      source_id: insertResult.items[0].index._id,
-      target_id: searchResponse.hits.hits[i]._id,
-      sentences: result,
-    });
-  }
-
-  await insertCompareResult({
-    user_id: req.user.user_id,
-    compare_mode: +MODE_UPLOAD,
-    match_result: compareResult,
-    create_time: Date.now(),
-  });
-
-  res.send({
-    data: {
-      similarity: articleSimilarities,
-      matchResult,
-      article: similarArticles,
-    },
-  });
 };
 
 const getArticleDetails = async (req, res) => {
