@@ -81,7 +81,7 @@ $(document).ready(async () => {
   });
 
   // client-side
-  socket.on('connect_error', (err) => {
+  socket.on('connect_error', () => {
     socket.disconnect();
     // console.log('disconnect due to auth error');
   });

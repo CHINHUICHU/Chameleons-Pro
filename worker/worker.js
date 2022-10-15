@@ -1,3 +1,4 @@
+/* eslint-disable no-constant-condition */
 require('dotenv').config();
 const { cache } = require('./cache');
 const stopWord = require('../util/stopWord');
