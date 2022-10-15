@@ -82,10 +82,11 @@ const searchArticleById = async (id) => {
   }
 };
 
-const getCompareResult = async (userId) => {
+const getCompareResult = async (userId, pageSize, page) => {
   try {
     const result = await client.search({
       index: DB_COMPARE_INDEX,
+      from: (page - 1) * pageSize,
       body: {
         query: {
           term: {
