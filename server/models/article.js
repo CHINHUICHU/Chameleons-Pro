@@ -47,7 +47,7 @@ const searchArticle = async (page, pageSize, searchQuery) => {
 const searchArticlesByTag = async (responseSize, searchQuery) => {
   try {
     const searchResponse = await client.search({
-      index: process.env.DB_NAME,
+      index: DB_ARTICLE_INDEX,
       body: {
         size: responseSize,
         query: {
