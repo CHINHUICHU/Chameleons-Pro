@@ -1,5 +1,150 @@
 /* eslint-disable no-undef */
+function displayTitles(sourceTitle, targetTitle, compareIndex) {
+  $(`<div class="input-group mb-3">
+          <div class="input-group-prepend shadow-sm">
+            <span class="input-group-text" >來源</span>
+          </div>
+          <input type="text" class="form-control" aria-label="Default" 
+          aria-describedby="inputGroup-sizing-default" id="source-title-${compareIndex}" readonly>
+          </div>`)
+    .css({ 'padding-left': '5%', 'padding-right': '5%' })
+    .appendTo('#multiple-result');
+
+  $(`#source-title-${compareIndex}`).val(sourceTitle);
+
+  $(`<div class="input-group mb-3">
+        <div class="input-group-prepend shadow-sm">
+          <span class="input-group-text" >比對</span>
+        </div>
+        <input type="text" class="form-control" aria-label="Default"
+        aria-describedby="inputGroup-sizing-default"
+        id="target-title-${compareIndex}" readonly>
+        </div>`)
+    .css({ 'padding-left': '5%', 'padding-right': '5%' })
+    .appendTo('#multiple-result');
+
+  $(`#target-title-${compareIndex}`).val(targetTitle);
+}
+
+function displaySimilarity(edges, compareIndex) {
+  $(`<div class="input-group mb-3">
+  <div class="input-group-prepend shadow-sm">
+    <span class="input-group-text" >相似度</span>
+  </div>
+  <input type="text" class="form-control" aria-label="Default"
+  aria-describedby="inputGroup-sizing-default"
+  id="similartiy-${+edges[compareIndex].source}-and-${+edges[compareIndex]
+    .target}" readonly>
+</div>`)
+    .css({ 'padding-left': '5%', 'padding-right': '5%' })
+    .appendTo('#multiple-result');
+
+  $(
+    `#similartiy-${+edges[compareIndex].source}-and-${+edges[compareIndex]
+      .target}`
+  ).val(`${(+edges[compareIndex].weight * 100).toFixed(2)}%`);
+}
+
+function displayCheckButton(edges, compareIndex) {
+  $('<button type="button">查看相似段落</button>')
+    .attr(
+      'id',
+      `${+edges[compareIndex].source}-and-${+edges[compareIndex].target}`
+    )
+    .css({ 'margin-left': '5%', 'margin-bottom': '3%' })
+    .addClass('check-similar-paragraph btn btn-secondary')
+    .appendTo('#multiple-result');
+}
+
+function showArticle(articleId) {
+  $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
+    .attr('id', `article-${articleId}-result`)
+    .addClass('article-result border')
+    .css({
+      'margin-bottom': '20px',
+      width: '35%',
+      height: '500px',
+      'overflow-y': 'scroll',
+    })
+    .appendTo('#article-result');
+}
+
+function preprocessArticle(sourceParagraphs, targetParagraphs) {
+  let processedSource = '';
+  let processedTarget = '';
+  for (const paragraph of sourceParagraphs) {
+    processedSource += `<p>${paragraph}</p>`;
+  }
+  for (const paragraph of targetParagraphs) {
+    processedTarget += `<p>${paragraph}</p>`;
+  }
+
+  return [processedSource, processedTarget];
+}
+
+function markArticle(matchResult, source, target) {
+  for (const matchSentence of matchResult) {
+    $(`#article-${source}-result`).mark(matchSentence.sourceSentence);
+    $(`#article-${target}-result`).mark(matchSentence.targetSentence);
+  }
+}
+
+let response;
+
 $(document).ready(async () => {
+  if (localStorage.getItem('result')) {
+    $('#multiple').hide();
+    $('#multiple-finish').hide();
+
+    let { articles, matchResult, similarity } = JSON.parse(
+      localStorage.getItem('result')
+    );
+
+    for (let i = 0; i < similarity.links.length; i++) {
+      displayTitles(
+        articles[+similarity.links[i].source - 1].title,
+        articles[+similarity.links[i].target - 1].title,
+        i
+      );
+
+      displaySimilarity(similarity.links, i);
+      displayCheckButton(similarity.links, i);
+    }
+
+    $('.check-similar-paragraph').click(function (e) {
+      e.stopPropagation();
+      $('#article-result').remove();
+      const articleIds = $(this).attr('id').split('-');
+      const [source, target] = [articleIds[0], articleIds[2]];
+
+      $('<div class=" p-3 mb-5 bg-white rounded"></div>')
+        .attr('id', 'article-result')
+        .css({
+          display: 'flex',
+          'justify-content': 'space-around',
+          'padding-left': '5%',
+          'padding-right': '5%',
+          'margin-top': '3%',
+        })
+        .insertAfter($(this));
+
+      showArticle(source);
+      showArticle(target);
+
+      const [processedSource, processedTarget] = preprocessArticle(
+        articles[+source - 1].content.split('\n'),
+        articles[+target - 1].content.split('\n')
+      );
+
+      $(`#article-${source}-result`).html(processedSource);
+      $(`#article-${target}-result`).html(processedTarget);
+
+      markArticle(matchResult[$(this).attr('id')], source, target);
+    });
+
+    localStorage.removeItem('result');
+  }
+
   let comparedArticles = 2;
   $('#new-article').click(() => {
     comparedArticles += 1;
@@ -30,8 +175,6 @@ $(document).ready(async () => {
       $(this).attr('disabled', true);
     }
   });
-
-  let response;
 
   $('#multiple-submit').click(async () => {
     $('#multiple').hide();
@@ -105,6 +248,7 @@ $(document).ready(async () => {
           .replaceAll('>', '&gt;'),
       });
     }
+
     const token = localStorage.getItem('jwt');
     const header = {
       'Content-Type': 'application/json',
@@ -119,126 +263,59 @@ $(document).ready(async () => {
       { headers: header }
     );
 
-    const edges = response.data.data.similarity.links;
+    if (response.data.data) {
+      const edges = response.data.data.similarity.links;
 
-    const edgeNumber = edges.length;
+      for (let i = 0; i < edges.length; i += 1) {
+        const sourceTitle = $(`#article-${+edges[i].source}-title`).val();
+        const targetTitle = $(`#article-${+edges[i].target}-title`).val();
 
-    for (let i = 0; i < edgeNumber; i += 1) {
-      const sourceTitle = $(`#article-${+edges[i].source}-title`).val();
-      const targetTitle = $(`#article-${+edges[i].target}-title`).val();
-
-      $(`<div class="input-group mb-3">
-        <div class="input-group-prepend shadow-sm">
-          <span class="input-group-text" >來源</span>
-        </div>
-        <input type="text" class="form-control" aria-label="Default" aria-describedby="inputGroup-sizing-default" id="source-title-${i}" readonly>
-        </div>`)
-        .css({ 'padding-left': '5%', 'padding-right': '5%' })
-        .appendTo('#multiple-result');
-
-      $(`#source-title-${i}`).val(sourceTitle);
-
-      $(`<div class="input-group mb-3">
-      <div class="input-group-prepend shadow-sm">
-        <span class="input-group-text" >比對</span>
-      </div>
-      <input type="text" class="form-control" aria-label="Default" 
-      aria-describedby="inputGroup-sizing-default" 
-      id="target-title-${i}" readonly>
-      </div>`)
-        .css({ 'padding-left': '5%', 'padding-right': '5%' })
-        .appendTo('#multiple-result');
-
-      $(`#target-title-${i}`).val(targetTitle);
-
-      $(`<div class="input-group mb-3">
-    <div class="input-group-prepend shadow-sm">
-      <span class="input-group-text" >相似度</span>
-    </div>
-    <input type="text" class="form-control" aria-label="Default" 
-    aria-describedby="inputGroup-sizing-default" 
-    id="similartiy-${+edges[i].source}-and-${+edges[i].target}" readonly>
-  </div>`)
-        .css({ 'padding-left': '5%', 'padding-right': '5%' })
-        .appendTo('#multiple-result');
-
-      $(`#similartiy-${+edges[i].source}-and-${+edges[i].target}`).val(
-        `${(+edges[i].weight * 100).toFixed(2)}%`
-      );
-
-      $('<button type="button">查看相似段落</button>')
-        .attr('id', `${+edges[i].source}-and-${+edges[i].target}`)
-        .css({ 'margin-left': '5%', 'margin-bottom': '3%' })
-        .addClass('check-similar-paragraph btn btn-secondary')
-        .appendTo('#multiple-result');
+        displayTitles(sourceTitle, targetTitle, i);
+        displaySimilarity(edges, i);
+        displayCheckButton(edges, i);
+      }
+    } else {
+      Swal.fire({
+        icon: 'success',
+        text: response.data.message,
+        showConfirmButton: false,
+      });
     }
-
-    $('.check-similar-paragraph').click(function (e) {
-      e.stopPropagation();
-      $('#article-result').remove();
-      const articleIds = $(this).attr('id').split('-');
-      const [article1, article2] = [articleIds[0], articleIds[2]];
-
-      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
-        .attr('id', 'article-result')
-        .css({
-          display: 'flex',
-          'justify-content': 'space-around',
-          'padding-left': '5%',
-          'padding-right': '5%',
-          'margin-top': '3%',
-        })
-        .insertAfter($(this));
-
-      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
-        .attr('id', `article-${article1}-result`)
-        .addClass('article-result border')
-        .css({
-          'margin-bottom': '20px',
-          width: '35%',
-          height: '500px',
-          'overflow-y': 'scroll',
-        })
-        .appendTo('#article-result');
-
-      const article1paragraphs = $(`#article-${article1}-content`)
-        .val()
-        .split('\n');
-      const article2paragraphs = $(`#article-${article2}-content`)
-        .val()
-        .split('\n');
-
-      let article1withParagraph = '';
-      let article2withParagraph = '';
-      for (const paragraph of article1paragraphs) {
-        article1withParagraph += `<p>${paragraph}</p>`;
-      }
-      for (const paragraph of article2paragraphs) {
-        article2withParagraph += `<p>${paragraph}</p>`;
-      }
-      $(`#article-${article1}-result`).html(article1withParagraph);
-
-      $('<div class="shadow-sm p-3 mb-5 bg-white rounded"></div>')
-        .attr('id', `article-${article2}-result`)
-        .addClass('article-result border')
-        .css({
-          'margin-bottom': '20px',
-          width: '35%',
-          height: '500px',
-          'overflow-y': 'scroll',
-        })
-        .appendTo('#article-result');
-      $(`#article-${article2}-result`).html(article2withParagraph);
-
-      const { matchResult } = response.data.data;
-      for (const matchSentence of matchResult[$(this).attr('id')]) {
-        $(`#article-${article1}-result`).mark(matchSentence.sourceSentence);
-        $(`#article-${article2}-result`).mark(matchSentence.targetSentence);
-      }
-    });
   });
 
   $('#signup-signin-link').click(() => {
     localStorage.setItem('previous-page', window.location.href);
   });
+});
+
+$(document).on('click', '.check-similar-paragraph', function (e) {
+  e.stopPropagation();
+  $('#article-result').remove();
+  const articleIds = $(this).attr('id').split('-');
+  const [source, target] = [articleIds[0], articleIds[2]];
+  $('<div class=" p-3 mb-5 bg-white rounded"></div>')
+    .attr('id', 'article-result')
+    .css({
+      display: 'flex',
+      'justify-content': 'space-around',
+      'padding-left': '5%',
+      'padding-right': '5%',
+      'margin-top': '3%',
+    })
+    .insertAfter($(this));
+
+  showArticle(source);
+  showArticle(target);
+
+  const [processedSource, processedTarget] = preprocessArticle(
+    $(`#article-${source}-content`).val().split('\n'),
+    $(`#article-${target}-content`).val().split('\n')
+  );
+
+  $(`#article-${source}-result`).html(processedSource);
+  $(`#article-${target}-result`).html(processedTarget);
+
+  const { matchResult } = response.data.data;
+
+  markArticle(matchResult[$(this).attr('id')], source, target);
 });
