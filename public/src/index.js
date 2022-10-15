@@ -7,7 +7,6 @@ const compareModeMap = {
 };
 
 $(document).ready(async () => {
-  // $('#script').load('../layout/script.html');
   $('#page-header').load('../layout/header.html');
   $('#page-footer').load('../layout/footer.html');
   if (localStorage.getItem('current-page') && localStorage.getItem('search')) {
@@ -62,19 +61,19 @@ $(document).ready(async () => {
     console.log('connect', socket.id);
   });
 
-  socket.on('hello', (result) => {
-    setTimeout(() => {
-      Swal.fire({
-        icon: 'success',
-        text: '比對結果出爐！',
-        showConfirmButton: false,
-      });
-      localStorage.setItem('result', result);
-      // console.log(result);
-      window.location.href = `/${
-        compareModeMap[JSON.parse(result).compare_mode]
-      }`;
-    }, 5000);
+  socket.on('finish', (result) => {
+    //setTimeout(() => {
+    Swal.fire({
+      icon: 'success',
+      text: '比對結果出爐！',
+      showConfirmButton: false,
+    });
+    localStorage.setItem('result', result);
+    // console.log(result);
+    window.location.href = `/${
+      compareModeMap[JSON.parse(result).compare_mode]
+    }`;
+    //}, 5000);
   });
 
   // client-side
@@ -91,10 +90,3 @@ $(document).ready(async () => {
 $(document).on('click', '#signup-signin-link', () => {
   localStorage.setItem('previous-page', window.location.href);
 });
-
-// $(document).on('click', '.delay-check-result', () => {
-//   console.log('hey');
-//   window.location.href = `/${compareModeMap(
-//     JSON.parse(localStorage.getItem('result')).compare_mode
-//   )}`;
-// });
