@@ -25,13 +25,14 @@ const {
   MODE_SINGLE,
   MODE_MULTIPLE,
   MODE_UPLOAD,
-  MATCH_PENDING,
-  MATCH_FINISHED,
+  // MATCH_PENDING,
+  // MATCH_FINISHED,
   DB_ARTICLE_INDEX,
   LENGTHY_ARTICLE_THRESHOLD,
   MUTIPLE_THRESHOLD,
   UPLOAD_RESPONSE_THRESHOLD,
   UPLOAD_RESPONSE_MIN_SIMILARITY,
+  PAGE_SIZE,
 } = process.env;
 
 const comparison = async (req, res, next) => {
@@ -87,7 +88,6 @@ const comparison = async (req, res, next) => {
     const insertArticlesResult = await insertArticles(insertArtile);
 
     const compareResult = {
-      status: +MATCH_PENDING,
       user_id: req.user.user_id,
       compare_mode: +MODE_SINGLE,
       match_result: [
@@ -181,7 +181,7 @@ const comparison = async (req, res, next) => {
 
     const compareResult = {
       user_id: req.user.user_id,
-      compare_mode: 1,
+      compare_mode: +MODE_SINGLE,
       match_result: [
         {
           similarity: articleSimilarity,
@@ -195,12 +195,12 @@ const comparison = async (req, res, next) => {
 
     await insertCompareResult(compareResult);
 
-    const response = {
-      similarity: articleSimilarity,
-      matchResult: result,
-    };
-
-    res.send({ data: response });
+    res.status(200).send({
+      data: {
+        similarity: articleSimilarity,
+        matchResult: result,
+      },
+    });
   } catch (err) {
     console.log(err);
     next();
@@ -294,6 +294,10 @@ const multipleComparison = async (req, res) => {
 
   const insertArticlesResult = await insertArticles(insertedArticles);
 
+  for (let i = 0; i < articles.numberOfArticles; i++) {
+    articles.all[i].id = insertArticlesResult.items[i].index._id;
+  }
+
   const articlesGraph = Graph();
   const matchedArticles = {};
 
@@ -317,21 +321,14 @@ const multipleComparison = async (req, res) => {
         articles.all[j].synonym
       );
 
-      matchedArticles[`${i + 1}-and-${j + 1}`] = matchResult;
-
-      // prepare compare result to insert into database
-      compareResult.push({
-        index: {
-          _index: process.env.DB_COMPARE_INDEX,
-        },
-      });
-
-      compareResult.push({
+      matchedArticles[`${i + 1}-and-${j + 1}`] = {
         similarity,
-        source_id: insertArticlesResult.items[i].index._id,
-        target_id: insertArticlesResult.items[j].index._id,
+        source_id: articles.all[i].id,
+        target_id: articles.all[j].id,
         sentences: matchResult,
-      });
+      };
+
+      compareResult.push(matchedArticles[`${i + 1}-and-${j + 1}`]);
     }
   }
 
@@ -341,6 +338,8 @@ const multipleComparison = async (req, res) => {
     match_result: compareResult,
     create_time: Date.now(),
   });
+
+  console.log(matchedArticles);
 
   res.send({
     data: {
@@ -354,7 +353,9 @@ const analyzeArticle = async (req, res) => {
   const { title, author, content } = req.body.data;
   const article = new Article(title, author, content);
 
-  if (cache.ready) {
+  const hasLongArticle = content.length >= +LENGTHY_ARTICLE_THRESHOLD;
+
+  if (cache.ready && hasLongArticle) {
     const insertResult = await insertArticles([
       {
         index: {
@@ -490,7 +491,6 @@ const getArticles = async (req, res) => {
     must_not: [],
     should: [],
   };
-  const pageSize = 10;
   const { page } = req.query;
   const searchConditions = req.query.key.split(' ');
   console.log(searchConditions);
@@ -509,7 +509,7 @@ const getArticles = async (req, res) => {
 
   console.log(esSearchQuery);
 
-  const searchResult = await searchArticle(page, pageSize, esSearchQuery);
+  const searchResult = await searchArticle(page, +PAGE_SIZE, esSearchQuery);
 
   console.log(searchResult.hits.hits);
 
@@ -524,7 +524,6 @@ const getArticles = async (req, res) => {
     article: searchArticleResult,
   };
   res.send({ data: response });
-  // res.send('ok');
 };
 
 const getArticleDetails = async (req, res) => {
@@ -546,7 +545,12 @@ function compare(a, b) {
 }
 
 const getArticleRecords = async (req, res) => {
-  const compareResults = await getCompareResult(req.user.user_id);
+  const { page } = req.query;
+  const compareResults = await getCompareResult(
+    req.user.user_id,
+    +PAGE_SIZE,
+    +page
+  );
   const searchArticles = [];
 
   // only show compare result with highest similarity (with multiple and upload mode)
@@ -556,13 +560,19 @@ const getArticleRecords = async (req, res) => {
     return element._source;
   });
 
+  // console.log('highestSimilaityResult', highestSimilaityResult);
+
   // prepare for search articles
   highestSimilaityResult.forEach((element) => {
     searchArticles.push(searchArticleById(element.match_result.source_id));
     searchArticles.push(searchArticleById(element.match_result.target_id));
   });
 
+  // console.log('searchArticles', searchArticles);
+
   let articleResult = await Promise.all(searchArticles);
+
+  // console.log('article result', articleResult);
 
   // organize article result to hash table
   articleResult = articleResult.reduce((accu, curr) => {
@@ -582,7 +592,12 @@ const getArticleRecords = async (req, res) => {
     return element;
   });
 
-  res.status(200).send({ data: highestSimilaityResult });
+  res.status(200).send({
+    data: {
+      totalRecords: compareResults.hits.total.value,
+      highestSimilaityResult,
+    },
+  });
 };
 
 module.exports = {

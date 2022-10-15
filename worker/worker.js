@@ -132,25 +132,19 @@ const {
             matchedArticles[`${i + 1}-and-${j + 1}`] = matchResult;
 
             // prepare compare result to insert into database
-            compareResult.push(
-              {
-                index: {
-                  _index: process.env.DB_COMPARE_INDEX,
-                },
-              },
-              {
-                compare_mode: +MODE_MULTIPLE,
-                similarity,
-                source_id: articles.all[i].id,
-                target_id: articles.all[j].id,
-                sentences: matchResult,
-              }
-            );
+            matchedArticles[`${i + 1}-and-${j + 1}`] = {
+              similarity,
+              source_id: articles.all[i].id,
+              target_id: articles.all[j].id,
+              sentences: matchResult,
+            };
+
+            compareResult.push(matchedArticles[`${i + 1}-and-${j + 1}`]);
           }
         }
 
         await insertCompareResult({
-          user_id: job.user_id,
+          user_id: user_id,
           compare_mode: +MODE_MULTIPLE,
           match_result: compareResult,
           create_time: Date.now(),
