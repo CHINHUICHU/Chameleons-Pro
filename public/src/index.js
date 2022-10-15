@@ -68,7 +68,11 @@ $(document).ready(async () => {
       text: '比對結果出爐！',
       showConfirmButton: false,
     });
-    localStorage.setItem('result', result);
+
+    localStorage.setItem(
+      `${compareModeMap[JSON.parse(result).compare_mode]}-result`,
+      result
+    );
     // console.log(result);
     window.location.href = `/${
       compareModeMap[JSON.parse(result).compare_mode]

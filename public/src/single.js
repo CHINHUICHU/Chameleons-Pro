@@ -45,9 +45,9 @@ function markArticle(matchResult) {
 }
 
 $(document).ready(async () => {
-  if (localStorage.getItem('result')) {
+  if (localStorage.getItem('single-result')) {
     const { source, target, compareResult, similarity } = JSON.parse(
-      localStorage.getItem('result')
+      localStorage.getItem('single-result')
     );
 
     prepareDisplayResult();
@@ -75,7 +75,7 @@ $(document).ready(async () => {
 
     markArticle(compareResult);
 
-    localStorage.removeItem('result');
+    localStorage.removeItem('single-result');
   }
 
   $('#article-search').change(() => {

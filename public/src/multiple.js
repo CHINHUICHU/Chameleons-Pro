@@ -92,12 +92,12 @@ function markArticle(matchResult, source, target) {
 let response;
 
 $(document).ready(async () => {
-  if (localStorage.getItem('result')) {
+  if (localStorage.getItem('multiple-result')) {
     $('#multiple').hide();
     $('#multiple-finish').hide();
 
     let { articles, matchResult, similarity } = JSON.parse(
-      localStorage.getItem('result')
+      localStorage.getItem('multiple-result')
     );
 
     for (let i = 0; i < similarity.links.length; i++) {
@@ -142,7 +142,7 @@ $(document).ready(async () => {
       markArticle(matchResult[$(this).attr('id')], source, target);
     });
 
-    localStorage.removeItem('result');
+    localStorage.removeItem('multiple-result');
   }
 
   let comparedArticles = 2;
