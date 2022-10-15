@@ -1,53 +1,50 @@
 /* eslint-disable no-undef */
 
+$.fn.showFlex = function () {
+  this.show();
+  this.css('display', 'flex');
+  this.css('justify-content', 'space-around');
+};
+
+function prepareDisplayResult() {
+  $('#top').showFlex();
+  $('#nav').hide();
+  $('#main').hide();
+  $('#finish').hide();
+  $('#result').showFlex();
+  $('#main-result').showFlex();
+}
+
+function displaySimilarity(similarity) {
+  $('#similarity').html(`相似度：${(similarity * 100).toFixed(2)}%`);
+}
+
+function preprocessArticleContent(sourceArticleContent, targetArticleContent) {
+  let sourceArticleWithParagraph = '';
+  let targetArticleWithParagraph = '';
+  for (const paragraph of sourceArticleContent) {
+    sourceArticleWithParagraph += `<p>${paragraph}</p>`;
+  }
+  for (const paragraph of targetArticleContent) {
+    targetArticleWithParagraph += `<p>${paragraph}</p>`;
+  }
+  return [sourceArticleWithParagraph, targetArticleWithParagraph];
+}
+
+function displayArticleInfo(title, author, content, kind) {
+  $(`#result-${kind}-title`).val(title);
+  $(`#result-${kind}-author`).val(author);
+  $(`#result-${kind}-content`).html(content);
+}
+
+function markArticle(matchResult) {
+  for (const matchSentence of matchResult) {
+    $('#result-source-content').mark(matchSentence.sourceSentence);
+    $('#result-target-content').mark(matchSentence.targetSentence);
+  }
+}
+
 $(document).ready(async () => {
-  $.fn.showFlex = function () {
-    this.show();
-    this.css('display', 'flex');
-    this.css('justify-content', 'space-around');
-  };
-
-  function prepareDisplayResult() {
-    $('#top').showFlex();
-    $('#nav').hide();
-    $('#main').hide();
-    $('#finish').hide();
-    $('#result').showFlex();
-    $('#main-result').showFlex();
-  }
-
-  function displaySimilarity(similarity) {
-    $('#similarity').html(`相似度：${(similarity * 100).toFixed(2)}%`);
-  }
-
-  function preprocessArticleContent(
-    sourceArticleContent,
-    targetArticleContent
-  ) {
-    let sourceArticleWithParagraph = '';
-    let targetArticleWithParagraph = '';
-    for (const paragraph of sourceArticleContent) {
-      sourceArticleWithParagraph += `<p>${paragraph}</p>`;
-    }
-    for (const paragraph of targetArticleContent) {
-      targetArticleWithParagraph += `<p>${paragraph}</p>`;
-    }
-    return [sourceArticleWithParagraph, targetArticleWithParagraph];
-  }
-
-  function displayArticleInfo(title, author, content, kind) {
-    $(`#result-${kind}-title`).val(title);
-    $(`#result-${kind}-author`).val(author);
-    $(`#result-${kind}-content`).html(content);
-  }
-
-  function markArticle(matchResult) {
-    for (const matchSentence of matchResult) {
-      $('#result-source-content').mark(matchSentence.sourceSentence);
-      $('#result-target-content').mark(matchSentence.targetSentence);
-    }
-  }
-
   if (localStorage.getItem('result')) {
     const { source, target, compareResult, similarity } = JSON.parse(
       localStorage.getItem('result')
@@ -227,7 +224,6 @@ $(document).ready(async () => {
           text: response.data.message,
           showConfirmButton: false,
         });
-        console.log(response.data.message);
       }
     } catch (error) {
       Swal.fire({
