@@ -207,7 +207,6 @@ $(document).ready(async () => {
 
       if (
         !validator.isLength($(`#article-${i}-author`).val(), {
-          min: 1,
           max: 20,
         })
       ) {
@@ -221,7 +220,6 @@ $(document).ready(async () => {
 
       if (
         !validator.isLength($(`#article-${i}-content`).val(), {
-          min: 1,
           max: 100000,
         })
       ) {
@@ -317,5 +315,5 @@ $(document).on('click', '.check-similar-paragraph', function (e) {
 
   const { matchResult } = response.data.data;
 
-  markArticle(matchResult[$(this).attr('id')], source, target);
+  markArticle(matchResult[$(this).attr('id')].sentences, source, target);
 });
