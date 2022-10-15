@@ -32,7 +32,7 @@ $(document).ready(async () => {
       $('#multiple-compare-link').show().css({ display: 'block' });
       $('#upload-compare-link').show().css({ display: 'block' });
 
-      console.log(response.data.data);
+      // console.log(response.data.data);
     } catch (error) {
       console.log(error);
     }
@@ -58,7 +58,7 @@ $(document).ready(async () => {
 
   // client-side
   socket.on('connect', () => {
-    console.log('connect', socket.id);
+    // console.log('connect', socket.id);
   });
 
   socket.on('finish', (result) => {
@@ -83,11 +83,11 @@ $(document).ready(async () => {
   // client-side
   socket.on('connect_error', (err) => {
     socket.disconnect();
-    console.log('disconnect due to auth error');
+    // console.log('disconnect due to auth error');
   });
 
   socket.on('disconnect', () => {
-    console.log('disconnected...');
+    // console.log('disconnected...');
   });
 });
 
