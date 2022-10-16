@@ -1,10 +1,10 @@
 /* eslint-disable no-undef */
 
-const compareModeMap = {
-  1: 'single',
-  2: 'multiple',
-  3: 'upload',
-};
+// const compareModeMap = {
+//   1: 'single',
+//   2: 'multiple',
+//   3: 'upload',
+// };
 
 $(document).ready(async () => {
   $('#page-header').load('../layout/header.html');
@@ -61,7 +61,7 @@ $(document).ready(async () => {
     // console.log('connect', socket.id);
   });
 
-  socket.on('finish', (result) => {
+  socket.on('finish', () => {
     //setTimeout(() => {
     Swal.fire({
       icon: 'success',

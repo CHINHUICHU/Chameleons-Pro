@@ -1,7 +1,11 @@
 require('dotenv').config();
 const { client } = require('../../server/models/database');
 
-const { DB_ARTICLE_INDEX, DB_COMPARE_INDEX, COMPARE_FINISHED } = process.env;
+const {
+  DB_ARTICLE_INDEX,
+  DB_COMPARE_INDEX,
+  // COMPARE_FINISHED
+} = process.env;
 
 const updateArticle = async (articleId, processed_content, tag) => {
   try {
