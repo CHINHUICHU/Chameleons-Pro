@@ -79,16 +79,15 @@ $(document).ready(async () => {
 
     if (
       !validator.isLength($('#article-source-content').val(), {
-        min: 1,
-        max: 100000,
+        max: 10000,
       }) ||
       !validator.isLength($('#article-target-content').val(), {
-        max: 100000,
+        max: 10000,
       })
     ) {
       Swal.fire({
         icon: 'error',
-        text: '文章字數上限為十萬字',
+        text: '文章字數上限為一萬字',
         showConfirmButton: false,
       });
       return;

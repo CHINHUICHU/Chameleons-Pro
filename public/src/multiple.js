@@ -75,7 +75,7 @@ $(document).ready(async () => {
   let comparedArticles = 2;
   $('#new-article').click(() => {
     comparedArticles += 1;
-    if (comparedArticles > 2) {
+    if (comparedArticles > 2 && comparedArticles <= 10) {
       $('#remove-article').attr('disabled', false);
     }
     $('#multiple-compare-article-1')
@@ -147,12 +147,12 @@ $(document).ready(async () => {
 
       if (
         !validator.isLength($(`#article-${i}-content`).val(), {
-          max: 100000,
+          max: 5000,
         })
       ) {
         Swal.fire({
           icon: 'error',
-          text: '文章字數上限為十萬字',
+          text: '文章字數上限為五千字',
           showConfirmButton: false,
         });
         return;
