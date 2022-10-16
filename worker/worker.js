@@ -7,7 +7,7 @@ const { Article, Articles } = require('../util/article');
 const { findMatchedSentence, calculateSimilarity } = require('../util/compare');
 const {
   updateArticle,
-  updateCompareResult,
+  // updateCompareResult,
   insertCompareResult,
   searchArticlesByTag,
 } = require('./model/article');
@@ -43,6 +43,9 @@ const {
           job.target.content
         );
 
+        source.id = job.source.id;
+        target.id = job.target.id;
+
         source.extractTag().splitSentence().tokenizer();
         target.extractTag().splitSentence().tokenizer();
 
@@ -52,10 +55,10 @@ const {
         source.synonym = synonym.findSynonym(source.filtered);
         target.synonym = synonym.findSynonym(target.filtered);
 
-        await updateArticle(job.source_id, source.synonym, source.tags);
-        await updateArticle(job.target_id, target.synonym, target.tags);
+        await updateArticle(source.id, source.synonym, source.tags);
+        await updateArticle(target.id, target.synonym, target.tags);
 
-        const compareResult = findMatchedSentence(
+        const matchResult = findMatchedSentence(
           source.sentences,
           target.sentences,
           source.synonym,
@@ -67,15 +70,31 @@ const {
           target.synonym.flat()
         );
 
-        await updateCompareResult(compare_result_id, similarity, compareResult);
+        // await updateCompareResult(compare_result_id, similarity, compareResult);
+
+        const compareResult = {
+          user_id: user_id,
+          compare_mode: +MODE_SINGLE,
+          match_result: [
+            {
+              similarity: similarity,
+              source_id: source.id,
+              target_id: target.id,
+              sentences: matchResult,
+            },
+          ],
+          create_time: Date.now(),
+        };
+
+        await insertCompareResult(compareResult);
 
         const finishedJob = {
-          source,
-          target,
-          similarity,
-          compareResult,
+          // source,
+          // target,
+          // similarity,
+          // compareResult,
           user_id,
-          compare_mode,
+          // compare_mode,
         };
 
         await cache.publish(CHANNEL_NAME, JSON.stringify(finishedJob));

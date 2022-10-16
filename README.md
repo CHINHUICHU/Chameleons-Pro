@@ -37,28 +37,25 @@
 | ---------------- | -------- |
 | test123@test.com | 123      |
 
-- General Case
+- Two Articles Comparison
 
-  - Two Articles Comparison
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/80673666/196016943-97edaa34-7e24-4827-b6b8-67cd8bd629bb.gif)
 
-  - Multiple articles comparison
+- Multiple articles comparison
 
-  - Upload to compare
+![mutiple](https://user-images.githubusercontent.com/80673666/196017731-2e9bf7f3-0eea-449a-a4b8-549e8c6ee035.gif)
 
-- Time-comsuming case
+- Upload to compare
 
-  - Two Articles Comparison
+![upload](https://user-images.githubusercontent.com/80673666/196017273-62e38bda-facb-4efc-9d5e-7f02bd3826c7.gif)
 
-  - Multiple articles comparison
-
-  - Upload to compare
+- Time-comsuming case (content > 20,000 words)
 
 - Search Articles
 
-  - Normal case
-  - Keyword exclusion
-
 - Check history Records
+
+![user](https://user-images.githubusercontent.com/80673666/196018748-6712a330-bca6-493c-bede-b1282ecef4a9.gif)
 
 ## Tech Stack
 

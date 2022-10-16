@@ -30,11 +30,13 @@ const updateCompareResult = async (
       index: DB_COMPARE_INDEX,
       id: compareResultId,
       doc: {
-        matchResult: {
-          sentences: matchResult,
-          similarity: similarity,
-        },
-        status: +COMPARE_FINISHED,
+        match_result: [
+          {
+            sentences: matchResult,
+            similarity: similarity,
+          },
+        ],
+        // status: +COMPARE_FINISHED,
       },
     });
     return result;
