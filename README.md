@@ -98,4 +98,4 @@
 ## Contact
 
 - [LinkedIn](https://www.linkedin.com/in/jimmychc/)
-- [Email](jimmychu021@gmail.com)
+- [Email](mailto:jimmychu021@gmail.com)
