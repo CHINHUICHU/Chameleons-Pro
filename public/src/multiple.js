@@ -234,10 +234,10 @@ $(document).on('click', '.check-similar-paragraph', function (e) {
 
   const { matchResult } = response.data.data;
 
-  const sourceSplit = $(`#article-${source}-content`)
+  const sourceContentSplit = $(`#article-${source}-content`)
     .val()
     .split(/(?=，|。|！|？|：|；)+/);
-  const targetSplit = $(`#article-${target}-content`)
+  const targetContentSplit = $(`#article-${target}-content`)
     .val()
     .split(/(?=，|。|！|？|：|；)+/);
 
@@ -247,38 +247,27 @@ $(document).on('click', '.check-similar-paragraph', function (e) {
 
   sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
 
-  console.log('sourceMarkIndex', sourceMarkIndex);
-
   let targetMarkIndex = matchResult[$(this).attr('id')].sentences.map(
     (element) => element.targetSentence
   );
 
   targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
 
-  console.log('targetMarkIndex', targetMarkIndex);
+  for (let index of sourceMarkIndex) {
+    sourceContentSplit[index] = `<mark>${sourceContentSplit[index]}</mark>`;
+  }
+  for (let index of targetMarkIndex) {
+    targetContentSplit[index] = `<mark>${targetContentSplit[index]}</mark>`;
+  }
 
   let sourceMarkedContent = '';
-
-  for (let i = 0; i < sourceSplit.length; i++) {
-    let mark = sourceMarkIndex.shift();
-    if (i === mark) {
-      sourceSplit[i] = `<mark>${sourceSplit[i]}<mark>`;
-    }
-    sourceMarkedContent += sourceSplit[i];
+  for (let sentence of sourceContentSplit) {
+    sourceMarkedContent += sentence;
   }
-
-  console.log('sourceMarkedContent', sourceMarkedContent);
-
   let targetMarkedContent = '';
-  for (let i = 0; i < targetSplit.length; i++) {
-    let mark = targetMarkIndex.shift();
-    if (i === mark) {
-      targetSplit[i] = `<mark>${targetSplit[i]}<mark>`;
-    }
-    targetMarkedContent += targetSplit[i];
+  for (let sentence of targetContentSplit) {
+    targetMarkedContent += sentence;
   }
-
-  console.log('targetMarkedContent', targetMarkedContent);
 
   $(`#article-${source}-result`).html(sourceMarkedContent);
 

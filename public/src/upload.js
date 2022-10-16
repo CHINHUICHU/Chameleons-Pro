@@ -226,25 +226,23 @@ $(document).on('click', '.check-upload-similar-paragraph', function (e) {
 
   targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
 
+  for (let index of sourceMarkIndex) {
+    sourceContentSplit[index] = `<mark>${sourceContentSplit[index]}</mark>`;
+  }
+  for (let index of targetMarkIndex) {
+    targetContentSplit[index] = `<mark>${targetContentSplit[index]}</mark>`;
+  }
+
   let sourceMarkedContent = '';
-  for (let i = 0; i < sourceContentSplit.length; i++) {
-    let mark = sourceMarkIndex.shift();
-    if (i === mark) {
-      sourceContentSplit[i] = `<mark>${sourceContentSplit[i]}<mark>`;
-    }
-    sourceMarkedContent += sourceContentSplit[i];
+  for (let sentence of sourceContentSplit) {
+    sourceMarkedContent += sentence;
+  }
+  let targetMarkedContent = '';
+  for (let sentence of targetContentSplit) {
+    targetMarkedContent += sentence;
   }
 
   $('#article-source-content').html(sourceMarkedContent);
-
-  let targetMarkedContent = '';
-  for (let i = 0; i < targetContentSplit.length; i++) {
-    let mark = targetMarkIndex.shift();
-    if (i === mark) {
-      targetContentSplit[i] = `<mark>${targetContentSplit[i]}<mark>`;
-    }
-    targetMarkedContent += targetContentSplit[i];
-  }
 
   $('#article-target-content').html(targetMarkedContent);
 });

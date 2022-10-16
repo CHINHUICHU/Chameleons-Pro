@@ -460,11 +460,13 @@ function compare(a, b) {
 
 const getArticleRecords = async (req, res) => {
   const { page } = req.query;
+
   const compareResults = await getCompareResult(
     req.user.user_id,
     +PAGE_SIZE,
     +page
   );
+
   const searchArticles = [];
 
   // only show compare result with highest similarity (with multiple and upload mode)

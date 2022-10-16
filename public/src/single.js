@@ -180,31 +180,30 @@ $(document).ready(async () => {
 
         sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
 
-        console.log('sourceMarkIndex', sourceMarkIndex);
-
         let targetMarkIndex = matchResult.map(
           (element) => element.targetSentence
         );
 
         targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
 
-        let sourceMarkedContent = '';
-        console.log('source', Date.now());
-        for (let i = 0; i < sourceContentSplit.length; i++) {
-          let mark = sourceMarkIndex.shift();
-          if (i === mark) {
-            sourceContentSplit[i] = `<mark>${sourceContentSplit[i]}<mark>`;
-          }
-          sourceMarkedContent += sourceContentSplit[i];
+        for (let index of sourceMarkIndex) {
+          sourceContentSplit[
+            index
+          ] = `<mark>${sourceContentSplit[index]}</mark>`;
+        }
+        for (let index of targetMarkIndex) {
+          targetContentSplit[
+            index
+          ] = `<mark>${targetContentSplit[index]}</mark>`;
         }
 
+        let sourceMarkedContent = '';
+        for (let sentence of sourceContentSplit) {
+          sourceMarkedContent += sentence;
+        }
         let targetMarkedContent = '';
-        for (let i = 0; i < targetContentSplit.length; i++) {
-          let mark = targetMarkIndex.shift();
-          if (i === mark) {
-            targetContentSplit[i] = `<mark>${targetContentSplit[i]}<mark>`;
-          }
-          targetMarkedContent += targetContentSplit[i];
+        for (let sentence of targetContentSplit) {
+          targetMarkedContent += sentence;
         }
 
         $('#result-source-content').html(sourceMarkedContent);

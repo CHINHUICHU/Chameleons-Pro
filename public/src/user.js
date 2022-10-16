@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
-
+// let end;
 async function getRecords(page, header) {
+  start = Date.now();
   let response = await axios.get(`/api/1.0/articles/records?page=${page}`, {
     headers: header,
   });
@@ -68,23 +69,7 @@ function displayRecords(records) {
     $(`#source-author-${i}`).val(records[i].source_article.author);
     $(`#target-author-${i}`).val(records[i].target_article.author);
 
-    // const sourceArticleParagraphs =
-    //   records[i].source_article.content.split('\n');
-    // const targetArticleParagraphs =
-    //   records[i].target_article.content.split('\n');
-
-    // let sourceWithParagraphTag = '';
-    // let targetWithParagraphTag = '';
-    // for (const paragraph of sourceArticleParagraphs) {
-    //   sourceWithParagraphTag += `<p>${paragraph}</p>`;
-    // }
-    // for (const paragraph of targetArticleParagraphs) {
-    //   targetWithParagraphTag += `<p>${paragraph}</p>`;
-    // }
-
     const matchResult = records[i].match_result.sentences;
-
-    // console.log(matchResult);
 
     const sourceContentSplit =
       records[i].source_article.content.split(/(?=，|。|\n|！|？|：|；)+/);
@@ -99,26 +84,20 @@ function displayRecords(records) {
 
     targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
 
-    console.log('sourceMarkIndex', sourceMarkIndex);
-
-    console.log('targetMarkIndex', targetMarkIndex);
-
-    let sourceMarkedContent = '';
-    for (let i = 0; i < sourceContentSplit.length; i++) {
-      let mark = sourceMarkIndex.shift();
-      if (i === mark) {
-        sourceContentSplit[i] = `<mark>${sourceContentSplit[i]}<mark>`;
-      }
-      sourceMarkedContent += sourceContentSplit[i];
+    for (let index of sourceMarkIndex) {
+      sourceContentSplit[index] = `<mark>${sourceContentSplit[index]}</mark>`;
+    }
+    for (let index of targetMarkIndex) {
+      targetContentSplit[index] = `<mark>${targetContentSplit[index]}</mark>`;
     }
 
+    let sourceMarkedContent = '';
+    for (let sentence of sourceContentSplit) {
+      sourceMarkedContent += sentence;
+    }
     let targetMarkedContent = '';
-    for (let i = 0; i < targetContentSplit.length; i++) {
-      let mark = targetMarkIndex.shift();
-      if (i === mark) {
-        targetContentSplit[i] = `<mark>${targetContentSplit[i]}<mark>`;
-      }
-      targetMarkedContent += targetContentSplit[i];
+    for (let sentence of targetContentSplit) {
+      targetMarkedContent += sentence;
     }
 
     $(`#source-content-${i}`).html(sourceMarkedContent);
@@ -159,89 +138,6 @@ $(document).ready(async () => {
     const records = response.data.data.highestSimilaityResult;
     displayRecords(records);
   }
-
-  // console.log(response);
-  // for (let i = 0; i < records.length; i += 1) {
-  //   const compareDate = Date(records[i].create_time)
-  //     .toLocaleString()
-  //     .split(' ');
-
-  //   $(`<tr class="accordion-toggle collapsed" id="accordion-${i}" data-toggle="collapse" data-parent="#accordion-${i}" href="#collapse-${i}">
-  //     <td class="expand-button"></td>
-  //     <td>${compareDate[1]} ${compareDate[2]} ${compareDate[3]}</td>
-  //     <td>${compareMap[records[i].compare_mode]}</td>
-  //     <td>${(records[i].match_result.similarity * 100).toFixed(2)}%</td>
-  //     </tr>
-
-  //     <tr class="hide-table-padding">
-  //     <td></td>
-  //     <td colspan="3">
-  //     <div id="collapse-${i}" class="collapse in p-3">
-  //       <div class="row">
-  //         <div class="col-6" id="source">
-  //           <div class="input-group mb-3">
-  //             <div class="input-group-prepend shadow-sm">
-  //               <span class="input-group-text">標題</span>
-  //             </div>
-  //             <input type="text" class="form-control" id="source-title-${i}" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
-  //           </div>
-  //           <div class="input-group mb-3">
-  //             <div class="input-group-prepend shadow-sm">
-  //               <span class="input-group-text">作者</span>
-  //             </div>
-  //             <input type="text" class="form-control" id="source-author-${i}" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
-  //           </div>
-  //           <div id="source-content-${i}" class="border shadow-sm p-3 mb-5 bg-white rounded article-content"></div>
-  //         </div>
-  //           <div class="col-6" id="target">
-  //             <div class="input-group mb-3">
-  //               <div class="input-group-prepend shadow-sm">
-  //                 <span class="input-group-text">標題</span>
-  //               </div>
-  //               <input type="text" class="form-control" id="target-title-${i}" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
-  //             </div>
-  //             <div class="input-group mb-3">
-  //               <div class="input-group-prepend shadow-sm">
-  //                 <span class="input-group-text">作者</span>
-  //             </div>
-  //             <input type="text" class="form-control" id="target-author-${i}" aria-label="Default" aria-describedby="inputGroup-sizing-default" readonly>
-  //             </div>
-  //           <div id="target-content-${i}" class="border shadow-sm p-3 mb-5 bg-white rounded article-content"></div>
-  //           </div>
-  //         </div>
-  //     </div></td>
-  //     </tr>`).appendTo('tbody');
-
-  //   $(`#source-title-${i}`).val(records[i].source_article.title);
-  //   $(`#target-title-${i}`).val(records[i].target_article.title);
-
-  //   $(`#source-author-${i}`).val(records[i].source_article.author);
-  //   $(`#target-author-${i}`).val(records[i].target_article.author);
-
-  //   const sourceArticleParagraphs =
-  //     records[i].source_article.content.split('\n');
-  //   const targetArticleParagraphs =
-  //     records[i].target_article.content.split('\n');
-
-  //   let sourceWithParagraphTag = '';
-  //   let targetWithParagraphTag = '';
-  //   for (const paragraph of sourceArticleParagraphs) {
-  //     sourceWithParagraphTag += `<p>${paragraph}</p>`;
-  //   }
-  //   for (const paragraph of targetArticleParagraphs) {
-  //     targetWithParagraphTag += `<p>${paragraph}</p>`;
-  //   }
-  //   $(`#source-content-${i}`).html(sourceWithParagraphTag);
-
-  //   $(`#target-content-${i}`).html(targetWithParagraphTag);
-
-  //   const matchResult = records[i].match_result;
-
-  //   for (const matchSentence of matchResult.sentences) {
-  //     $(`#source-content-${i}`).mark(matchSentence.sourceSentence);
-  //     $(`#target-content-${i}`).mark(matchSentence.targetSentence);
-  //   }
-  // }
 });
 
 $(document).on('click', '.pagination-inner a', async function () {
