@@ -25,14 +25,11 @@ const {
   MODE_SINGLE,
   MODE_MULTIPLE,
   MODE_UPLOAD,
-  // MATCH_PENDING,
-  // MATCH_FINISHED,
   DB_ARTICLE_INDEX,
-  LENGTHY_ARTICLE_THRESHOLD,
-  // MUTIPLE_THRESHOLD,
   UPLOAD_RESPONSE_THRESHOLD,
   UPLOAD_RESPONSE_MIN_SIMILARITY,
   PAGE_SIZE,
+  LENGTHY_ARTICLE_THRESHOLD,
 } = process.env;
 
 const comparison = async (req, res, next) => {
@@ -53,11 +50,11 @@ const comparison = async (req, res, next) => {
 
   const [source, target] = articles.all;
 
-  // const hasLongArticle =
-  //   sourceArticle.content.length >= +LENGTHY_ARTICLE_THRESHOLD ||
-  //   targetArticle.content.length >= +LENGTHY_ARTICLE_THRESHOLD;
+  const hasLongArticle =
+    sourceArticle.content.length >= +LENGTHY_ARTICLE_THRESHOLD ||
+    targetArticle.content.length >= +LENGTHY_ARTICLE_THRESHOLD;
 
-  if (cache.ready) {
+  if (cache.ready && hasLongArticle) {
     const insertArtile = [
       {
         index: {
@@ -90,29 +87,12 @@ const comparison = async (req, res, next) => {
     source.id = insertArticlesResult.items[0].index._id;
     target.id = insertArticlesResult.items[1].index._id;
 
-    // const compareResult = {
-    //   user_id: req.user.user_id,
-    //   compare_mode: +MODE_SINGLE,
-    //   match_result: [
-    //     {
-    //       source_id: insertArticlesResult.items[0].index._id,
-    //       target_id: insertArticlesResult.items[1].index._id,
-    //     },
-    //   ],
-    //   create_time: Date.now(),
-    // };
-
-    // const compareResultResponse = await insertCompareResult(compareResult);
-
     try {
       await cache.lpush(
         'chinese-article-compare',
         JSON.stringify({
           user_id: req.user.user_id,
           compare_mode: +MODE_SINGLE,
-          // compare_result_id: compareResultResponse._id,
-          // source_id: insertArticlesResult.items[0].index._id,
-          // target_id: insertArticlesResult.items[1].index._id,
           source,
           target,
         })
@@ -240,38 +220,7 @@ const multipleComparison = async (req, res) => {
     );
   });
 
-  // const hasTimeConsumingJob = req.body.data.length >= +MUTIPLE_THRESHOLD;
-  // const hasLenthyContent = articles.checkLengthyContent();
-
-  // if (cache.ready && (hasTimeConsumingJob || hasLenthyContent)) {
-  //   const insertArticlesResult = await insertArticles(insertedArticles);
-
-  //   for (let i = 0; i < articles.numberOfArticles; i++) {
-  //     articles.all[i].id = insertArticlesResult.items[i].index._id;
-  //   }
-
-  //   await cache.lpush(
-  //     'chinese-article-compare',
-  //     JSON.stringify({
-  //       user_id: req.user.user_id,
-  //       compare_mode: +MODE_MULTIPLE,
-  //       articles: articles.all,
-  //     })
-  //   );
-
-  //   return res
-  //     .status(200)
-  //     .send({ status_code: 200, data: null, message: '文章比對進行中' });
-  // }
-
   articles.all.forEach((article) => {
-    // article preprocessing
-    // const article = articles.newArticle(
-    //   element.title,
-    //   element.author,
-    //   element.content
-    // );
-
     article.extractTag().splitSentence().tokenizer();
     article.filtered = stopWord.filterStopWords(article.tokens);
     article.synonym = synonym.findSynonym(article.filtered);
@@ -355,44 +304,6 @@ const multipleComparison = async (req, res) => {
 const analyzeArticle = async (req, res) => {
   const { title, author, content } = req.body.data;
   const article = new Article(title, author, content);
-
-  // const hasLongArticle = content.length >= +LENGTHY_ARTICLE_THRESHOLD;
-
-  // if (cache.ready && hasLongArticle) {
-  //   const insertResult = await insertArticles([
-  //     {
-  //       index: {
-  //         _index: DB_ARTICLE_INDEX,
-  //       },
-  //     },
-  //     {
-  //       title: article.title,
-  //       author: article.author,
-  //       content: article.content,
-  //       user_id: req.user.user_id,
-  //       create_time: Date.now(),
-  //     },
-  //   ]);
-
-  //   // console.log(insertResult.items[0].index);
-
-  //   article.id = insertResult.items[0].index._id;
-
-  //   console.log(article.id);
-
-  //   await cache.lpush(
-  //     'chinese-article-compare',
-  //     JSON.stringify({
-  //       user_id: req.user.user_id,
-  //       compare_mode: +MODE_UPLOAD,
-  //       article,
-  //     })
-  //   );
-
-  //   return res
-  //     .status(200)
-  //     .send({ status_code: 200, data: null, message: '文章比對進行中' });
-  // }
 
   article.extractTag().splitSentence().tokenizer();
   article.filtered = stopWord.filterStopWords(article.tokens);
@@ -571,11 +482,7 @@ const getArticleRecords = async (req, res) => {
     searchArticles.push(searchArticleById(element.match_result.target_id));
   });
 
-  // console.log('searchArticles', searchArticles);
-
   let articleResult = await Promise.all(searchArticles);
-
-  // console.log('article result', articleResult);
 
   // organize article result to hash table
   articleResult = articleResult.reduce((accu, curr) => {

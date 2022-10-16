@@ -1,11 +1,5 @@
 /* eslint-disable no-undef */
 
-// const compareModeMap = {
-//   1: 'single',
-//   2: 'multiple',
-//   3: 'upload',
-// };
-
 $(document).ready(async () => {
   $('#page-header').load('../layout/header.html');
   $('#page-footer').load('../layout/footer.html');
@@ -62,22 +56,11 @@ $(document).ready(async () => {
   });
 
   socket.on('finish', () => {
-    //setTimeout(() => {
     Swal.fire({
       icon: 'success',
       text: '比對結果出爐，請至會員頁查看結果',
       showConfirmButton: false,
     });
-
-    // localStorage.setItem(
-    //   `${compareModeMap[JSON.parse(result).compare_mode]}-result`,
-    //   result
-    // );
-    // console.log(result);
-    // window.location.href = `/${
-    //   compareModeMap[JSON.parse(result).compare_mode]
-    // }`;
-    //}, 5000);
   });
 
   // client-side

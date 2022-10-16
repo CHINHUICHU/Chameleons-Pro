@@ -45,39 +45,6 @@ function markArticle(matchResult) {
 }
 
 $(document).ready(async () => {
-  if (localStorage.getItem('single-result')) {
-    const { source, target, compareResult, similarity } = JSON.parse(
-      localStorage.getItem('single-result')
-    );
-
-    prepareDisplayResult();
-
-    displaySimilarity(similarity);
-
-    const [sourceArticleWithParagraph, targetArticleWithParagraph] =
-      preprocessArticleContent(
-        source.content.split('\n'),
-        target.content.split('\n')
-      );
-
-    displayArticleInfo(
-      source.title,
-      source.author,
-      sourceArticleWithParagraph,
-      'source'
-    );
-    displayArticleInfo(
-      target.title,
-      target.author,
-      targetArticleWithParagraph,
-      'target'
-    );
-
-    markArticle(compareResult);
-
-    localStorage.removeItem('single-result');
-  }
-
   $('#article-search').change(() => {
     localStorage.setItem('search', $('#article-search').val());
     window.location.href = '/search';

@@ -5,21 +5,12 @@ const stopWord = require('../util/stopWord');
 const synonym = require('../util/synonym');
 const { Article } = require('../util/article');
 const { findMatchedSentence, calculateSimilarity } = require('../util/compare');
-const {
-  updateArticle,
-  // updateCompareResult,
-  insertCompareResult,
-  // searchArticlesByTag,
-} = require('./model/article');
-// const Graph = require('graph-data-structure');
+const { updateArticle, insertCompareResult } = require('./model/article');
 
 const {
   MODE_SINGLE,
-  // MODE_MULTIPLE,
-  // MODE_UPLOAD,
+
   CHANNEL_NAME,
-  // UPLOAD_RESPONSE_THRESHOLD,
-  // UPLOAD_RESPONSE_MIN_SIMILARITY,
 } = process.env;
 
 (async () => {
@@ -29,7 +20,6 @@ const {
         (await cache.brpop('chinese-article-compare', 0))[1]
       );
 
-      // if (job.compare_mode === +MODE_SINGLE) {
       const { user_id } = job;
 
       const source = new Article(
@@ -89,207 +79,10 @@ const {
       await insertCompareResult(compareResult);
 
       const finishedJob = {
-        // source,
-        // target,
-        // similarity,
-        // compareResult,
         user_id,
-        // compare_mode,
       };
 
       await cache.publish(CHANNEL_NAME, JSON.stringify(finishedJob));
-      // }
-
-      // if (job.compare_mode === +MODE_MULTIPLE) {
-      //   const { user_id, compare_mode } = job;
-      //   const articles = new Articles();
-
-      //   const updateArticles = [];
-
-      //   job.articles.forEach((element) => {
-      //     // article preprocessing
-      //     const article = articles.newArticle(
-      //       element.title,
-      //       element.author,
-      //       element.content
-      //     );
-
-      //     article.id = element.id;
-
-      //     article.extractTag().splitSentence().tokenizer();
-      //     article.filtered = stopWord.filterStopWords(article.tokens);
-      //     article.synonym = synonym.findSynonym(article.filtered);
-      //     updateArticles.push(
-      //       updateArticle(article.id, article.synonym, article.tags)
-      //     );
-      //   });
-
-      //   await Promise.all(updateArticles);
-
-      //   const articlesGraph = Graph();
-      //   const matchedArticles = {};
-
-      //   const compareResult = [];
-
-      //   // article comparison
-      //   for (let i = 0; i < articles.numberOfArticles; i += 1) {
-      //     for (let j = i + 1; j < articles.numberOfArticles; j += 1) {
-      //       const similarity = calculateSimilarity(
-      //         articles.all[i].synonym.flat(),
-      //         articles.all[j].synonym.flat()
-      //       );
-
-      //       articlesGraph.addEdge(i + 1, j + 1, similarity);
-
-      //       // find matched sentences between two articles
-      //       const matchResult = findMatchedSentence(
-      //         articles.all[i].sentences,
-      //         articles.all[j].sentences,
-      //         articles.all[i].synonym,
-      //         articles.all[j].synonym
-      //       );
-
-      //       matchedArticles[`${i + 1}-and-${j + 1}`] = matchResult;
-
-      //       // prepare compare result to insert into database
-      //       matchedArticles[`${i + 1}-and-${j + 1}`] = {
-      //         similarity,
-      //         source_id: articles.all[i].id,
-      //         target_id: articles.all[j].id,
-      //         sentences: matchResult,
-      //       };
-
-      //       compareResult.push(matchedArticles[`${i + 1}-and-${j + 1}`]);
-      //     }
-      //   }
-
-      //   await insertCompareResult({
-      //     user_id: user_id,
-      //     compare_mode: +MODE_MULTIPLE,
-      //     match_result: compareResult,
-      //     create_time: Date.now(),
-      //   });
-
-      //   await cache.publish(
-      //     CHANNEL_NAME,
-      //     JSON.stringify({
-      //       articles: job.articles,
-      //       user_id,
-      //       compare_mode,
-      //       similarity: articlesGraph.serialize(),
-      //       matchResult: matchedArticles,
-      //     })
-      //   );
-      // }
-
-      // if (job.compare_mode === +MODE_UPLOAD) {
-      //   const { user_id, article, compare_mode } = job;
-
-      //   const uploadedArticle = new Article(
-      //     article.title,
-      //     article.author,
-      //     article.content
-      //   );
-
-      //   uploadedArticle.id = article.id;
-
-      //   uploadedArticle.extractTag().splitSentence().tokenizer();
-
-      //   uploadedArticle.filtered = stopWord.filterStopWords(
-      //     uploadedArticle.tokens
-      //   );
-
-      //   uploadedArticle.synonym = synonym.findSynonym(uploadedArticle.filtered);
-
-      //   console.log(uploadedArticle);
-
-      //   await updateArticle(
-      //     uploadedArticle.id,
-      //     uploadedArticle.synonym,
-      //     uploadedArticle.tags
-      //   );
-
-      //   const searchTags = [];
-      //   uploadedArticle.tags.forEach((element) => {
-      //     searchTags.push({ match: { tag: element } });
-      //   });
-
-      //   const responseSize = +UPLOAD_RESPONSE_THRESHOLD;
-      //   const searchResponse = await searchArticlesByTag(
-      //     responseSize,
-      //     searchTags
-      //   );
-
-      //   console.log('search response', searchResponse.hits.hits);
-
-      //   const articleSimilarities = [];
-      //   const similarArticles = [];
-      //   const matchResult = [];
-      //   const compareResult = [];
-
-      //   for (
-      //     let i = 0;
-      //     i < Math.min(searchResponse.hits.total.value, responseSize);
-      //     i += 1
-      //   ) {
-      //     const articleSimilarity = calculateSimilarity(
-      //       uploadedArticle.synonym.flat(),
-      //       searchResponse.hits.hits[i]._source.processed_content.flat()
-      //     );
-      //     let { title, author, content, processed_content } =
-      //       searchResponse.hits.hits[i]._source;
-
-      //     let compareArticle = new Article(title, author, content);
-      //     compareArticle.splitSentence();
-
-      //     let result = findMatchedSentence(
-      //       uploadedArticle.sentences,
-      //       compareArticle.sentences,
-      //       uploadedArticle.synonym,
-      //       processed_content
-      //     );
-
-      //     // console.log('similarity', articleSimilarity);
-
-      //     if (articleSimilarity >= +UPLOAD_RESPONSE_MIN_SIMILARITY) {
-      //       articleSimilarities.push(articleSimilarity);
-
-      //       similarArticles.push({
-      //         title,
-      //         author,
-      //         content,
-      //       });
-
-      //       matchResult.push(result);
-      //     }
-
-      //     compareResult.push({
-      //       similarity: articleSimilarity,
-      //       source_id: uploadedArticle.id,
-      //       target_id: searchResponse.hits.hits[i]._id,
-      //       sentences: result,
-      //     });
-      //   }
-
-      //   await insertCompareResult({
-      //     user_id: user_id,
-      //     compare_mode: +MODE_UPLOAD,
-      //     match_result: compareResult,
-      //     create_time: Date.now(),
-      //   });
-
-      //   await cache.publish(
-      //     CHANNEL_NAME,
-      //     JSON.stringify({
-      //       article,
-      //       user_id,
-      //       compare_mode,
-      //       similarity: articleSimilarities,
-      //       similarArticles,
-      //       matchResult,
-      //     })
-      //   );
-      // }
     } catch (err) {
       console.log(err);
     }
