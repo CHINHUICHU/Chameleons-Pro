@@ -10,15 +10,13 @@
 
 [Demo](#Demo)
 
-[Tech Stack](#Tech)
+[Tech Stack](#Tech-stack)
 
 [Architechture](#Architechture)
 
-[Algorithm Design](#Algorithm)
+[Algorithm Design](#Algorithm-design)
 
-[Performance Test](#Performance)
-
-[Test Cases](#Test)
+[Contact](#Contact)
 
 ## Features
 
@@ -96,3 +94,8 @@
   - Compare number of tokens between two sentences and select larger one as benchmark
   - Define related sentences with the following formula, currently set threshold = 0.5
     <br><img width="321" alt="related sentence" src="https://user-images.githubusercontent.com/80673666/195996989-0e1ce255-eb3b-4a4b-be87-85a71d793ba5.png">
+
+## Contact
+
+- [LinkedIn](https://www.linkedin.com/in/jimmychc/)
+- [Email](jimmychu021@gmail.com)
