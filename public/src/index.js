@@ -65,18 +65,18 @@ $(document).ready(async () => {
     //setTimeout(() => {
     Swal.fire({
       icon: 'success',
-      text: '比對結果出爐！',
+      text: '比對結果出爐，請至會員頁查看結果',
       showConfirmButton: false,
     });
 
-    localStorage.setItem(
-      `${compareModeMap[JSON.parse(result).compare_mode]}-result`,
-      result
-    );
+    // localStorage.setItem(
+    //   `${compareModeMap[JSON.parse(result).compare_mode]}-result`,
+    //   result
+    // );
     // console.log(result);
-    window.location.href = `/${
-      compareModeMap[JSON.parse(result).compare_mode]
-    }`;
+    // window.location.href = `/${
+    //   compareModeMap[JSON.parse(result).compare_mode]
+    // }`;
     //}, 5000);
   });
 
