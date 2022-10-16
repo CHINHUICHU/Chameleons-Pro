@@ -19,6 +19,10 @@ function displaySimilarity(similarity) {
   $('#similarity').html(`相似度：${(similarity * 100).toFixed(2)}%`);
 }
 
+// function splitContent(content) {
+//   return content.split(/(?:，|。|\n|！|？|：|；)+/);
+// }
+
 function preprocessArticleContent(sourceArticleContent, targetArticleContent) {
   let sourceArticleWithParagraph = '';
   let targetArticleWithParagraph = '';
@@ -37,10 +41,10 @@ function displayArticleInfo(title, author, content, kind) {
   $(`#result-${kind}-content`).html(content);
 }
 
-function markArticle(matchResult) {
+function markArticle(source, target, matchResult) {
   for (const matchSentence of matchResult) {
-    $('#result-source-content').mark(matchSentence.sourceSentence);
-    $('#result-target-content').mark(matchSentence.targetSentence);
+    $('#result-source-content').mark(source[matchSentence.sourceSentence]);
+    $('#result-target-content').mark(target[matchSentence.targetSentence]);
   }
 }
 
@@ -184,7 +188,14 @@ $(document).ready(async () => {
           'target'
         );
 
-        markArticle(matchResult);
+        const sourceContentSplit = $('#article-source-content')
+          .val()
+          .split(/(?:，|。|\n|！|？|：|；)+/);
+        const targetContentSplit = $('#article-target-content')
+          .val()
+          .split(/(?:，|。|\n|！|？|：|；)+/);
+
+        markArticle(sourceContentSplit, targetContentSplit, matchResult);
       } else {
         Swal.fire({
           icon: 'success',

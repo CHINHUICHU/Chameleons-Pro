@@ -87,9 +87,14 @@ function displayRecords(records) {
 
     const matchResult = records[i].match_result;
 
+    const sourceSplit =
+      records[i].source_article.content.split(/(?:，|。|\n|！|？|：|；)+/);
+    const targetSplit =
+      records[i].target_article.content.split(/(?:，|。|\n|！|？|：|；)+/);
+
     for (const matchSentence of matchResult.sentences) {
-      $(`#source-content-${i}`).mark(matchSentence.sourceSentence);
-      $(`#target-content-${i}`).mark(matchSentence.targetSentence);
+      $(`#source-content-${i}`).mark(sourceSplit[matchSentence.sourceSentence]);
+      $(`#target-content-${i}`).mark(targetSplit[matchSentence.targetSentence]);
     }
   }
 }
