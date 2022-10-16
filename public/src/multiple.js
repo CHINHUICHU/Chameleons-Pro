@@ -82,10 +82,14 @@ function preprocessArticle(sourceParagraphs, targetParagraphs) {
   return [processedSource, processedTarget];
 }
 
-function markArticle(matchResult, source, target) {
+function markArticle(matchResult, source, target, sourceSplit, targetSplit) {
   for (const matchSentence of matchResult) {
-    $(`#article-${source}-result`).mark(matchSentence.sourceSentence);
-    $(`#article-${target}-result`).mark(matchSentence.targetSentence);
+    $(`#article-${source}-result`).mark(
+      sourceSplit[matchSentence.sourceSentence]
+    );
+    $(`#article-${target}-result`).mark(
+      targetSplit[matchSentence.targetSentence]
+    );
   }
 }
 
@@ -262,5 +266,18 @@ $(document).on('click', '.check-similar-paragraph', function (e) {
 
   const { matchResult } = response.data.data;
 
-  markArticle(matchResult[$(this).attr('id')].sentences, source, target);
+  const sourceSplit = $(`#article-${source}-content`)
+    .val()
+    .split(/(?:，|。|\n|！|？|：|；)+/);
+  const targetSplit = $(`#article-${target}-content`)
+    .val()
+    .split(/(?:，|。|\n|！|？|：|；)+/);
+
+  markArticle(
+    matchResult[$(this).attr('id')].sentences,
+    source,
+    target,
+    sourceSplit,
+    targetSplit
+  );
 });

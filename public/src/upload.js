@@ -83,10 +83,10 @@ function prepareDisplayResult(kind) {
     .appendTo('#article-result');
 }
 
-function markArticle(matchResult) {
+function markArticle(matchResult, source, target) {
   for (const matchSentence of matchResult) {
-    $('#article-source-content').mark(matchSentence.sourceSentence);
-    $('#article-target-content').mark(matchSentence.targetSentence);
+    $('#article-source-content').mark(source[matchSentence.sourceSentence]);
+    $('#article-target-content').mark(target[matchSentence.targetSentence]);
   }
 }
 
@@ -236,5 +236,10 @@ $(document).on('click', '.check-upload-similar-paragraph', function (e) {
 
   const { matchResult } = response.data.data;
 
-  markArticle(matchResult[articleId]);
+  const source = $('#upload-article-content')
+    .val()
+    .split(/(?:，|。|\n|！|？|：|；)+/);
+  const target = article[articleId].content.split(/(?:，|。|\n|！|？|：|；)+/);
+
+  markArticle(matchResult[articleId], source, target);
 });

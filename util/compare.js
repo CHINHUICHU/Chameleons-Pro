@@ -34,10 +34,8 @@ function findMatchedSentence(
         MATCH_THREASHOLD
       ) {
         result.push({
-          sourceSentence:
-            splitSourceArticle[synonymTaggedSource.indexOf(source)],
-          targetSentence:
-            splitTargetArticle[synonymTaggedTarget.indexOf(target)],
+          sourceSentence: synonymTaggedSource.indexOf(source),
+          targetSentence: synonymTaggedTarget.indexOf(target),
         });
       }
     }
