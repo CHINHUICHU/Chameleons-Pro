@@ -49,9 +49,9 @@
 
 ![upload](https://user-images.githubusercontent.com/80673666/196017273-62e38bda-facb-4efc-9d5e-7f02bd3826c7.gif)
 
-- Time-comsuming case (content > 20,000 words)
+- Time-comsuming case (content > 3,000 words)
 
-- Search Articles
+![socket](https://user-images.githubusercontent.com/80673666/196049628-0f429f31-656c-4ac3-8616-7d8551f3eeb9.gif)
 
 - Check history Records
 
@@ -96,7 +96,5 @@
   - Compare number of tokens between two sentences and select larger one as benchmark
   - Define related sentences with the following formula, currently set threshold = 0.5
     <br><img width="321" alt="related sentence" src="https://user-images.githubusercontent.com/80673666/195996989-0e1ce255-eb3b-4a4b-be87-85a71d793ba5.png">
-
-## Performance Test
 
 ## Test Cases
