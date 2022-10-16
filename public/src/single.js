@@ -19,33 +19,9 @@ function displaySimilarity(similarity) {
   $('#similarity').html(`相似度：${(similarity * 100).toFixed(2)}%`);
 }
 
-// function splitContent(content) {
-//   return content.split(/(?:，|。|\n|！|？|：|；)+/);
-// }
-
-function preprocessArticleContent(sourceArticleContent, targetArticleContent) {
-  let sourceArticleWithParagraph = '';
-  let targetArticleWithParagraph = '';
-  for (const paragraph of sourceArticleContent) {
-    sourceArticleWithParagraph += `<p>${paragraph}</p>`;
-  }
-  for (const paragraph of targetArticleContent) {
-    targetArticleWithParagraph += `<p>${paragraph}</p>`;
-  }
-  return [sourceArticleWithParagraph, targetArticleWithParagraph];
-}
-
-function displayArticleInfo(title, author, content, kind) {
+function displayArticleInfo(title, author, kind) {
   $(`#result-${kind}-title`).val(title);
   $(`#result-${kind}-author`).val(author);
-  $(`#result-${kind}-content`).html(content);
-}
-
-function markArticle(source, target, matchResult) {
-  for (const matchSentence of matchResult) {
-    $('#result-source-content').mark(source[matchSentence.sourceSentence]);
-    $('#result-target-content').mark(target[matchSentence.targetSentence]);
-  }
 }
 
 $(document).ready(async () => {
@@ -169,33 +145,70 @@ $(document).ready(async () => {
 
         displaySimilarity(similarity);
 
-        const [sourceArticleWithParagraph, targetArticleWithParagraph] =
-          preprocessArticleContent(
-            $('#article-source-content').val().split('\n'),
-            $('#article-target-content').val().split('\n')
-          );
+        console.log(
+          $('#article-source-title').val(),
+          $('#article-source-author').val()
+        );
 
         displayArticleInfo(
           $('#article-source-title').val(),
           $('#article-source-author').val(),
-          sourceArticleWithParagraph,
           'source'
         );
+
         displayArticleInfo(
           $('#article-target-title').val(),
           $('#article-target-author').val(),
-          targetArticleWithParagraph,
           'target'
+        );
+
+        console.log(
+          $('#article-source-title').val(),
+          $('#article-source-author').val()
         );
 
         const sourceContentSplit = $('#article-source-content')
           .val()
-          .split(/(?:，|。|\n|！|？|：|；)+/);
+          .split(/(?=，|。|！|？|：|；)+/);
         const targetContentSplit = $('#article-target-content')
           .val()
-          .split(/(?:，|。|\n|！|？|：|；)+/);
+          .split(/(?=，|。|！|？|：|；)+/);
 
-        markArticle(sourceContentSplit, targetContentSplit, matchResult);
+        let sourceMarkIndex = matchResult.map(
+          (element) => element.sourceSentence
+        );
+
+        sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
+
+        console.log('sourceMarkIndex', sourceMarkIndex);
+
+        let targetMarkIndex = matchResult.map(
+          (element) => element.targetSentence
+        );
+
+        targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
+
+        let sourceMarkedContent = '';
+        console.log('source', Date.now());
+        for (let i = 0; i < sourceContentSplit.length; i++) {
+          let mark = sourceMarkIndex.shift();
+          if (i === mark) {
+            sourceContentSplit[i] = `<mark>${sourceContentSplit[i]}<mark>`;
+          }
+          sourceMarkedContent += sourceContentSplit[i];
+        }
+
+        let targetMarkedContent = '';
+        for (let i = 0; i < targetContentSplit.length; i++) {
+          let mark = targetMarkIndex.shift();
+          if (i === mark) {
+            targetContentSplit[i] = `<mark>${targetContentSplit[i]}<mark>`;
+          }
+          targetMarkedContent += targetContentSplit[i];
+        }
+
+        $('#result-source-content').html(sourceMarkedContent);
+        $('#result-target-content').html(targetMarkedContent);
       } else {
         Swal.fire({
           icon: 'success',
@@ -204,6 +217,7 @@ $(document).ready(async () => {
         });
       }
     } catch (error) {
+      console.log(error);
       Swal.fire({
         icon: 'error',
         text: error.response.data.message,

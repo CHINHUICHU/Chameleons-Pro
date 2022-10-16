@@ -69,30 +69,6 @@ function showArticle(articleId) {
     .appendTo('#article-result');
 }
 
-function preprocessArticle(sourceParagraphs, targetParagraphs) {
-  let processedSource = '';
-  let processedTarget = '';
-  for (const paragraph of sourceParagraphs) {
-    processedSource += `<p>${paragraph}</p>`;
-  }
-  for (const paragraph of targetParagraphs) {
-    processedTarget += `<p>${paragraph}</p>`;
-  }
-
-  return [processedSource, processedTarget];
-}
-
-function markArticle(matchResult, source, target, sourceSplit, targetSplit) {
-  for (const matchSentence of matchResult) {
-    $(`#article-${source}-result`).mark(
-      sourceSplit[matchSentence.sourceSentence]
-    );
-    $(`#article-${target}-result`).mark(
-      targetSplit[matchSentence.targetSentence]
-    );
-  }
-}
-
 let response;
 
 $(document).ready(async () => {
@@ -256,28 +232,55 @@ $(document).on('click', '.check-similar-paragraph', function (e) {
   showArticle(source);
   showArticle(target);
 
-  const [processedSource, processedTarget] = preprocessArticle(
-    $(`#article-${source}-content`).val().split('\n'),
-    $(`#article-${target}-content`).val().split('\n')
-  );
-
-  $(`#article-${source}-result`).html(processedSource);
-  $(`#article-${target}-result`).html(processedTarget);
-
   const { matchResult } = response.data.data;
 
   const sourceSplit = $(`#article-${source}-content`)
     .val()
-    .split(/(?:，|。|\n|！|？|：|；)+/);
+    .split(/(?=，|。|！|？|：|；)+/);
   const targetSplit = $(`#article-${target}-content`)
     .val()
-    .split(/(?:，|。|\n|！|？|：|；)+/);
+    .split(/(?=，|。|！|？|：|；)+/);
 
-  markArticle(
-    matchResult[$(this).attr('id')].sentences,
-    source,
-    target,
-    sourceSplit,
-    targetSplit
+  let sourceMarkIndex = matchResult[$(this).attr('id')].sentences.map(
+    (element) => element.sourceSentence
   );
+
+  sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
+
+  console.log('sourceMarkIndex', sourceMarkIndex);
+
+  let targetMarkIndex = matchResult[$(this).attr('id')].sentences.map(
+    (element) => element.targetSentence
+  );
+
+  targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
+
+  console.log('targetMarkIndex', targetMarkIndex);
+
+  let sourceMarkedContent = '';
+
+  for (let i = 0; i < sourceSplit.length; i++) {
+    let mark = sourceMarkIndex.shift();
+    if (i === mark) {
+      sourceSplit[i] = `<mark>${sourceSplit[i]}<mark>`;
+    }
+    sourceMarkedContent += sourceSplit[i];
+  }
+
+  console.log('sourceMarkedContent', sourceMarkedContent);
+
+  let targetMarkedContent = '';
+  for (let i = 0; i < targetSplit.length; i++) {
+    let mark = targetMarkIndex.shift();
+    if (i === mark) {
+      targetSplit[i] = `<mark>${targetSplit[i]}<mark>`;
+    }
+    targetMarkedContent += targetSplit[i];
+  }
+
+  console.log('targetMarkedContent', targetMarkedContent);
+
+  $(`#article-${source}-result`).html(sourceMarkedContent);
+
+  $(`#article-${target}-result`).html(targetMarkedContent);
 });

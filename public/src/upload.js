@@ -49,19 +49,6 @@ function displaySimilarity(similarity, index) {
   );
 }
 
-function preprocessArticle(sourceParagraphs, targetParagraphs) {
-  let processedSource = '';
-  let processedTarget = '';
-  for (const paragraph of sourceParagraphs) {
-    processedSource += `<p>${paragraph}</p>`;
-  }
-  for (const paragraph of targetParagraphs) {
-    processedTarget += `<p>${paragraph}</p>`;
-  }
-
-  return [processedSource, processedTarget];
-}
-
 function displayCheckResultBtn(index) {
   $('<button type="button">查看相似段落</button>')
     .attr('id', `check-similar-paragraph-${index}`)
@@ -81,13 +68,6 @@ function prepareDisplayResult(kind) {
       'overflow-y': 'scroll',
     })
     .appendTo('#article-result');
-}
-
-function markArticle(matchResult, source, target) {
-  for (const matchSentence of matchResult) {
-    $('#article-source-content').mark(source[matchSentence.sourceSentence]);
-    $('#article-target-content').mark(target[matchSentence.targetSentence]);
-  }
 }
 
 let response;
@@ -221,25 +201,50 @@ $(document).on('click', '.check-upload-similar-paragraph', function (e) {
     })
     .insertAfter($(this));
 
-  const [processedSource, processedTarget] = preprocessArticle(
-    $('#upload-article-content').val().split('\n'),
-    article[articleId].content.split('\n')
-  );
-
   prepareDisplayResult('source');
-
-  $('#article-source-content').html(processedSource);
 
   prepareDisplayResult('target');
 
-  $('#article-target-content').html(processedTarget);
-
   const { matchResult } = response.data.data;
 
-  const source = $('#upload-article-content')
+  const sourceContentSplit = $('#upload-article-content')
     .val()
-    .split(/(?:，|。|\n|！|？|：|；)+/);
-  const target = article[articleId].content.split(/(?:，|。|\n|！|？|：|；)+/);
+    .split(/(?=，|。|！|？|：|；)+/);
 
-  markArticle(matchResult[articleId], source, target);
+  const targetContentSplit =
+    article[articleId].content.split(/(?=，|。|！|？|：|；)+/);
+
+  let sourceMarkIndex = matchResult[articleId].map(
+    (element) => element.sourceSentence
+  );
+
+  sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
+
+  let targetMarkIndex = matchResult[articleId].map(
+    (element) => element.targetSentence
+  );
+
+  targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
+
+  let sourceMarkedContent = '';
+  for (let i = 0; i < sourceContentSplit.length; i++) {
+    let mark = sourceMarkIndex.shift();
+    if (i === mark) {
+      sourceContentSplit[i] = `<mark>${sourceContentSplit[i]}<mark>`;
+    }
+    sourceMarkedContent += sourceContentSplit[i];
+  }
+
+  $('#article-source-content').html(sourceMarkedContent);
+
+  let targetMarkedContent = '';
+  for (let i = 0; i < targetContentSplit.length; i++) {
+    let mark = targetMarkIndex.shift();
+    if (i === mark) {
+      targetContentSplit[i] = `<mark>${targetContentSplit[i]}<mark>`;
+    }
+    targetMarkedContent += targetContentSplit[i];
+  }
+
+  $('#article-target-content').html(targetMarkedContent);
 });

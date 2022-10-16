@@ -68,34 +68,67 @@ function displayRecords(records) {
     $(`#source-author-${i}`).val(records[i].source_article.author);
     $(`#target-author-${i}`).val(records[i].target_article.author);
 
-    const sourceArticleParagraphs =
-      records[i].source_article.content.split('\n');
-    const targetArticleParagraphs =
-      records[i].target_article.content.split('\n');
+    // const sourceArticleParagraphs =
+    //   records[i].source_article.content.split('\n');
+    // const targetArticleParagraphs =
+    //   records[i].target_article.content.split('\n');
 
-    let sourceWithParagraphTag = '';
-    let targetWithParagraphTag = '';
-    for (const paragraph of sourceArticleParagraphs) {
-      sourceWithParagraphTag += `<p>${paragraph}</p>`;
+    // let sourceWithParagraphTag = '';
+    // let targetWithParagraphTag = '';
+    // for (const paragraph of sourceArticleParagraphs) {
+    //   sourceWithParagraphTag += `<p>${paragraph}</p>`;
+    // }
+    // for (const paragraph of targetArticleParagraphs) {
+    //   targetWithParagraphTag += `<p>${paragraph}</p>`;
+    // }
+
+    const matchResult = records[i].match_result.sentences;
+
+    // console.log(matchResult);
+
+    const sourceContentSplit =
+      records[i].source_article.content.split(/(?=，|。|\n|！|？|：|；)+/);
+    const targetContentSplit =
+      records[i].target_article.content.split(/(?=，|。|\n|！|？|：|；)+/);
+
+    let sourceMarkIndex = matchResult.map((element) => element.sourceSentence);
+
+    sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
+
+    let targetMarkIndex = matchResult.map((element) => element.targetSentence);
+
+    targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
+
+    console.log('sourceMarkIndex', sourceMarkIndex);
+
+    console.log('targetMarkIndex', targetMarkIndex);
+
+    let sourceMarkedContent = '';
+    for (let i = 0; i < sourceContentSplit.length; i++) {
+      let mark = sourceMarkIndex.shift();
+      if (i === mark) {
+        sourceContentSplit[i] = `<mark>${sourceContentSplit[i]}<mark>`;
+      }
+      sourceMarkedContent += sourceContentSplit[i];
     }
-    for (const paragraph of targetArticleParagraphs) {
-      targetWithParagraphTag += `<p>${paragraph}</p>`;
+
+    let targetMarkedContent = '';
+    for (let i = 0; i < targetContentSplit.length; i++) {
+      let mark = targetMarkIndex.shift();
+      if (i === mark) {
+        targetContentSplit[i] = `<mark>${targetContentSplit[i]}<mark>`;
+      }
+      targetMarkedContent += targetContentSplit[i];
     }
-    $(`#source-content-${i}`).html(sourceWithParagraphTag);
 
-    $(`#target-content-${i}`).html(targetWithParagraphTag);
+    $(`#source-content-${i}`).html(sourceMarkedContent);
 
-    const matchResult = records[i].match_result;
+    $(`#target-content-${i}`).html(targetMarkedContent);
 
-    const sourceSplit =
-      records[i].source_article.content.split(/(?:，|。|\n|！|？|：|；)+/);
-    const targetSplit =
-      records[i].target_article.content.split(/(?:，|。|\n|！|？|：|；)+/);
-
-    for (const matchSentence of matchResult.sentences) {
-      $(`#source-content-${i}`).mark(sourceSplit[matchSentence.sourceSentence]);
-      $(`#target-content-${i}`).mark(targetSplit[matchSentence.targetSentence]);
-    }
+    // for (const matchSentence of matchResult.sentences) {
+    //   $(`#source-content-${i}`).mark(sourceSplit[matchSentence.sourceSentence]);
+    //   $(`#target-content-${i}`).mark(targetSplit[matchSentence.targetSentence]);
+    // }
   }
 }
 
