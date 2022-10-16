@@ -87,6 +87,7 @@ const getCompareResult = async (userId, pageSize, page) => {
     const result = await client.search({
       index: DB_COMPARE_INDEX,
       from: (page - 1) * pageSize,
+      sort: { create_time: 'desc' },
       body: {
         query: {
           term: {
