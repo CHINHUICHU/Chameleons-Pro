@@ -21,6 +21,8 @@ const {
 
 const { cache } = require('../../util/cache');
 
+const { generateTag } = require('../../util/generateTag');
+
 const {
   MODE_SINGLE,
   MODE_MULTIPLE,
@@ -114,6 +116,9 @@ const comparison = async (req, res, next) => {
     element.synonym = synonym.findSynonym(element.filtered);
   });
 
+  console.log('source', source);
+  console.log('target', target);
+
   try {
     const insertArticle = [
       {
@@ -173,15 +178,19 @@ const comparison = async (req, res, next) => {
           sentences: result,
         },
       ],
-      create_time: Date.now(),
     };
 
     await insertCompareResult(compareResult);
 
+    // generate HTML tag
+    const markedSourceContent = generateTag(source.sentences, result.source);
+    const markedTargetContent = generateTag(target.sentences, result.target);
+
     res.status(200).send({
       data: {
         similarity: articleSimilarity,
-        matchResult: result,
+        markedSourceContent,
+        markedTargetContent,
       },
     });
   } catch (err) {
@@ -288,7 +297,6 @@ const multipleComparison = async (req, res) => {
     user_id: req.user.user_id,
     compare_mode: +MODE_MULTIPLE,
     match_result: compareResult,
-    create_time: Date.now(),
   });
 
   console.log(matchedArticles);
@@ -388,7 +396,6 @@ const analyzeArticle = async (req, res) => {
     user_id: req.user.user_id,
     compare_mode: +MODE_UPLOAD,
     match_result: compareResult,
-    create_time: Date.now(),
   });
 
   res.send({
