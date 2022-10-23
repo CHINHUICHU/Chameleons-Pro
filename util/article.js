@@ -25,7 +25,7 @@ class Article {
   }
 
   splitSentence() {
-    this.sentences = this.content.split(/(?:，|。|\n|！|？|：|；)+/);
+    this.sentences = this.content.split(/(?=，|。|\n|！|？|：|；)+/);
     return this;
   }
 
