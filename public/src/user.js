@@ -1,7 +1,5 @@
 /* eslint-disable no-undef */
-// let end;
 async function getRecords(page, header) {
-  start = Date.now();
   let response = await axios.get(`/api/1.0/articles/records?page=${page}`, {
     headers: header,
   });
@@ -13,9 +11,7 @@ async function getRecords(page, header) {
 function displayRecords(records) {
   $('tbody').empty();
   for (let i = 0; i < records.length; i += 1) {
-    const compareDate = Date(records[i].create_time)
-      .toLocaleString()
-      .split(' ');
+    const compareDate = Date(records[i].create_at).toLocaleString().split(' ');
 
     $(`<tr class="accordion-toggle collapsed" id="accordion-${i}" data-toggle="collapse" data-parent="#accordion-${i}" href="#collapse-${i}">
       <td class="expand-button"></td>
@@ -69,49 +65,11 @@ function displayRecords(records) {
     $(`#source-author-${i}`).val(records[i].source_article.author);
     $(`#target-author-${i}`).val(records[i].target_article.author);
 
-    const matchResult = records[i].match_result.sentences;
+    $(`#source-content-${i}`).html(records[i].source_article.content);
 
-    const sourceContentSplit =
-      records[i].source_article.content.split(/(?=，|。|\n|！|？|：|；)+/);
-    const targetContentSplit =
-      records[i].target_article.content.split(/(?=，|。|\n|！|？|：|；)+/);
-
-    let sourceMarkIndex = matchResult.map((element) => element.sourceSentence);
-
-    sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
-
-    let targetMarkIndex = matchResult.map((element) => element.targetSentence);
-
-    targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
-
-    for (let index of sourceMarkIndex) {
-      sourceContentSplit[index] = `<mark>${sourceContentSplit[index]}</mark>`;
-    }
-    for (let index of targetMarkIndex) {
-      targetContentSplit[index] = `<mark>${targetContentSplit[index]}</mark>`;
-    }
-
-    let sourceMarkedContent = '';
-    for (let sentence of sourceContentSplit) {
-      sourceMarkedContent += sentence;
-    }
-    let targetMarkedContent = '';
-    for (let sentence of targetContentSplit) {
-      targetMarkedContent += sentence;
-    }
-
-    $(`#source-content-${i}`).html(sourceMarkedContent);
-
-    $(`#target-content-${i}`).html(targetMarkedContent);
-
-    // for (const matchSentence of matchResult.sentences) {
-    //   $(`#source-content-${i}`).mark(sourceSplit[matchSentence.sourceSentence]);
-    //   $(`#target-content-${i}`).mark(targetSplit[matchSentence.targetSentence]);
-    // }
+    $(`#target-content-${i}`).html(records[i].target_article.content);
   }
 }
-
-// let response;
 
 const compareMap = {
   1: '單篇比對',
@@ -136,6 +94,7 @@ $(document).ready(async () => {
 
     $('#page-1').addClass('pagination-active');
     const records = response.data.data.highestSimilaityResult;
+
     displayRecords(records);
   }
 });

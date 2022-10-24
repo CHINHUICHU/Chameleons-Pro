@@ -160,12 +160,7 @@ const comparison = async (req, res, next) => {
       target.synonym.flat()
     );
 
-    const result = findMatchedSentence(
-      source.sentences,
-      target.sentences,
-      source.synonym,
-      target.synonym
-    );
+    const result = findMatchedSentence(source.synonym, target.synonym);
 
     const compareResult = {
       user_id: req.user.user_id,
@@ -276,8 +271,6 @@ const multipleComparison = async (req, res) => {
 
       // find matched sentences between two articles
       const matchResult = findMatchedSentence(
-        articles.all[i].sentences,
-        articles.all[j].sentences,
         articles.all[i].synonym,
         articles.all[j].synonym
       );
@@ -287,7 +280,12 @@ const multipleComparison = async (req, res) => {
         target: generateTag(articles.all[j].sentences, matchResult.target),
       };
 
-      compareResult.push(matchedArticles[`${i + 1}-and-${j + 1}`]);
+      compareResult.push({
+        similarity,
+        sentences: matchResult,
+        target_id: articles.all[j].id,
+        source_id: articles.all[i].id,
+      });
     }
   }
 
@@ -361,12 +359,9 @@ const analyzeArticle = async (req, res) => {
     let compareArticle = new Article(title, author, content);
     compareArticle.splitSentence();
 
-    let result = findMatchedSentence(
-      article.sentences,
-      compareArticle.sentences,
-      article.synonym,
-      processed_content
-    );
+    let result = findMatchedSentence(article.synonym, processed_content);
+
+    // console.log('result', result);
 
     if (articleSimilarity >= +UPLOAD_RESPONSE_MIN_SIMILARITY) {
       articleSimilarities.push(articleSimilarity);
@@ -374,11 +369,18 @@ const analyzeArticle = async (req, res) => {
       similarArticles.push({
         title,
         author,
-        content,
       });
 
-      matchResult.push(result);
+      matchResult.push({
+        source: generateTag(article.sentences, result.source),
+        target: generateTag(
+          content.split(/(?=，|。|\n|！|？|：|；)+/),
+          result.target
+        ),
+      });
     }
+
+    console.log(matchResult);
 
     compareResult.push({
       similarity: articleSimilarity,
@@ -479,8 +481,6 @@ const getArticleRecords = async (req, res) => {
     return element._source;
   });
 
-  // console.log('highestSimilaityResult', highestSimilaityResult);
-
   // prepare for search articles
   highestSimilaityResult.forEach((element) => {
     searchArticles.push(searchArticleById(element.match_result.source_id));
@@ -503,9 +503,19 @@ const getArticleRecords = async (req, res) => {
   // map source article and target article to result
   highestSimilaityResult = highestSimilaityResult.map((element) => {
     element.source_article = articleResult[element.match_result.source_id];
+    element.source_article.content = generateTag(
+      element.source_article.content.split(/(?=，|。|\n|！|？|：|；)+/),
+      element.match_result.sentences.source
+    );
     element.target_article = articleResult[element.match_result.target_id];
+    element.target_article.content = generateTag(
+      element.target_article.content.split(/(?=，|。|\n|！|？|：|；)+/),
+      element.match_result.sentences.target
+    );
     return element;
   });
+
+  console.log(highestSimilaityResult);
 
   res.status(200).send({
     data: {

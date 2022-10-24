@@ -13,12 +13,7 @@ function findMatchedKeyword(longSentence, shortSentence) {
   return matched;
 }
 
-function findMatchedSentence(
-  splitSourceArticle,
-  splitTargetArticle,
-  synonymTaggedSource,
-  synonymTaggedTarget
-) {
+function findMatchedSentence(synonymTaggedSource, synonymTaggedTarget) {
   const result = {};
   result.source = new Set();
   result.target = new Set();
