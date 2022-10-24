@@ -283,10 +283,8 @@ const multipleComparison = async (req, res) => {
       );
 
       matchedArticles[`${i + 1}-and-${j + 1}`] = {
-        similarity,
-        source_id: articles.all[i].id,
-        target_id: articles.all[j].id,
-        sentences: matchResult,
+        source: generateTag(articles.all[i].sentences, matchResult.source),
+        target: generateTag(articles.all[j].sentences, matchResult.target),
       };
 
       compareResult.push(matchedArticles[`${i + 1}-and-${j + 1}`]);
@@ -298,8 +296,6 @@ const multipleComparison = async (req, res) => {
     compare_mode: +MODE_MULTIPLE,
     match_result: compareResult,
   });
-
-  console.log(matchedArticles);
 
   res.send({
     data: {
