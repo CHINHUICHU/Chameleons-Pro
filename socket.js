@@ -6,7 +6,6 @@ const server = http.createServer(app);
 const { subscriber } = require('./util/subscriber');
 const { SERVER_PORT } = process.env;
 const { socketAuth } = require('./util/util');
-// const { MODE_SINGLE, MODE_MULTIPLE, MODE_UPLOAD } = process.env;
 
 const io = new Server(server);
 

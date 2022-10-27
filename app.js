@@ -2,8 +2,6 @@
 require('dotenv').config();
 const express = require('express');
 
-const cors = require('cors');
-
 const path = require('path');
 
 const options = {
@@ -16,9 +14,10 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
 app.set('view engine', 'ejs');
-app.use(cors());
 
-app.use(`/api/${process.env.API_VERSION}`, [
+const { API_VERSION } = process.env;
+
+app.use(`/api/${API_VERSION}`, [
   require('./server/routes/user'),
   require('./server/routes/article'),
 ]);
@@ -111,7 +110,7 @@ app.get('/login', (req, res, next) => {
   });
 });
 
-app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
+app.get(`/api/${API_VERSION}/health`, (req, res) => {
   res.send('I am a healthy server!!!!');
 });
 
@@ -135,7 +134,3 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
-
-// app.listen(process.env.SERVER_PORT, () => {
-//   console.log(`server is listening on port ${process.env.SERVER_PORT}...`);
-// });
