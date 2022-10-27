@@ -8,13 +8,15 @@
 
 [Features](#Features)
 
-[Demo](#Demo)
+[Test Account](#test-account)
+
+[Algorithm Design](#Algorithm-design)
 
 [Tech Stack](#Tech-stack)
 
 [Architechture](#Architechture)
 
-[Algorithm Design](#Algorithm-design)
+[Demo](#Demo)
 
 [Contact](#Contact)
 
@@ -22,18 +24,51 @@
 
 - Three comparison mode
   - Two articles comparison
+    The system compares source and target articles and return similarity and similar sentences.
   - Multiple articles comparison
+    When the number of articles > 2, the system compares each pair of articles.
   - Upload to compare
-- Check history records of the most similar articles in user page
+    Users upload 1 article and the system search articles in database to conduct analysis
+- Check history records
 - Support article search with keyword exclusion
 
-## Demo
+## Test Account
 
 - Test Account
 
 | Email            | Password |
 | ---------------- | -------- |
 | test123@test.com | 123      |
+
+## Algorithm Design
+
+- Articles preprocessing
+
+  - Sentence splitting
+    Articles are split by common punctuation marks in Chinese, e.g. ，, \n, ！, ？, ：, ；, .etc. The output is an array of sentences, the punctuation marks are preserved for frontend result display.
+  - Tokenization
+    Jieba is used for tokenizing each sentence, and sentences become a set of tokens. The output returns a 2D array.
+  - Stop words filtering
+    A stop word table is built when the server starts running. Tokens are filtered if it exists in the table.
+  - Synonym identification
+    A synonym map is built based on a pre-defined dictionary. Synonyms have the same keys in the table. Semantically similar tokens are replaced with the same tag.
+  - Keyword extraction
+    Before storing articles in the database, Jieba is used for extracting keywords of articles. Keywords are used for upload to compare mode. Possible similar articles are selected based on tags rather than the full text. The number of keywords is based on the length of the article.
+
+- Similarity Calculation
+
+  - INPUT: two 2D arrays represent preprocessed articles OUTPUT: the similarity score
+  - First, flatten the array of synonym-tagged tokens into a 1D array because similarity calculation is only based on tokens rather than sentences.
+  - Second, use Jaccard Index to calculate the similarity. Tokens of articles are added into sets. Duplicate tokens are viewed as one token. The similarity is evaluated by the intersection of sets divided by the union of sets.
+    <br><img width="321" alt="similarity" src="https://user-images.githubusercontent.com/80673666/195996938-39381a1b-efd8-458a-b03b-6fa4dde8962e.png">
+
+- Related Sentence Indentification
+
+  - INPUT: two 1D arrays represent sets of tokens. OUTPUT: two arrays of sentence indices represent sentences that have related one(s) in the other article
+  - Decide which sentence should be the benchmark by comparing the number of processed tokens of two sentences and choose the larger one.
+  - Add tokens of the benchmark into the set first. And examine tokens of the other sentence with the set to count matched ones.
+  - If the number of matched tokens is more than half of the benchmark set's size, identify two sentences that are similar and return sentence indices.
+    <br><img width="321" alt="related sentence" src="https://user-images.githubusercontent.com/80673666/195996989-0e1ce255-eb3b-4a4b-be87-85a71d793ba5.png">
 
 - Two Articles Comparison
 
@@ -74,26 +109,6 @@
 ## Architecture
 
 ![image](https://user-images.githubusercontent.com/80673666/195997275-f8252c6b-31c5-44de-b65c-fcf79811b28e.png)
-
-## Algorithm Design
-
-- Articles preprocessing
-
-  - Sentence splitting
-  - Tokenization
-  - Stop words filtering
-  - Synonym identification
-
-- Similarity Calculation
-
-  - Flattern the array of synonym-tagged tokens
-  - Use Jaccard Index to calculate the similarity
-    <br><img width="321" alt="similarity" src="https://user-images.githubusercontent.com/80673666/195996938-39381a1b-efd8-458a-b03b-6fa4dde8962e.png">
-
-- Related Sentence Indentification
-  - Compare number of tokens between two sentences and select larger one as benchmark
-  - Define related sentences with the following formula, currently set threshold = 0.5
-    <br><img width="321" alt="related sentence" src="https://user-images.githubusercontent.com/80673666/195996989-0e1ce255-eb3b-4a4b-be87-85a71d793ba5.png">
 
 ## Contact
 
