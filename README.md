@@ -44,16 +44,18 @@
 
 - Articles preprocessing
 
-  - Sentence splitting
-    Articles are split by common punctuation marks in Chinese, e.g. ，, \n, ！, ？, ：, ；, .etc. The output is an array of sentences, the punctuation marks are preserved for frontend result display.
-  - Tokenization
-    Jieba is used for tokenizing each sentence, and sentences become a set of tokens. The output returns a 2D array.
-  - Stop words filtering
-    A stop word table is built when the server starts running. Tokens are filtered if it exists in the table.
-  - Synonym identification
-    A synonym map is built based on a pre-defined dictionary. Synonyms have the same keys in the table. Semantically similar tokens are replaced with the same tag.
-  - Keyword extraction
-    Before storing articles in the database, Jieba is used for extracting keywords of articles. Keywords are used for upload to compare mode. Possible similar articles are selected based on tags rather than the full text. The number of keywords is based on the length of the article.
+![image](https://user-images.githubusercontent.com/80673666/198559340-c5e713ef-d80a-49e2-9108-161c413f7940.png)
+
+- Sentence splitting
+  Articles are split by common punctuation marks in Chinese, e.g. ，, \n, ！, ？, ：, ；, .etc. The output is an array of sentences, the punctuation marks are preserved for frontend result display.
+- Tokenization
+  Jieba is used for tokenizing each sentence, and sentences become a set of tokens. The output returns a 2D array.
+- Stop words filtering
+  A stop word table is built when the server starts running. Tokens are filtered if it exists in the table.
+- Synonym identification
+  A synonym map is built based on a pre-defined dictionary. Synonyms have the same keys in the table. Semantically similar tokens are replaced with the same tag.
+- Keyword extraction
+  Before storing articles in the database, Jieba is used for extracting keywords of articles. Keywords are used for upload to compare mode. Possible similar articles are selected based on tags rather than the full text. The number of keywords is based on the length of the article.
 
 - Similarity Calculation
 
