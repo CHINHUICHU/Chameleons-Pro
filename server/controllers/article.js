@@ -32,6 +32,8 @@ const {
   UPLOAD_RESPONSE_MIN_SIMILARITY,
   PAGE_SIZE,
   LENGTHY_ARTICLE_THRESHOLD,
+  COMPARE_FINISH,
+  // COMPARE_PENDING,
 } = process.env;
 
 const comparison = async (req, res, next) => {
@@ -167,6 +169,7 @@ const comparison = async (req, res, next) => {
           source_id: insertArticlesResult.items[0].index._id,
           target_id: insertArticlesResult.items[1].index._id,
           sentences: result,
+          status: +COMPARE_FINISH,
         },
       ],
     };
@@ -279,6 +282,7 @@ const multipleComparison = async (req, res) => {
         sentences: matchResult,
         target_id: articles.all[j].id,
         source_id: articles.all[i].id,
+        status: COMPARE_FINISH,
       });
     }
   }
@@ -380,6 +384,7 @@ const analyzeArticle = async (req, res) => {
       source_id: insertResult.items[0].index._id,
       target_id: searchResponse.hits.hits[i]._id,
       sentences: result,
+      status: +COMPARE_FINISH,
     });
   }
 
@@ -465,6 +470,11 @@ const getArticleRecords = async (req, res) => {
     +page
   );
 
+  console.log(
+    'compareResults',
+    compareResults.hits.hits[0]._source.match_result
+  );
+
   const searchArticles = [];
 
   // only show compare result with highest similarity (with multiple and upload mode)
@@ -481,8 +491,6 @@ const getArticleRecords = async (req, res) => {
   });
 
   let articleResult = await Promise.all(searchArticles);
-
-  console.log('articleResult', articleResult);
 
   // organize article result to hash table
   articleResult = articleResult.reduce((accu, curr) => {
@@ -509,8 +517,6 @@ const getArticleRecords = async (req, res) => {
     );
     return element;
   });
-
-  console.log(highestSimilaityResult);
 
   res.status(200).send({
     data: {

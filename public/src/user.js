@@ -9,6 +9,7 @@ async function getRecords(page, header) {
 }
 
 function displayRecords(records) {
+  console.log(records);
   $('tbody').empty();
   for (let i = 0; i < records.length; i += 1) {
     const compareDate = Date(records[i].create_at).toLocaleString().split(' ');
@@ -17,7 +18,10 @@ function displayRecords(records) {
       <td class="expand-button"></td>
       <td>${compareDate[1]} ${compareDate[2]} ${compareDate[3]}</td>
       <td>${compareMap[records[i].compare_mode]}</td>
-      <td>${(records[i].match_result.similarity * 100).toFixed(2)}%</td>
+      <td>${compareStatus[records[i].match_result.status]}</td>
+      <td>${
+        (records[i].match_result.similarity * 100).toFixed(2) || '比對進行中'
+      }%</td>
       </tr>
 
       <tr class="hide-table-padding">
@@ -75,6 +79,11 @@ const compareMap = {
   1: '單篇比對',
   2: '多篇比對',
   3: '上傳比對',
+};
+
+const compareStatus = {
+  0: '進行中',
+  1: '已完成',
 };
 
 $(document).ready(async () => {
