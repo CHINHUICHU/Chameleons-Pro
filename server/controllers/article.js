@@ -68,7 +68,7 @@ const comparison = async (req, res, next) => {
         author: source.author,
         content: source.content,
         user_id: req.user.user_id,
-        create_time: Date.now(),
+        // create_time: Date.now(),
       },
       {
         index: {
@@ -80,7 +80,7 @@ const comparison = async (req, res, next) => {
         author: target.author,
         content: target.content,
         user_id: req.user.user_id,
-        create_time: Date.now(),
+        // create_time: Date.now(),
       },
     ];
 
@@ -133,7 +133,7 @@ const comparison = async (req, res, next) => {
         processed_content: source.synonym,
         tag: source.tags,
         user_id: req.user.user_id,
-        create_time: Date.now(),
+        // create_time: Date.now(),
       },
       {
         index: {
@@ -147,7 +147,7 @@ const comparison = async (req, res, next) => {
         processed_content: target.synonym,
         tag: target.tags,
         user_id: req.user.user_id,
-        create_time: Date.now(),
+        // create_time: Date.now(),
       },
     ];
 
@@ -219,7 +219,7 @@ const multipleComparison = async (req, res) => {
         author: article.author,
         content: article.content,
         user_id: req.user.user_id,
-        create_time: Date.now(),
+        // create_time: Date.now(),
       }
     );
   });
@@ -243,7 +243,7 @@ const multipleComparison = async (req, res) => {
         processed_content: article.synonym,
         tag: article.tags,
         user_id: req.user.user_id,
-        create_time: Date.now(),
+        // create_time: Date.now(),
       }
     );
   });
@@ -324,7 +324,7 @@ const analyzeArticle = async (req, res) => {
       processed_content: article.synonym,
       tag: article.tags,
       user_id: req.user.user_id,
-      create_time: Date.now(),
+      // create_time: Date.now(),
     },
   ]);
 
