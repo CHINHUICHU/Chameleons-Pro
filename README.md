@@ -42,24 +42,26 @@
 
 ## Algorithm Design
 
-- Articles preprocessing
+- ### Articles preprocessing
 
-![image](https://user-images.githubusercontent.com/80673666/198559340-c5e713ef-d80a-49e2-9108-161c413f7940.png)
+![image](https://user-images.githubusercontent.com/80673666/198678555-b9f1bea6-e846-4986-8a85-18568cc1f050.png)
+![image](https://user-images.githubusercontent.com/80673666/198678618-34009ce6-97ed-4886-aaa9-8b509aba56fd.png)
 
-- Sentence splitting
+- #### Sentence splitting
   <p>Articles are split by common punctuation marks in Chinese, e.g. ，, \n, ！, ？, ：, ；, .etc. The output is an array of sentences, the punctuation marks are preserved for frontend result display.</p>
-- Tokenization
+- #### Tokenization
   <p>Jieba is used for tokenizing each sentence, and sentences become a set of tokens. The output returns a 2D array.</p>
-- Stop words filtering
+- #### Stop words filtering
   <p>A stop word table is built when the server starts running. Tokens are filtered if it exists in the table.</p>
-- Synonym identification
+- #### Synonym identification
   <p>A synonym map is built based on a pre-defined dictionary. Synonyms have the same keys in the table. Semantically similar tokens are replaced with the same tag.</p>
-- Keyword extraction
+- #### Keyword extraction
   <p>Before storing articles in the database, Jieba is used for extracting keywords of articles. Keywords are used for upload to compare mode. Possible similar articles are selected based on tags rather than the full text. The number of keywords is based on the length of the article.</p>
-- Example
-  ![preprocess](https://user-images.githubusercontent.com/80673666/198674272-caa98ecc-6cb0-4521-8c09-ae63cbe36a86.gif)
+- #### Example
 
-- Similarity Calculation
+  <br>![preprocess](https://user-images.githubusercontent.com/80673666/198674272-caa98ecc-6cb0-4521-8c09-ae63cbe36a86.gif)
+
+- ### Similarity Calculation
 
 ![image](https://user-images.githubusercontent.com/80673666/198618584-69602804-eba5-4f36-9c53-43b96b9e92b7.png)
 
@@ -68,9 +70,9 @@
 - Second, use Jaccard Index to calculate the similarity. Tokens of articles are added into sets. Duplicate tokens are viewed as one token. The similarity is evaluated by the intersection of sets divided by the union of sets.
   <br><img width="321" alt="similarity" src="https://user-images.githubusercontent.com/80673666/195996938-39381a1b-efd8-458a-b03b-6fa4dde8962e.png">
 - Example
-  <img width="701" alt="similarty calculation" src="https://user-images.githubusercontent.com/80673666/198675792-0aa50191-f51d-46a4-a7c0-26d76aff918f.png">
+  <br><img width="701" alt="similarty calculation" src="https://user-images.githubusercontent.com/80673666/198675792-0aa50191-f51d-46a4-a7c0-26d76aff918f.png">
 
-- Related Sentence Indentification
+- ### Related Sentence Indentification
 
   - INPUT: two 1D arrays represent sets of tokens. OUTPUT: two arrays of sentence indices represent sentences that have related one(s) in the other article
   - Decide which sentence should be the benchmark by comparing the number of processed tokens of two sentences and choose the larger one.
