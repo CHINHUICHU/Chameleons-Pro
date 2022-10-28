@@ -16,12 +16,13 @@ class Article {
   id;
   tokens = [];
   tags = [];
-  #TAG_NUMBER = 20;
+  #TAG_NUMBER;
   filtered = [];
   synonym = [];
 
   constructor(title, author, content) {
     (this.title = title), (this.author = author), (this.content = content);
+    this.#TAG_NUMBER = Math.ceil(this.content.length / 100);
   }
 
   splitSentence() {
