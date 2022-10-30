@@ -37,7 +37,7 @@ const {
 } = process.env;
 
 const comparison = async (req, res, next) => {
-  console.time('start');
+  console.time('test');
   const articles = new Articles();
   const { sourceArticle, targetArticle } = req.body.data;
 
@@ -117,7 +117,7 @@ const comparison = async (req, res, next) => {
     element.synonym = synonym.findSynonym(element.filtered);
   });
 
-  console.timeEnd('end');
+  console.timeEnd('test');
 
   try {
     const insertArticle = [
