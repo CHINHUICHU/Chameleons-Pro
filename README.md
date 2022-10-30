@@ -18,6 +18,8 @@
 
 [Tech Stack](#Tech-stack)
 
+[Mapping](#Mapping)
+
 [Contact](#Contact)
 
 ## Features
@@ -135,6 +137,10 @@
 
 ![jQuery](https://img.shields.io/badge/jquery-%230769AD.svg?style=for-the-badge&logo=jquery&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=for-the-badge&logo=bootstrap&logoColor=white)
+
+## Mapping
+
+[Elasticseach Mapping](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/mapping.md#mapping)
 
 ## Contact
 
