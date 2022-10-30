@@ -196,6 +196,7 @@ const comparison = async (req, res, next) => {
 };
 
 const multipleComparison = async (req, res) => {
+  console.time('m');
   let articles = new Articles();
 
   const insertedArticles = [];
@@ -294,6 +295,8 @@ const multipleComparison = async (req, res) => {
     compare_mode: +MODE_MULTIPLE,
     match_result: compareResult,
   });
+
+  console.timeEnd('m');
 
   res.send('ok');
 
