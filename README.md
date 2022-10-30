@@ -12,11 +12,11 @@
 
 [Algorithm Design](#Algorithm-design)
 
-[Tech Stack](#Tech-stack)
-
 [Architechture](#Architechture)
 
 [Demo](#Demo)
+
+[Tech Stack](#Tech-stack)
 
 [Contact](#Contact)
 
@@ -79,6 +79,26 @@
   - Add tokens of the benchmark into the set first. And examine tokens of the other sentence with the set to count matched ones.
   - If the number of matched tokens is more than half of the benchmark set's size, identify two sentences that are similar and return sentence indices.
     <br><img width="321" alt="related sentence" src="https://user-images.githubusercontent.com/80673666/195996989-0e1ce255-eb3b-4a4b-be87-85a71d793ba5.png">
+  - Matched sentence example
+    <br><img width="741" alt="result" src="https://user-images.githubusercontent.com/80673666/198858830-d8ad319d-4efc-4759-9401-0406e809a68d.png">
+  - Explanation
+  <p>「此領域探討如何處理及運用自然語言」 and 「自然語言處理包括很多方面和步驟」 have 5 mathced tokens out of 6 </p>
+  <p>「自然語言處理包括多方面和步驟」 and 「此領域探討如何處理及運用自然語言」have 3 matched tokens out of 6 </p>
+
+## Architecture
+
+- ### Main system architecture
+  ![image](https://user-images.githubusercontent.com/80673666/198864855-39eedc42-7f7e-4269-8dfa-bd9ca36da704.png)
+  - NGINX is used as reverse proxy, it redirects requests from port 80 to the port that the server runs. The server is on AWS EC2, and saves processed result to Elasticsearch. This is the general case when the request can be quickly finished without blocking the server.
+- ### Message queue design
+
+  ![image](https://user-images.githubusercontent.com/80673666/198865416-b2d5d124-4160-46f8-8462-d8da700943bc.png)
+
+  - When the server detects the request may take longer time to process, it will push the job into a message queue. The message queue is built with Redis.
+  - The worker constantly check if there are jobs in queue and pop job to process. List is used to implement the queue over the sorted set since pop and push only take O(1) and the order of request do not need to be guaranteed.
+  - When the worker finish job, it will notify the server by publishing message to a Redis channel. The server will send result to clients after receiving message from the worker.
+
+## Demo
 
 - Two Articles Comparison
 
@@ -115,10 +135,6 @@
 
 ![jQuery](https://img.shields.io/badge/jquery-%230769AD.svg?style=for-the-badge&logo=jquery&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=for-the-badge&logo=bootstrap&logoColor=white)
-
-## Architecture
-
-![image](https://user-images.githubusercontent.com/80673666/195997275-f8252c6b-31c5-44de-b65c-fcf79811b28e.png)
 
 ## Contact
 
