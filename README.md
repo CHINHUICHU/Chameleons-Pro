@@ -12,7 +12,7 @@
 
 [Algorithm Design](#Algorithm-design)
 
-[Architechture](#Architechture)
+[Architechture](#architechture)
 
 [Demo](#Demo)
 
