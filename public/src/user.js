@@ -18,7 +18,7 @@ function displayRecords(records) {
       <td class="expand-button"></td>
       <td>${compareDate[1]} ${compareDate[2]} ${compareDate[3]}</td>
       <td>${compareMap[records[i].compare_mode]}</td>
-      <td>${compareStatus[records[i].match_result.status]}</td>
+      <td>${compareStatus[records[i].status]}</td>
       <td>${
         (records[i].match_result.similarity * 100).toFixed(2) || '比對進行中'
       }%</td>
