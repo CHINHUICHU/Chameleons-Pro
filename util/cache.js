@@ -7,7 +7,6 @@ const cache = new Redis({
   username: process.env.CACHE_USER,
   password: process.env.CACHE_PASSWORD,
   db: process.env.CACHE_DB,
-  //   tls: {},
 });
 
 cache.ready = false;
