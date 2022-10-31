@@ -1,15 +1,16 @@
 /* eslint-disable no-unused-vars */
 require('dotenv').config();
 const express = require('express');
-
+const cors = require('cors');
 const path = require('path');
 
 const options = {
   root: path.join(__dirname, 'public'),
 };
-
+const { DOMAIN_NAME } = process.env;
 const app = express();
 
+app.use(cors({ origin: DOMAIN_NAME }));
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
