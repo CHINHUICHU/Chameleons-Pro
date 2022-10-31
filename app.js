@@ -2,8 +2,6 @@
 require('dotenv').config();
 const express = require('express');
 
-const cors = require('cors');
-
 const path = require('path');
 
 const options = {
@@ -16,7 +14,6 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
 app.set('view engine', 'ejs');
-app.use(cors());
 
 app.use(`/api/${process.env.API_VERSION}`, [
   require('./server/routes/user'),
@@ -128,14 +125,10 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log('something wrong', err);
+  console.log('internal server error', err);
   res
     .status(500)
     .send({ error_code: 500, error_message: 'internal server error' });
 });
 
 module.exports = app;
-
-// app.listen(process.env.SERVER_PORT, () => {
-//   console.log(`server is listening on port ${process.env.SERVER_PORT}...`);
-// });
