@@ -1,17 +1,13 @@
 /* eslint-disable no-constant-condition */
-require('dotenv').config();
+require('dotenv').config({ path: '../.env' });
 const { cache } = require('./cache');
 const stopWord = require('../util/stopWord');
 const synonym = require('../util/synonym');
 const { Article } = require('../util/article');
 const { findMatchedSentence, calculateSimilarity } = require('../util/compare');
-const { updateArticle, insertCompareResult } = require('./model/article');
+const { updateArticle, updateCompareResult } = require('./model/article');
 
-const {
-  MODE_SINGLE,
-
-  CHANNEL_NAME,
-} = process.env;
+const { CHANNEL_NAME } = process.env;
 
 (async () => {
   while (true) {
@@ -20,7 +16,7 @@ const {
         (await cache.brpop('chinese-article-compare', 0))[1]
       );
 
-      const { user_id } = job;
+      const { compare_result_id, user_id } = job;
 
       const source = new Article(
         job.source.title,
@@ -48,41 +44,28 @@ const {
       await updateArticle(source.id, source.synonym, source.tags);
       await updateArticle(target.id, target.synonym, target.tags);
 
-      const matchResult = findMatchedSentence(
-        source.sentences,
-        target.sentences,
-        source.synonym,
-        target.synonym
-      );
+      const matchResult = findMatchedSentence(source.synonym, target.synonym);
 
       const similarity = calculateSimilarity(
         source.synonym.flat(),
         target.synonym.flat()
       );
 
-      // await updateCompareResult(compare_result_id, similarity, compareResult);
-
-      const compareResult = {
-        user_id: user_id,
-        compare_mode: +MODE_SINGLE,
-        match_result: [
-          {
-            similarity: similarity,
-            source_id: source.id,
-            target_id: target.id,
-            sentences: matchResult,
-          },
-        ],
-        create_time: Date.now(),
-      };
-
-      await insertCompareResult(compareResult);
+      await updateCompareResult(
+        compare_result_id,
+        job.source.id,
+        job.target.id,
+        similarity,
+        matchResult
+      );
 
       const finishedJob = {
         user_id,
       };
 
       await cache.publish(CHANNEL_NAME, JSON.stringify(finishedJob));
+
+      console.log('worker finished job');
     } catch (err) {
       console.log(err);
     }

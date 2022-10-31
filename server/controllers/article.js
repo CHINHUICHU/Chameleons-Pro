@@ -33,7 +33,7 @@ const {
   PAGE_SIZE,
   LENGTHY_ARTICLE_THRESHOLD,
   COMPARE_FINISH,
-  // COMPARE_PENDING,
+  COMPARE_PENDING,
 } = process.env;
 
 const comparison = async (req, res, next) => {
@@ -89,10 +89,19 @@ const comparison = async (req, res, next) => {
     source.id = insertArticlesResult.items[0].index._id;
     target.id = insertArticlesResult.items[1].index._id;
 
+    let insertCompareResultResponse = await insertCompareResult({
+      user_id: req.user.user_id,
+      compare_mode: +MODE_SINGLE,
+      status: +COMPARE_PENDING,
+    });
+
+    console.log('insertCompareResultResponse', insertCompareResultResponse);
+
     try {
       await cache.lpush(
         'chinese-article-compare',
         JSON.stringify({
+          compare_result_id: insertCompareResultResponse._id,
           user_id: req.user.user_id,
           compare_mode: +MODE_SINGLE,
           source,
@@ -169,9 +178,9 @@ const comparison = async (req, res, next) => {
           source_id: insertArticlesResult.items[0].index._id,
           target_id: insertArticlesResult.items[1].index._id,
           sentences: result,
-          status: +COMPARE_FINISH,
         },
       ],
+      status: +COMPARE_FINISH,
     };
 
     await insertCompareResult(compareResult);
@@ -282,7 +291,6 @@ const multipleComparison = async (req, res) => {
         sentences: matchResult,
         target_id: articles.all[j].id,
         source_id: articles.all[i].id,
-        status: COMPARE_FINISH,
       });
     }
   }
@@ -291,6 +299,7 @@ const multipleComparison = async (req, res) => {
     user_id: req.user.user_id,
     compare_mode: +MODE_MULTIPLE,
     match_result: compareResult,
+    status: COMPARE_FINISH,
   });
 
   res.send({
@@ -358,8 +367,6 @@ const analyzeArticle = async (req, res) => {
 
     let result = findMatchedSentence(article.synonym, processed_content);
 
-    // console.log('result', result);
-
     if (articleSimilarity >= +UPLOAD_RESPONSE_MIN_SIMILARITY) {
       articleSimilarities.push(articleSimilarity);
 
@@ -384,7 +391,6 @@ const analyzeArticle = async (req, res) => {
       source_id: insertResult.items[0].index._id,
       target_id: searchResponse.hits.hits[i]._id,
       sentences: result,
-      status: +COMPARE_FINISH,
     });
   }
 
@@ -392,6 +398,7 @@ const analyzeArticle = async (req, res) => {
     user_id: req.user.user_id,
     compare_mode: +MODE_UPLOAD,
     match_result: compareResult,
+    status: COMPARE_FINISH,
   });
 
   res.send({
@@ -468,11 +475,6 @@ const getArticleRecords = async (req, res) => {
     req.user.user_id,
     +PAGE_SIZE,
     +page
-  );
-
-  console.log(
-    'compareResults',
-    compareResults.hits.hits[0]._source.match_result
   );
 
   const searchArticles = [];

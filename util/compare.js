@@ -4,6 +4,7 @@ const MATCH_THREASHOLD = +process.env.MATCH_THREASHOLD;
 function findMatchedKeyword(longSentence, shortSentence) {
   const compareSet = [];
   let matched = 0;
+
   longSentence.forEach((element) => compareSet.push(element));
   shortSentence.forEach((element) => {
     if (compareSet.includes(element)) {
