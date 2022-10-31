@@ -21,6 +21,8 @@ const {
 
 const { cache } = require('../../util/cache');
 
+const { generateTag } = require('../../util/generateTag');
+
 const {
   MODE_SINGLE,
   MODE_MULTIPLE,
@@ -30,6 +32,8 @@ const {
   UPLOAD_RESPONSE_MIN_SIMILARITY,
   PAGE_SIZE,
   LENGTHY_ARTICLE_THRESHOLD,
+  COMPARE_FINISH,
+  // COMPARE_PENDING,
 } = process.env;
 
 const comparison = async (req, res, next) => {
@@ -66,7 +70,6 @@ const comparison = async (req, res, next) => {
         author: source.author,
         content: source.content,
         user_id: req.user.user_id,
-        create_time: Date.now(),
       },
       {
         index: {
@@ -78,7 +81,6 @@ const comparison = async (req, res, next) => {
         author: target.author,
         content: target.content,
         user_id: req.user.user_id,
-        create_time: Date.now(),
       },
     ];
 
@@ -114,6 +116,9 @@ const comparison = async (req, res, next) => {
     element.synonym = synonym.findSynonym(element.filtered);
   });
 
+  console.log('source', source);
+  console.log('target', target);
+
   try {
     const insertArticle = [
       {
@@ -128,7 +133,6 @@ const comparison = async (req, res, next) => {
         processed_content: source.synonym,
         tag: source.tags,
         user_id: req.user.user_id,
-        create_time: Date.now(),
       },
       {
         index: {
@@ -142,7 +146,6 @@ const comparison = async (req, res, next) => {
         processed_content: target.synonym,
         tag: target.tags,
         user_id: req.user.user_id,
-        create_time: Date.now(),
       },
     ];
 
@@ -155,12 +158,7 @@ const comparison = async (req, res, next) => {
       target.synonym.flat()
     );
 
-    const result = findMatchedSentence(
-      source.sentences,
-      target.sentences,
-      source.synonym,
-      target.synonym
-    );
+    const result = findMatchedSentence(source.synonym, target.synonym);
 
     const compareResult = {
       user_id: req.user.user_id,
@@ -171,17 +169,22 @@ const comparison = async (req, res, next) => {
           source_id: insertArticlesResult.items[0].index._id,
           target_id: insertArticlesResult.items[1].index._id,
           sentences: result,
+          status: +COMPARE_FINISH,
         },
       ],
-      create_time: Date.now(),
     };
 
     await insertCompareResult(compareResult);
 
+    // generate HTML tag
+    const markedSourceContent = generateTag(source.sentences, result.source);
+    const markedTargetContent = generateTag(target.sentences, result.target);
+
     res.status(200).send({
       data: {
         similarity: articleSimilarity,
-        matchResult: result,
+        markedSourceContent,
+        markedTargetContent,
       },
     });
   } catch (err) {
@@ -215,7 +218,6 @@ const multipleComparison = async (req, res) => {
         author: article.author,
         content: article.content,
         user_id: req.user.user_id,
-        create_time: Date.now(),
       }
     );
   });
@@ -239,7 +241,6 @@ const multipleComparison = async (req, res) => {
         processed_content: article.synonym,
         tag: article.tags,
         user_id: req.user.user_id,
-        create_time: Date.now(),
       }
     );
   });
@@ -267,20 +268,22 @@ const multipleComparison = async (req, res) => {
 
       // find matched sentences between two articles
       const matchResult = findMatchedSentence(
-        articles.all[i].sentences,
-        articles.all[j].sentences,
         articles.all[i].synonym,
         articles.all[j].synonym
       );
 
       matchedArticles[`${i + 1}-and-${j + 1}`] = {
-        similarity,
-        source_id: articles.all[i].id,
-        target_id: articles.all[j].id,
-        sentences: matchResult,
+        source: generateTag(articles.all[i].sentences, matchResult.source),
+        target: generateTag(articles.all[j].sentences, matchResult.target),
       };
 
-      compareResult.push(matchedArticles[`${i + 1}-and-${j + 1}`]);
+      compareResult.push({
+        similarity,
+        sentences: matchResult,
+        target_id: articles.all[j].id,
+        source_id: articles.all[i].id,
+        status: COMPARE_FINISH,
+      });
     }
   }
 
@@ -288,10 +291,7 @@ const multipleComparison = async (req, res) => {
     user_id: req.user.user_id,
     compare_mode: +MODE_MULTIPLE,
     match_result: compareResult,
-    create_time: Date.now(),
   });
-
-  console.log(matchedArticles);
 
   res.send({
     data: {
@@ -322,7 +322,6 @@ const analyzeArticle = async (req, res) => {
       processed_content: article.synonym,
       tag: article.tags,
       user_id: req.user.user_id,
-      create_time: Date.now(),
     },
   ]);
 
@@ -357,12 +356,9 @@ const analyzeArticle = async (req, res) => {
     let compareArticle = new Article(title, author, content);
     compareArticle.splitSentence();
 
-    let result = findMatchedSentence(
-      article.sentences,
-      compareArticle.sentences,
-      article.synonym,
-      processed_content
-    );
+    let result = findMatchedSentence(article.synonym, processed_content);
+
+    // console.log('result', result);
 
     if (articleSimilarity >= +UPLOAD_RESPONSE_MIN_SIMILARITY) {
       articleSimilarities.push(articleSimilarity);
@@ -370,17 +366,25 @@ const analyzeArticle = async (req, res) => {
       similarArticles.push({
         title,
         author,
-        content,
       });
 
-      matchResult.push(result);
+      matchResult.push({
+        source: generateTag(article.sentences, result.source),
+        target: generateTag(
+          content.split(/(?=，|。|\n|！|？|：|；)+/),
+          result.target
+        ),
+      });
     }
+
+    console.log(matchResult);
 
     compareResult.push({
       similarity: articleSimilarity,
       source_id: insertResult.items[0].index._id,
       target_id: searchResponse.hits.hits[i]._id,
       sentences: result,
+      status: +COMPARE_FINISH,
     });
   }
 
@@ -388,7 +392,6 @@ const analyzeArticle = async (req, res) => {
     user_id: req.user.user_id,
     compare_mode: +MODE_UPLOAD,
     match_result: compareResult,
-    create_time: Date.now(),
   });
 
   res.send({
@@ -467,6 +470,11 @@ const getArticleRecords = async (req, res) => {
     +page
   );
 
+  console.log(
+    'compareResults',
+    compareResults.hits.hits[0]._source.match_result
+  );
+
   const searchArticles = [];
 
   // only show compare result with highest similarity (with multiple and upload mode)
@@ -475,8 +483,6 @@ const getArticleRecords = async (req, res) => {
     element._source.match_result = element._source.match_result.shift();
     return element._source;
   });
-
-  // console.log('highestSimilaityResult', highestSimilaityResult);
 
   // prepare for search articles
   highestSimilaityResult.forEach((element) => {
@@ -500,7 +506,15 @@ const getArticleRecords = async (req, res) => {
   // map source article and target article to result
   highestSimilaityResult = highestSimilaityResult.map((element) => {
     element.source_article = articleResult[element.match_result.source_id];
+    element.source_article.content = generateTag(
+      element.source_article.content.split(/(?=，|。|\n|！|？|：|；)+/),
+      element.match_result.sentences.source
+    );
     element.target_article = articleResult[element.match_result.target_id];
+    element.target_article.content = generateTag(
+      element.target_article.content.split(/(?=，|。|\n|！|？|：|；)+/),
+      element.match_result.sentences.target
+    );
     return element;
   });
 

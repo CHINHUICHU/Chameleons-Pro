@@ -1,11 +1,11 @@
 require('dotenv').config();
 const MATCH_THREASHOLD = +process.env.MATCH_THREASHOLD;
 
-function findMatchedKeyword(longArticle, shortArticle) {
+function findMatchedKeyword(longSentence, shortSentence) {
   const compareSet = [];
   let matched = 0;
-  longArticle.forEach((element) => compareSet.push(element));
-  shortArticle.forEach((element) => {
+  longSentence.forEach((element) => compareSet.push(element));
+  shortSentence.forEach((element) => {
     if (compareSet.includes(element)) {
       matched++;
     }
@@ -13,13 +13,10 @@ function findMatchedKeyword(longArticle, shortArticle) {
   return matched;
 }
 
-function findMatchedSentence(
-  splitSourceArticle,
-  splitTargetArticle,
-  synonymTaggedSource,
-  synonymTaggedTarget
-) {
-  const result = [];
+function findMatchedSentence(synonymTaggedSource, synonymTaggedTarget) {
+  const result = {};
+  result.source = new Set();
+  result.target = new Set();
 
   for (const source of synonymTaggedSource) {
     for (const target of synonymTaggedTarget) {
@@ -33,13 +30,14 @@ function findMatchedSentence(
         matchedKeywordCount / Math.max(source.length, target.length) >=
         MATCH_THREASHOLD
       ) {
-        result.push({
-          sourceSentence: synonymTaggedSource.indexOf(source),
-          targetSentence: synonymTaggedTarget.indexOf(target),
-        });
+        result.source.add(synonymTaggedSource.indexOf(source));
+        result.target.add(synonymTaggedTarget.indexOf(target));
       }
     }
   }
+
+  result.source = Array.from([...result.source]);
+  result.target = Array.from([...result.target]);
 
   return result;
 }

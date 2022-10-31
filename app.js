@@ -15,7 +15,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
 app.set('view engine', 'ejs');
 
-app.use(`/api/${process.env.API_VERSION}`, [
+const { API_VERSION } = process.env;
+
+app.use(`/api/${API_VERSION}`, [
   require('./server/routes/user'),
   require('./server/routes/article'),
 ]);
@@ -108,7 +110,7 @@ app.get('/login', (req, res, next) => {
   });
 });
 
-app.get(`/api/${process.env.API_VERSION}/health`, (req, res) => {
+app.get(`/api/${API_VERSION}/health`, (req, res) => {
   res.send('I am a healthy server!!!!');
 });
 

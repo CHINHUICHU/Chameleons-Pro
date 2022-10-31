@@ -234,42 +234,7 @@ $(document).on('click', '.check-similar-paragraph', function (e) {
 
   const { matchResult } = response.data.data;
 
-  const sourceContentSplit = $(`#article-${source}-content`)
-    .val()
-    .split(/(?=，|。|！|？|：|；)+/);
-  const targetContentSplit = $(`#article-${target}-content`)
-    .val()
-    .split(/(?=，|。|！|？|：|；)+/);
+  $(`#article-${source}-result`).html(matchResult[$(this).attr('id')].source);
 
-  let sourceMarkIndex = matchResult[$(this).attr('id')].sentences.map(
-    (element) => element.sourceSentence
-  );
-
-  sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
-
-  let targetMarkIndex = matchResult[$(this).attr('id')].sentences.map(
-    (element) => element.targetSentence
-  );
-
-  targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
-
-  for (let index of sourceMarkIndex) {
-    sourceContentSplit[index] = `<mark>${sourceContentSplit[index]}</mark>`;
-  }
-  for (let index of targetMarkIndex) {
-    targetContentSplit[index] = `<mark>${targetContentSplit[index]}</mark>`;
-  }
-
-  let sourceMarkedContent = '';
-  for (let sentence of sourceContentSplit) {
-    sourceMarkedContent += sentence;
-  }
-  let targetMarkedContent = '';
-  for (let sentence of targetContentSplit) {
-    targetMarkedContent += sentence;
-  }
-
-  $(`#article-${source}-result`).html(sourceMarkedContent);
-
-  $(`#article-${target}-result`).html(targetMarkedContent);
+  $(`#article-${target}-result`).html(matchResult[$(this).attr('id')].target);
 });
