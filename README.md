@@ -18,7 +18,9 @@
 
 [Tech Stack](#Tech-stack)
 
-[Mapping](#Mapping)
+[Database Mapping](#Database-Mapping)
+
+[Performance Testing](#performance-testing)
 
 [Contact](#Contact)
 
@@ -26,9 +28,9 @@
 
 - Three comparison mode
   - Two articles comparison
-    The system compares source and target articles and return similarity and similar sentences.
+    The system compares source and target articles and return similarity and similar sentences. Mainly for comparing longer articles. If article content is longer than 10,000 words, the request will be processed asynchronously. Max content lenght: 40,000 words.
   - Multiple articles comparison
-    When the number of articles > 2, the system compares each pair of articles.
+    When the number of articles > 2, the system compares each pair of articles. Max article number: 10; max content length: 2,000 word.
   - Upload to compare
     Users upload 1 article and the system search articles in database to conduct analysis
 - Check history records
@@ -114,7 +116,7 @@
 
 ![upload](https://user-images.githubusercontent.com/80673666/196017273-62e38bda-facb-4efc-9d5e-7f02bd3826c7.gif)
 
-- Time-comsuming case (content > 3,000 words)
+- Time-comsuming case (content > 10,000 words)
 
 ![socket](https://user-images.githubusercontent.com/80673666/196049628-0f429f31-656c-4ac3-8616-7d8551f3eeb9.gif)
 
@@ -138,9 +140,34 @@
 ![jQuery](https://img.shields.io/badge/jquery-%230769AD.svg?style=for-the-badge&logo=jquery&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=for-the-badge&logo=bootstrap&logoColor=white)
 
-## Mapping
+## Elasticsearch Mapping
 
+Please refer the following document for full mappings.
 [Elasticseach Mapping](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/mapping.md#mapping)
+
+## Performance Testing
+
+- #### Two articles comparison
+
+  | Source length | Target length | Avg Server Processing Time (ms) | Avg CPU utilization (%) |
+  | ------------- | ------------- | ------------------------------- | ----------------------- |
+  | 10000         | 10000         | 294.1                           | 24.5                    |
+  | 15000         | 15000         | 196.1                           | 36.8                    |
+  | 20000         | 20000         | 324.0                           | 66.0                    |
+  | 40000         | 40000         | 385.2                           | 69.7                    |
+
+- #### Multiple articles comparison
+
+| Article # | Article length | Avg Server Processing Time (ms) | Avg CPU utilization (%) |
+| --------- | -------------- | ------------------------------- | ----------------------- |
+| 5         | 2000           | 258.5                           | 16.6                    |
+| 10        | 2000           | 758.2                           | 36.4                    |
+| 5         | 5000           | 1097.9                          | 56.6                    |
+| 10        | 5000           | 3003.5                          | 78.3                    |
+| 20        | 2000           | 2391.8                          | 62.4                    |
+| 5         | 10000          | 3503.8                          | 86.7                    |
+
+[Read more](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/performace_test.md)
 
 ## Contact
 
