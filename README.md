@@ -140,10 +140,10 @@
 ![jQuery](https://img.shields.io/badge/jquery-%230769AD.svg?style=for-the-badge&logo=jquery&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/bootstrap-%23563D7C.svg?style=for-the-badge&logo=bootstrap&logoColor=white)
 
-## Elasticsearch Mapping
+## Database Mapping
 
 Please refer the following document for full mappings.
-[Elasticseach Mapping](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/mapping.md#mapping)
+[Database Mapping](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/mapping.md#mapping)
 
 ## Performance Testing
 
