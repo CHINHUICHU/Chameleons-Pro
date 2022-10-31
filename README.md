@@ -158,16 +158,16 @@ Please refer the following document for full mappings.
 
 - #### Multiple articles comparison
 
-| Article # | Article length | Avg Server Processing Time (ms) | Avg CPU utilization (%) |
-| --------- | -------------- | ------------------------------- | ----------------------- |
-| 5         | 2000           | 258.5                           | 16.6                    |
-| 10        | 2000           | 758.2                           | 36.4                    |
-| 5         | 5000           | 1097.9                          | 56.6                    |
-| 10        | 5000           | 3003.5                          | 78.3                    |
-| 20        | 2000           | 2391.8                          | 62.4                    |
-| 5         | 10000          | 3503.8                          | 86.7                    |
+  | Article # | Article length | Avg Server Processing Time (ms) | Avg CPU utilization (%) |
+  | --------- | -------------- | ------------------------------- | ----------------------- |
+  | 5         | 2000           | 258.5                           | 16.6                    |
+  | 10        | 2000           | 758.2                           | 36.4                    |
+  | 5         | 5000           | 1097.9                          | 56.6                    |
+  | 10        | 5000           | 3003.5                          | 78.3                    |
+  | 20        | 2000           | 2391.8                          | 62.4                    |
+  | 5         | 10000          | 3503.8                          | 86.7                    |
 
-[Read more](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/performace_test.md)
+[Read more](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/performace_test.md#performance-testing)
 
 ## Contact
 
