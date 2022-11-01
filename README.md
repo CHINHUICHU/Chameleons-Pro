@@ -92,15 +92,19 @@
 ## Architecture
 
 - ### Main system architecture
-  ![image](https://user-images.githubusercontent.com/80673666/198864855-39eedc42-7f7e-4269-8dfa-bd9ca36da704.png)
+
+  ![image](https://user-images.githubusercontent.com/80673666/199229265-a3c9fb73-f95e-4c3b-bce4-a6a763b74c80.png)
+
   - NGINX is used as reverse proxy, it redirects requests from port 80 to the port that the server runs. The server is on AWS EC2, and saves processed result to Elasticsearch. This is the general case when the request can be quickly finished without blocking the server.
+
 - ### Message queue design
 
-  ![image](https://user-images.githubusercontent.com/80673666/198865416-b2d5d124-4160-46f8-8462-d8da700943bc.png)
+  ![image](https://user-images.githubusercontent.com/80673666/199230060-feb44f4e-2fca-44e9-b034-7e0e9e0d5145.png)
 
   - When the server detects the request may take longer time to process, it will push the job into a message queue. The message queue is built with Redis.
   - The worker constantly check if there are jobs in queue and pop job to process. List is used to implement the queue over the sorted set since pop and push only take O(1) and the order of request do not need to be guaranteed.
   - When the worker finish job, it will notify the server by publishing message to a Redis channel. The server will send result to clients after receiving message from the worker.
+  - If the job failed, the worker will push job back to the queue and count retry times. Job with retry over 3 times will be discarded.
 
 ## Demo
 
