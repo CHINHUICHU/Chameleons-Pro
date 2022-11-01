@@ -1,4 +1,4 @@
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const Redis = require('ioredis');
 
 const cache = new Redis({

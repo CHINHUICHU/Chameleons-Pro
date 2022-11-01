@@ -1,5 +1,5 @@
 /* eslint-disable no-constant-condition */
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const { cache } = require('./cache');
 const stopWord = require('../util/stopWord');
 const synonym = require('../util/synonym');
@@ -10,11 +10,10 @@ const { updateArticle, updateCompareResult } = require('./model/article');
 const { CHANNEL_NAME } = process.env;
 
 (async () => {
+  let job;
   while (true) {
     try {
-      const job = JSON.parse(
-        (await cache.brpop('chinese-article-compare', 0))[1]
-      );
+      job = JSON.parse((await cache.brpop('chinese-article-compare', 0))[1]);
 
       const { compare_result_id, user_id } = job;
 
@@ -61,6 +60,7 @@ const { CHANNEL_NAME } = process.env;
 
       const finishedJob = {
         user_id,
+        message: 'succeed',
       };
 
       await cache.publish(CHANNEL_NAME, JSON.stringify(finishedJob));
@@ -68,6 +68,27 @@ const { CHANNEL_NAME } = process.env;
       console.log('worker finished job');
     } catch (err) {
       console.log(err);
+      // worker job fail handling
+      if (job.retry < 3) {
+        job.retry++;
+        await cache.lpush(JSON.stringify(job));
+        await updateCompareResult(
+          job.compare_result_id,
+          job.source.id,
+          job.target.id,
+          0,
+          {
+            source: [],
+            target: [],
+          }
+        );
+      }
+      const failedJob = {
+        user_id: job.user_id,
+        message: 'failed',
+      };
+
+      await cache.publish(CHANNEL_NAME, JSON.stringify(failedJob));
     }
   }
 })();
