@@ -9,7 +9,6 @@ async function getRecords(page, header) {
 }
 
 function displayRecords(records) {
-  console.log(records);
   $('tbody').empty();
   for (let i = 0; i < records.length; i += 1) {
     const compareDate = Date(records[i].create_at).toLocaleString().split(' ');
