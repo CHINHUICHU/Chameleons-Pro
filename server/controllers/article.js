@@ -92,10 +92,19 @@ const comparison = async (req, res, next) => {
     let insertCompareResultResponse = await insertCompareResult({
       user_id: req.user.user_id,
       compare_mode: +MODE_SINGLE,
+      match_result: [
+        {
+          similarity: 0,
+          source_id: source.id,
+          target_id: target.id,
+          sentences: {
+            source: [],
+            target: [],
+          },
+        },
+      ],
       status: +COMPARE_PENDING,
     });
-
-    console.log('insertCompareResultResponse', insertCompareResultResponse);
 
     try {
       await cache.lpush(
@@ -106,6 +115,7 @@ const comparison = async (req, res, next) => {
           compare_mode: +MODE_SINGLE,
           source,
           target,
+          retry: 0,
         })
       );
 
@@ -478,6 +488,8 @@ const getArticleRecords = async (req, res) => {
   );
 
   const searchArticles = [];
+
+  // console.log('compare results', compareResults.hits.hits);
 
   // only show compare result with highest similarity (with multiple and upload mode)
   let highestSimilaityResult = compareResults.hits.hits.map((element) => {
