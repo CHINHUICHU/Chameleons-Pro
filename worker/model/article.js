@@ -1,7 +1,7 @@
 require('dotenv').config();
 const { client } = require('../../server/models/database');
 
-const { DB_ARTICLE_INDEX, DB_COMPARE_INDEX, COMPARE_FINISH } = process.env;
+const { DB_ARTICLE_INDEX, DB_COMPARE_INDEX } = process.env;
 
 const updateArticle = async (articleId, processed_content, tag) => {
   try {
@@ -25,7 +25,8 @@ const updateCompareResult = async (
   sourceId,
   targetId,
   similarity,
-  matchResult
+  matchResult,
+  status
 ) => {
   try {
     const result = client.update({
@@ -40,7 +41,7 @@ const updateCompareResult = async (
             similarity: similarity,
           },
         ],
-        status: COMPARE_FINISH,
+        status: status,
       },
     });
     return result;

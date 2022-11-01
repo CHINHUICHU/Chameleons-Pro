@@ -7,7 +7,7 @@ const { Article } = require('../util/article');
 const { findMatchedSentence, calculateSimilarity } = require('../util/compare');
 const { updateArticle, updateCompareResult } = require('./model/article');
 
-const { CHANNEL_NAME } = process.env;
+const { CHANNEL_NAME, COMPARE_FINISH, COMPARE_PENDING } = process.env;
 
 (async () => {
   let job;
@@ -55,7 +55,8 @@ const { CHANNEL_NAME } = process.env;
         job.source.id,
         job.target.id,
         similarity,
-        matchResult
+        matchResult,
+        +COMPARE_FINISH
       );
 
       const finishedJob = {
@@ -81,7 +82,8 @@ const { CHANNEL_NAME } = process.env;
           {
             source: [],
             target: [],
-          }
+          },
+          +COMPARE_PENDING
         );
       }
       const failedJob = {
