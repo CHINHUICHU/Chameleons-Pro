@@ -67,6 +67,7 @@ const { CHANNEL_NAME } = process.env;
 
       console.log('worker finished job');
     } catch (err) {
+      console.log('worker failed job');
       console.log(err);
       // worker job fail handling
       if (job.retry < 3) {
