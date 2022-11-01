@@ -188,8 +188,6 @@ $(document).on('click', '.check-upload-similar-paragraph', function (e) {
   $('#article-result').remove();
   const articleId = $(this).attr('id').split('-')[3];
 
-  const { article } = response.data.data;
-
   $('<div></div>')
     .attr('id', 'article-result')
     .css({
@@ -207,42 +205,7 @@ $(document).on('click', '.check-upload-similar-paragraph', function (e) {
 
   const { matchResult } = response.data.data;
 
-  const sourceContentSplit = $('#upload-article-content')
-    .val()
-    .split(/(?=，|。|！|？|：|；)+/);
+  $('#article-source-content').html(matchResult[articleId].source);
 
-  const targetContentSplit =
-    article[articleId].content.split(/(?=，|。|！|？|：|；)+/);
-
-  let sourceMarkIndex = matchResult[articleId].map(
-    (element) => element.sourceSentence
-  );
-
-  sourceMarkIndex = Array.from(new Set([...sourceMarkIndex])).sort();
-
-  let targetMarkIndex = matchResult[articleId].map(
-    (element) => element.targetSentence
-  );
-
-  targetMarkIndex = Array.from(new Set([...targetMarkIndex])).sort();
-
-  for (let index of sourceMarkIndex) {
-    sourceContentSplit[index] = `<mark>${sourceContentSplit[index]}</mark>`;
-  }
-  for (let index of targetMarkIndex) {
-    targetContentSplit[index] = `<mark>${targetContentSplit[index]}</mark>`;
-  }
-
-  let sourceMarkedContent = '';
-  for (let sentence of sourceContentSplit) {
-    sourceMarkedContent += sentence;
-  }
-  let targetMarkedContent = '';
-  for (let sentence of targetContentSplit) {
-    targetMarkedContent += sentence;
-  }
-
-  $('#article-source-content').html(sourceMarkedContent);
-
-  $('#article-target-content').html(targetMarkedContent);
+  $('#article-target-content').html(matchResult[articleId].target);
 });

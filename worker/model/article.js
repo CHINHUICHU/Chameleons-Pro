@@ -22,8 +22,11 @@ const updateArticle = async (articleId, processed_content, tag) => {
 
 const updateCompareResult = async (
   compareResultId,
+  sourceId,
+  targetId,
   similarity,
-  matchResult
+  matchResult,
+  status
 ) => {
   try {
     const result = client.update({
@@ -32,10 +35,13 @@ const updateCompareResult = async (
       doc: {
         match_result: [
           {
+            source_id: sourceId,
+            target_id: targetId,
             sentences: matchResult,
             similarity: similarity,
           },
         ],
+        status: status,
       },
     });
     return result;

@@ -58,8 +58,6 @@ const socketAuth = async (socket, next) => {
       email: user.email,
     };
 
-    // socket.join(socket.user.user_id);
-
     return next();
   } catch (err) {
     const error = new Error('wrong token');
