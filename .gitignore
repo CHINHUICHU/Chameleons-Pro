@@ -3,4 +3,5 @@ node_modules/
 .DS_Store
 Mapping/
 openSearch_conn.js
-worker/.env.example
+docs/example.md
+docs/architechture.md
