@@ -101,8 +101,8 @@
 
   ![image](https://user-images.githubusercontent.com/80673666/199230060-feb44f4e-2fca-44e9-b034-7e0e9e0d5145.png)
 
-  - When the server detects the request may take longer time to process, it will push the job into a message queue. The message queue is built with Redis.
-  - The worker constantly check if there are jobs in queue and pop job to process. List is used to implement the queue over the sorted set since pop and push only take O(1) and the order of request do not need to be guaranteed.
+  - When the server detects the request may take longer time to process, it will push the job into a message queue (lpush). The message queue is built with Redis.
+  - The worker constantly check if there are jobs in queue and pop job to process. List is used to implement the queue over the sorted set since the order of request do not need to be guaranteed.
   - When the worker finish job, it will notify the server by publishing message to a Redis channel. The server will send result to clients after receiving message from the worker.
   - If the job failed, the worker will push job back to the queue and count retry times. Job with retry over 3 times will be discarded.
 
