@@ -7,10 +7,20 @@ const path = require('path');
 const options = {
   root: path.join(__dirname, 'public'),
 };
-const { DOMAIN_NAME } = process.env;
+const { DOMAIN_NAME, TEST_IP } = process.env;
 const app = express();
 
-app.use(cors({ origin: DOMAIN_NAME }));
+const whiteList = [DOMAIN_NAME, TEST_IP];
+const corsOptionsDelegate = function (req, callback) {
+  var corsOptions;
+  if (whiteList.indexOf(req.header('Origin')) !== -1) {
+    corsOptions = { origin: true }; // reflect (enable) the requested origin in the CORS response
+  } else {
+    corsOptions = { origin: false }; // disable CORS for this request
+  }
+  callback(null, corsOptions); // callback expects two parameters: error and options
+};
+app.use(cors(corsOptionsDelegate));
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
