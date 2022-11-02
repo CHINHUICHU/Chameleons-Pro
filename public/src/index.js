@@ -61,9 +61,9 @@ $(document).ready(async () => {
       text: '比對結果出爐，請至會員頁查看結果',
       showConfirmButton: false,
     });
-    setTimeout(() => {
-      window.location.href = '/user';
-    }, 500);
+    // setTimeout(() => {
+    //   window.location.href = '/user';
+    // }, 500);
   });
 
   // client-side
