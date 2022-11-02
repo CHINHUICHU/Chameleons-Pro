@@ -73,7 +73,7 @@ const { CHANNEL_NAME, COMPARE_FINISH, COMPARE_PENDING } = process.env;
       // worker job fail handling
       if (job.retry < 3) {
         job.retry++;
-        await cache.lpush(JSON.stringify(job));
+        await cache.lpush('chinese-article-compare', JSON.stringify(job));
         await updateCompareResult(
           job.compare_result_id,
           job.source.id,
