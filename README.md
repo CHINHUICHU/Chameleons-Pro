@@ -93,9 +93,9 @@
 
 - ### Main system architecture
 
-  ![image](https://user-images.githubusercontent.com/80673666/199229265-a3c9fb73-f95e-4c3b-bce4-a6a763b74c80.png)
+  ![image](https://user-images.githubusercontent.com/80673666/199389930-bec3235e-c5e2-4243-a7ff-720dbafa7753.png)
 
-  - NGINX is used as reverse proxy, it redirects requests from port 80 to the port that the server runs. The server is on AWS EC2, and saves processed result to Elasticsearch. This is the general case when the request can be quickly finished without blocking the server.
+  - NGINX is used as reverse proxy, it redirects requests from port 80 to the port that the server runs. The server is on AWS EC2, and saves processed result to Elasticsearch. This is the general case when the request can be quickly finished without blocking the server. Data will be periodically backed up to AWS S3 repository.
 
 - ### Message queue design
 
