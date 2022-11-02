@@ -135,9 +135,6 @@ const comparison = async (req, res, next) => {
     element.synonym = synonym.findSynonym(element.filtered);
   });
 
-  console.log('source', source);
-  console.log('target', target);
-
   try {
     const insertArticle = [
       {
@@ -169,8 +166,6 @@ const comparison = async (req, res, next) => {
     ];
 
     const insertArticlesResult = await insertArticles(insertArticle);
-
-    console.log(insertArticlesResult.items);
 
     const articleSimilarity = calculateSimilarity(
       source.synonym.flat(),
@@ -352,8 +347,6 @@ const analyzeArticle = async (req, res) => {
   const responseSize = +UPLOAD_RESPONSE_THRESHOLD;
   const searchResponse = await searchArticlesByTag(responseSize, searchTags);
 
-  console.log(searchResponse.hits.hits);
-
   const articleSimilarities = [];
   const similarArticles = [];
   const matchResult = [];
@@ -394,8 +387,6 @@ const analyzeArticle = async (req, res) => {
       });
     }
 
-    console.log(matchResult);
-
     compareResult.push({
       similarity: articleSimilarity,
       source_id: insertResult.items[0].index._id,
@@ -427,7 +418,6 @@ const getArticles = async (req, res) => {
   };
   const { page } = req.query;
   const searchConditions = req.query.key.split(' ');
-  console.log(searchConditions);
 
   if (searchConditions.length > 0) {
     searchConditions.forEach((element) => {
@@ -441,11 +431,7 @@ const getArticles = async (req, res) => {
     });
   }
 
-  console.log(esSearchQuery);
-
   const searchResult = await searchArticle(page, +PAGE_SIZE, esSearchQuery);
-
-  console.log(searchResult.hits.hits);
 
   const searchArticleResult = searchResult.hits.hits.map((element) => ({
     id: element._id,
@@ -488,8 +474,6 @@ const getArticleRecords = async (req, res) => {
   );
 
   const searchArticles = [];
-
-  // console.log('compare results', compareResults.hits.hits);
 
   // only show compare result with highest similarity (with multiple and upload mode)
   let highestSimilaityResult = compareResults.hits.hits.map((element) => {
