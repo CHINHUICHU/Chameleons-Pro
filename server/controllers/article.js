@@ -179,6 +179,8 @@ const comparison = async (req, res, next) => {
 
     const result = findMatchedSentence(source.synonym, target.synonym);
 
+    console.log('finish', +COMPARE_FINISH);
+
     const compareResult = {
       user_id: req.user.user_id,
       compare_mode: +MODE_SINGLE,
