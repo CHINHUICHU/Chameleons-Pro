@@ -171,7 +171,7 @@ Please refer the following document for full mappings.
   | 20        | 2000           | 2391.8                          | 62.4                    |
   | 5         | 10000          | 3503.8                          | 86.7                    |
 
-  [Read more](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/performace_test.md#performance-testing)
+  [Read more](https://github.com/CHINHUICHU/Chameleons-Pro/blob/main/docs/performance_test.md#performance-testing)
 
 ## Contact
 

@@ -36,11 +36,10 @@
     - Compare average request processing time. To enhance user experience, if the article content is longer than 10000 words, trigger the worker to asynchronously process the request.
     - Set 70% of CPU utilization as upper bound to prevent the server from crashing. Therefore, set 40000 words as limit of article content in two article comparison.
 
-          |       | average request processing time (ms)  |
-
-      |-------|---------------------------------------|
-      | 10000 | 738.3 |
-      | 15000 | 1420.625 |
+      |       | average request processing time (ms) |
+      | ----- | ------------------------------------ |
+      | 10000 | 738.3                                |
+      | 15000 | 1420.625                             |
 
   - #### Multiple article comparison
     - Currently, multiple artcile comparison does not support asynchronously processing. When user compares 10 articles simultaneously, it takes around 2 seconds to process request. Therefore, set 10 articles and 2000 words of content as upper bound for multiple comparison mode.
