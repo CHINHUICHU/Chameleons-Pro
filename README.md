@@ -73,6 +73,8 @@
 - First, flatten the array of synonym-tagged tokens into a 1D array because similarity calculation is only based on tokens rather than sentences.
 - Second, use Jaccard Index to calculate the similarity. Tokens of articles are added into sets. Duplicate tokens are viewed as one token. The similarity is evaluated by the intersection of sets divided by the union of sets.
   <br><img width="321" alt="similarity" src="https://user-images.githubusercontent.com/80673666/195996938-39381a1b-efd8-458a-b03b-6fa4dde8962e.png">
+  ![Jaccard index](https://user-images.githubusercontent.com/80673666/201466769-ba02a828-31fc-43d6-b4b3-9cdc9431fdf6.png)
+
 - Example
   <br><img width="701" alt="similarty calculation" src="https://user-images.githubusercontent.com/80673666/198675792-0aa50191-f51d-46a4-a7c0-26d76aff918f.png">
 
