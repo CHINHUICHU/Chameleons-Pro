@@ -1,8 +1,8 @@
-[![readme-logo (1)](https://user-images.githubusercontent.com/80673666/195984705-fd82a13f-c263-4032-8e08-9ad7a49a6de1.png)](https://chameleons.pro)
+![readme-logo (1)](https://user-images.githubusercontent.com/80673666/195984705-fd82a13f-c263-4032-8e08-9ad7a49a6de1.png)
 
 # Chameleons-Pro
 
-[CHAMELEONS PRO](https://chameleons.pro) is a Chinese similarity detection system helps users to compare multiple articles simultaneously. The system will calculate similarity between two articles and mark related sentences.
+CHAMELEONS PRO is a Chinese similarity detection system helps users to compare multiple articles simultaneously. The system will calculate similarity between two articles and mark related sentences.
 
 ## Content
 
